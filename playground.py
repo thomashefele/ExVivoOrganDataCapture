@@ -51,19 +51,28 @@ def BT_port(s, init):
     while True:
         end_BT = time.time()
         lap_BT = end_BT - init
+        
+        match round(lap_BT):
+            case 1:
+                count = 1
+            case 2:
+                count = 2
+            case 0:
+                count = 0
+            case _:
+                pass
+            
         err = abs(round(lap_BT,1)-count)
         if err >= 2.5:
-            print("Error exceeded! Restarting port")
+            count = 0
             s.close()
             s.open()
             pass
         else:
             BT_byte = s.read(43)
             BT_str = str(FB_byte)
-            print(f"{BT_str[2,43]} {round(lap_BT)} {count})
-      
-        
-                      
+            print(f"{BT_str[2,43]} {round(lap_BT,1)} {count})
+        count += 5
 
 MT_thread = threading.Thread(target=MT_port, args=(MT,start),)
 FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1,start),)
