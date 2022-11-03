@@ -19,8 +19,8 @@ import matplotlib as plt
 #initialize
 MT = ser.Serial("COM3", 9600, timeout=1000)
 FT_1 = ser.Serial("COM4", 2400, timeout=1000)
-FT_2 = ser.Serial("COM5", 2400, timeout=1000)
-BT = ser.Serial("COM6", 9600, timeout=1000)
+#FT_2 = ser.Serial("COM5", 2400, timeout=1000)
+#BT = ser.Serial("COM6", 9600, timeout=1000)
 start = time.time()
 MT.write(b'DR 051 013B\r')
 
@@ -93,30 +93,31 @@ def BT_port(s,init):
     
 MT_thread = threading.Thread(target=MT_port, args=(MT,start),)
 FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1_,start),)
-FT_2_thread = threading.Thread(target=FT_2_port, args=(FT_2,start),)
-BT_thread = threading.Thread(target=BT_port, args=(BT,start),)
+#FT_2_thread = threading.Thread(target=FT_2_port, args=(FT_2,start),)
+#BT_thread = threading.Thread(target=BT_port, args=(BT,start),)
 
 MT_thread.start()
 FT_1_thread.start()
-FT_2_thread.start()
-BT_thread.start()
+#FT_2_thread.start()
+#BT_thread.start()
 
 #real time data graphing:
 #in progress    
 
 MT_thread.join()
 FT_1_thread.join()
-FT_2_thread.join()
-BT_thread.join()
+#FT_2_thread.join()
+#BT_thread.join()
 
 #creating dataframe for kidney data
 comb = {"Arterial Flow (L/min)": data_AF, "Arterial Pressure (mmHg)": data_AP, 
         "Kidney Mass (kg)": data_KM, "Urine Output (kg)": data_UO, 
         "O2 Sat (Venous)": data_sO2v, "Hematocrit": data_hct}
 data_matrix = pd.DataFrame(comb)
-with data_matrix.to_csv("DTK_data.csv",f"case{k}",True)
+print(data_matrix)
+#with data_matrix.to_csv("DTK_data.csv",f"case{k}",True)
 
 MT.close()
 FT_1.close()
 FT_2.close()
-BT_.close
+#BT_.close
