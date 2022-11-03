@@ -2,10 +2,11 @@
 #set data rate at 0.2 Hz
 
 #input
-k = input("Enter case number (##):")
+#k = input("Enter case number (##):")
 
 #initiliaze arrays to be used for Pandas
-data_AF, data_AP, data_KM, data_UO, data_sO2v, data_hct = [],[],[],[],[],[]
+data_AF, data_AP, data_KM = [],[],[]
+data_UO, data_sO2v, data_hct = [],[],[]
 
 #necessary libraries
 import serial as ser
@@ -22,32 +23,34 @@ FT_1 = ser.Serial("COM4", 2400, timeout=1000)
 #FT_2 = ser.Serial("COM5", 2400, timeout=1000)
 #BT = ser.Serial("COM6", 9600, timeout=1000)
 start = time.time()
-MT.write(b'DR 051 013B\r')
+MT.write(b'DR 05 013B\r')
 
 #threading functions
 #arterial flow and pressure
 def MT_port(s,init):
     while True:
+
         end_MT = time.time()
         lap_MT = round(end_MT - init)
         MT_byte = s.read(35)
         MT_str = str(MT_byte)
+        AF_str = MT_str[5:8] + "." + MT_str[8:10]
+        AP_str = MT_str[11:15]
         global data_AF, data_AP
-        
-        match MT_str[5], MT_str[11]:
-            case "+","+":
-                data_AF.append(float(MT_str[6:10]))
-                data_AP.append(float(MT_str[6:10]))
-            case "+","-":
-                data_AF.append(float(MT_str[6:10]))
-                data_AP.append(float(MT_str[5:10]))
-            case "+","-":
-                data_AF.append(float(MT_str[5:10]))
-                data_AP.append(float(MT_str[6:10]))
-            case _:
-                data_AF.append(float(MT_str[5:10]))
-                data_AP.append(float(MT_str[5:10]))
-        print(f"{MT_str[5:15]} {lap_MT}")
+
+        if MT_str[5] == "+" and MT_str[11] == "+":
+            data_AF.append(float(AF_str[1:5]))
+            data_AP.append(float(AP_str[12:15]))
+        elif MT_str[5] == "+" and MT_str[11] == "+":
+            data_AF.append(float(AF_str[1:5]))
+            data_AP.append(float(AP_str[11:15]))
+        elif MT_str[5] != "+" and MT_str[11] == "+":
+            data_AF.append(float(AF_str[0:5]))
+            data_AP.append(float(AP_str[12:15]))
+        else:
+            data_AF.append(float(AF_str[0:5]))
+            data_AP.append(float(AP_str))
+        print(f"{AF_str} {AP_str} {lap_MT}")
 
 #kidney mass            
 def FT_1_port(s,init):
@@ -88,11 +91,11 @@ def FT_2_port(s,init):
         i += 1        
         
 #sO2 and hct
-def BT_port(s,init):
+#def BT_port(s,init):
 #in progress
     
 MT_thread = threading.Thread(target=MT_port, args=(MT,start),)
-FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1_,start),)
+FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1,start),)
 #FT_2_thread = threading.Thread(target=FT_2_port, args=(FT_2,start),)
 #BT_thread = threading.Thread(target=BT_port, args=(BT,start),)
 
@@ -103,21 +106,20 @@ FT_1_thread.start()
 
 #real time data graphing:
 #in progress    
-
+ 
 MT_thread.join()
 FT_1_thread.join()
 #FT_2_thread.join()
 #BT_thread.join()
 
 #creating dataframe for kidney data
-comb = {"Arterial Flow (L/min)": data_AF, "Arterial Pressure (mmHg)": data_AP, 
-        "Kidney Mass (kg)": data_KM, "Urine Output (kg)": data_UO, 
-        "O2 Sat (Venous)": data_sO2v, "Hematocrit": data_hct}
+comb = {"Arterial Flow (L/min)": data_AF, "Arterial Pressure (mmHg)": data_AP,"Kidney Mass (kg)": data_KM}
+#"Urine Output (kg)": data_UO, "O2 Sat (Venous)": data_sO2v, "Hematocrit": data_hct
 data_matrix = pd.DataFrame(comb)
 print(data_matrix)
-#with data_matrix.to_csv("DTK_data.csv",f"case{k}",True)
+data_matrix.to_csv("data_test.csv",index=False)
 
 MT.close()
 FT_1.close()
-FT_2.close()
+#FT_2.close()
 #BT_.close
