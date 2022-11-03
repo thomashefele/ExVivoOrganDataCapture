@@ -60,6 +60,7 @@ def BT_port(init):
             BT_str = str(BT_byte)
             print(f"{BT_str[2:43]} {lap_BT}")
         time.sleep(5)
+        init += 1
     
 MT_thread = threading.Thread(target=MT_port, args=(MT,start),)
 FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1_,start),)
