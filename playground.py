@@ -1,13 +1,12 @@
 #notes:
 #set data rate at 0.2 Hz
 
-#input
-#k = input("Enter case number (##):")
-
 #initiliaze arrays to be used for Pandas
 time_MT, time_FT_1, time_BT = [],[],[]
-data_AF, data_AP, data_KM = [],[],[]
-data_UO, data_sO2v, data_hct = [],[],[]
+data_AF, data_AP = [],[]
+data_KM = []
+data_UO = []
+data_sO2v, data_hct = [],[]
 
 #necessary libraries
 import serial as ser
@@ -22,7 +21,7 @@ import matplotlib as plt
 MT = ser.Serial("COM3", 9600, timeout=1000)
 FT_1 = ser.Serial("COM4", 2400, timeout=1000)
 #FT_2 = ser.Serial("COM5", 2400, timeout=1000)
-#BT = ser.Serial("COM6", 9600, timeout=1000)
+BT = ser.Serial("COM6", 9600, timeout=1000)
 MT.write(b'DR 05 013B\r')
 
 #threading functions
@@ -107,17 +106,17 @@ def BT_port(s):
 MT_thread = threading.Thread(target=MT_port, args=(MT),)
 FT_1_thread = threading.Thread(target=FT_1_port, args=(FT_1),)
 #FT_2_thread = threading.Thread(target=FT_2_port, args=(FT_2,start),)
-#BT_thread = threading.Thread(target=BT_port, args=(BT),)
+BT_thread = threading.Thread(target=BT_port, args=(BT),)
 
 MT_thread.start()
 FT_1_thread.start()
 #FT_2_thread.start()
-#BT_thread.start()
+BT_thread.start()
 
 MT_thread.join()
 FT_1_thread.join()
 #FT_2_thread.join()
-#BT_thread.join()
+BT_thread.join()
 
 #creating dataframe for kidney data
 comb = {"MedTronic Date/Time": time_MT, "Arterial Flow (L/min)": data_AF, 
@@ -134,4 +133,4 @@ data_matrix.to_csv("data_test.csv",index=False)
 MT.close()
 FT_1.close()
 #FT_2.close()
-#BT_.close
+BT_.close
