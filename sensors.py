@@ -13,7 +13,7 @@ import pandas as pd
 interval = 10
 start = time.time()
 
-MT_port = ser.serial("COM3", 9600, timeout= 1000)
+MT_port = ser.Serial("COM3", 9600, timeout= 1000)
 MT_port.write(b"DR 01 0137\r")
 data_AF, data_AP = [],[]
 AF_avg, AP_avg, ts_MT = [],[],[]
@@ -38,6 +38,7 @@ while True:
             data_AP.append(float(AP_str[11:15]))
 
         if intv%interval == 0:
+            #need to compute to more decimal places, if possible
             AF_avg.append(np.mean(data_AF))
             AP_avg.append(np.mean(data_AP))
             ts_MT.append(intv)
@@ -53,7 +54,7 @@ print(AF_avg, AP_avg, ts_MT)
 interval = 10
 start = time.time()
 
-FT_1_port = ser.serial("COM4", 2400, timeout= 1000)
+FT_1_port = ser.Serial("COM4", 2400, timeout= 1000)
 data_FT_1 = []
 i = 1
 FT_1_avg, ts_FT_1 = [], []
@@ -61,8 +62,9 @@ FT_1_avg, ts_FT_1 = [], []
 while True:
         intv = round(time.time() - start)           
         FT_1_str = str(FT_1_port.read(6))
-        data_FT_1.append(float(FT_1_str[2:8])
-
+        #write function to rearrange in case of misplaced string
+        data_FT_1.append(float(FT_1_str[2:8]))
+        
         if intv != 0 and intv%interval == 0 and i%10 == 0:
                FT_1_avg.append(np.mean(data_FT_1))
                ts_FT_1.append(intv)
@@ -80,7 +82,7 @@ print(FT_1_avg, ts_FT_1)
 interval = 10
 start = time.time()
 
-BT_port = ser.serial("COM5", 9600, timeout= 1000)
+BT_port = ser.Serial("COM5", 9600, timeout= 1000)
 N = 1
 data_sO2v, data_hct = [],[]                               
 sO2v_avg, hct_avg, ts_BT = [],[],[]
@@ -113,7 +115,7 @@ interval = 10
 start = time.time()
                          
 
-FT_2_port = ser.serial("COM6", 2400, timeout= 1000)
+FT_2_port = ser.Serial("COM6", 2400, timeout= 1000)
 data_FT_2 = []
 i = 1
 FT_2_avg, ts_FT_2 = [],[]
