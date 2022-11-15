@@ -18,7 +18,7 @@ AF_avg, AP_avg, FT_1_avg, sO2v_avg, hct_avg, FT_2_avg = [],[],[],[],[],[]
 ts_MT, ts_FT_1, ts_BT, ts_FT_2 = [],[],[],[]
 
 def MT(port_name, b, t, interval):
-        MT_port = ser.serial(port_name, baud= b, timeout= t)
+        MT_port = ser.Serial(port_name, baud= b, timeout= t)
         MT_port.write(b"DR 01 0137\r")
         data_AF, data_AP = [],[]
         global AF_avg, AP_avg, ts_MT
@@ -43,6 +43,7 @@ def MT(port_name, b, t, interval):
                     data_AP.append(float(AP_str[11:15]))
                 
                 if intv%interval == 0:
+                        #figure out if need to calculate to more decimal places
                         AF_avg.append(np.mean(data_AF))
                         AP_avg.append(np.mean(data_AP))
                         ts_MT.append(intv)
@@ -52,16 +53,17 @@ def MT(port_name, b, t, interval):
                 
 
 def FT_1(port_name, b, t, interval):
-        FT_1_port = ser.serial(port_name, baud= b, timeout= t)
+        FT_1_port = ser.Serial(port_name, baud= b, timeout= t)
         data_FT_1 = []
         i = 1
         global FT_1_avg, ts_FT_1
-                
+        
+        #write function to rearrange data if stream is 'offshifted'
         while True:
                 intv = round(time.time() - start)           
                 FT_1_str = str(FT_1_port.read(6))
-                data_FT_1.append(float(FT_1_str[2:8])
-                
+                data_FT_1.append(float(FT_1_str[2:8]))
+                #determine why duplicates are occassionally occurring
                 if intv != 0 and intv%interval == 0 and i%10 == 0:
                        FT_1_avg.append(np.mean(data_FT_1))
                        ts_FT_1.append(intv)
@@ -73,7 +75,7 @@ def FT_1(port_name, b, t, interval):
                 
 
 def BT(port_name, b, t, interval):
-        BT_port = ser.serial(port_name, baud= b, timeout= t)
+        BT_port = ser.Serial(port_name, baud= b, timeout= t)
         N = 1
         data_sO2v, data_hct = [],[]                               
         global sO2v_avg, hct_avg, ts_BT
@@ -89,7 +91,7 @@ def BT(port_name, b, t, interval):
                         data_sO2v.append(0)
                         data_hct.append(0)               
                 if mod >= 5 and mod <= 10:
-                       sO2v_avg.append(np.mean(data_sO2V))
+                       sO2v_avg.append(np.mean(data_sO2v))
                        hct_avg.append(np.mean(data_hct))         
                        ts_BT.append(10*N)
                        data_FT_1 = []
@@ -98,16 +100,16 @@ def BT(port_name, b, t, interval):
                        pass                     
 
 def FT_2(port_name, b, t, interval):
-        FT_2_port = ser.serial(port_name, baud= b, timeout= t)
+        FT_2_port = ser.Serial(port_name, baud= b, timeout= t)
         data_FT_2 = []
         i = 0
         global FT_2_avg, ts_FT_2
-             
+        #write function to rearrange data if stream is 'offshifted'     
         while True:
                 intv = round(time.time() - start)           
                 FT_2_str = str(FT_2_port.read(6))
-                data_FT_2.append(float(FT_2_str[2:8])
-                
+                data_FT_2.append(float(FT_2_str[2:8]))
+                #determine why duplicates are occassionally occurring
                 if intv != 0 and intv%interval == 0 and i%(interval - 1) == 0:
                        FT_2_avg.append(np.mean(data_FT_2))
                        ts_FT_2.append(time.ctime())
