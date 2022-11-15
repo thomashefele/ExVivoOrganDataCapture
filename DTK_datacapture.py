@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import serial as ser
 import time
 import numpy as np
@@ -32,16 +29,16 @@ def MT(port_name, b, t, interval):
 
                 if MT_str[5] == "+" and MT_str[11] == "+":
                     data_AF.append(float(AF_str[1:5]))
-                    data_AP.append(float(AP_str[12:15]))
+                    data_AP.append(float(AP_str[1:4]))
                 elif MT_str[5] == "+" and MT_str[11] != "+":
                     data_AF.append(float(AF_str[1:5]))
-                    data_AP.append(float(AP_str[11:15]))
+                    data_AP.append(float(AP_str[0:4]))
                 elif MT_str[5] != "+" and MT_str[11] == "+":
                     data_AF.append(float(AF_str[0:5]))
-                    data_AP.append(float(AP_str[12:15]))
+                    data_AP.append(float(AP_str[1:4]))
                 else:
                     data_AF.append(float(AF_str[0:5]))
-                    data_AP.append(float(AP_str[11:15]))
+                    data_AP.append(float(AP_str[0:4]))
                 
                 if intv%interval == 0 and check != intv:
                         #figure out if need to calculate to more decimal places
@@ -116,7 +113,7 @@ def FT_2(port_name, b, t, interval):
                 #determine why duplicates are occassionally occurring
                 if intv != 0 and intv%interval == 0 and i%10 == 0:
                        FT_2_avg.append(np.mean(data_FT_2))
-                       ts_FT_2.append(time.ctime())
+                       ts_FT_2.append(intv)
                        data_FT_2 = []
                        i = 1
                        check = intv 
@@ -139,3 +136,7 @@ MT_thread.join()
 FT_1_thread.join()
 BT_thread.join()
 FT_2_thread.join()
+
+df = pd.DataFrame({"Arterial Flow (L/min)": AF_avg, "Arterial Pressure (mmHg)": AP_avg, "Kidney Mass (kg)": FT_1_avg, "sO2": sO2v_avg, 
+                   "Hct": hct_avg, "Urine Output (kg)": FT_2_avg, "Time 1": ts_MT, "Time 2": ts_FT_1, "Time 3": ts_BT, "Time 4": ts_FT_2})
+print(df)
