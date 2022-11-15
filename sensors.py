@@ -26,16 +26,16 @@ while True:
 
         if MT_str[5] == "+" and MT_str[11] == "+":
             data_AF.append(float(AF_str[1:5]))
-            data_AP.append(float(AP_str[12:15]))
+            data_AP.append(float(AP_str[1:4]))
         elif MT_str[5] == "+" and MT_str[11] != "+":
             data_AF.append(float(AF_str[1:5]))
-            data_AP.append(float(AP_str[11:15]))
+            data_AP.append(float(AP_str[0:4]))
         elif MT_str[5] != "+" and MT_str[11] == "+":
             data_AF.append(float(AF_str[0:5]))
-            data_AP.append(float(AP_str[12:15]))
+            data_AP.append(float(AP_str[1:4]))
         else:
             data_AF.append(float(AF_str[0:5]))
-            data_AP.append(float(AP_str[11:15]))
+            data_AP.append(float(AP_str[0:4]))
 
         if intv%interval == 0:
             #need to compute to more decimal places, if possible
