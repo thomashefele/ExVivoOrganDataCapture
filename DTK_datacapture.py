@@ -4,7 +4,8 @@
 import serial as ser
 import time
 import numpy as np
-import threading
+from math import floor
+from threading import Thread
 import pandas as pd
         
 lap = 10
@@ -44,7 +45,7 @@ def MT(port_name, b, t, interval):
                 if intv%interval == 0:
                         AF_avg.append(np.mean(data_AF))
                         AP_avg.append(np.mean(data_AP))
-                        ts_MT.append(time.ctime())
+                        ts_MT.append(intv)
                         data_AF, data_AP = [],[]
                 else:
                         pass
@@ -63,7 +64,7 @@ def FT_1(port_name, b, t, interval):
                 
                 if intv != 0 and intv%interval == 0 and i%(interval - 1) == 0:
                        FT_1_avg.append(np.mean(data_FT_1))
-                       ts_FT_1.append(time.ctime())
+                       ts_FT_1.append(intv)
                        data_FT_1 = []
                        i = 0
                 else:
@@ -73,10 +74,12 @@ def FT_1(port_name, b, t, interval):
 
 def BT(port_name, b, t, interval):
         BT_port = ser.serial(port_name, baud= b, timeout= t)
+        N = 1
         data_sO2v, data_hct = [],[]                               
         global sO2v_avg, hct_avg, ts_BT
         while True:
-                intv = round(time.time() - start)
+                intv = floor(time.time() - start)
+                mod = intv%interval 
                 BT_str = str(BT_port.read(43))
                 #change below when data is available during trial perfusion
                 #data_sO2v.append(BT_str[12:14]))
@@ -84,9 +87,15 @@ def BT(port_name, b, t, interval):
                 #change "0" to data_...[-1] during trial perfusion 
                 if BT_str[12:14] == "--" and BT_str[20:22] == "--":
                         data_sO2v.append(0)
-                        data_hct.append(0)
-                mod = intv%interval 
-                if mod 
+                        data_hct.append(0)               
+                if mod >= 5 and mod < 10:
+                       sO2v_avg.append(np.mean(data_sO2V))
+                       hct_avg.append(np.mean(data_hct))         
+                       ts_BT.append(10*N)
+                       data_FT_1 = []
+                       N += 1
+                else:
+                        pass                     
 
 def FT_2(port_name, b, t, interval):
         FT_2_port = ser.serial(port_name, baud= b, timeout= t)
@@ -109,10 +118,10 @@ def FT_2(port_name, b, t, interval):
                 i += 1
         
 
-MT_thread = threading.Thread(target= MT, args= (name[0], baud_rate[0], t_o, lap),)
-FT_1_thread = threading.Thread(target= FT_1, args= (name[1], baud_rate[1], t_o, lap),)
-BT_thread = threading.Thread(target= BT, args= (name[2], baud_rate[2], t_o, lap),)
-FT_2_thread = threading.Thread(target= FT_2, args= (name[3], baud_rate[3], t_o, lap),)
+MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o, lap),)
+FT_1_thread = Thread(target= FT_1, args= (name[1], baud_rate[1], t_o, lap),)
+BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o, lap),)
+FT_2_thread = Thread(target= FT_2, args= (name[3], baud_rate[3], t_o, lap),)
 
 MT_thread.start()
 FT_1_thread.start()
