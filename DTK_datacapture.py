@@ -41,12 +41,12 @@ def MT(port_name, b, t, interval):
                     data_AP.append(float(AP_str[0:4]))
                 
                 if intv%interval == 0 and check != intv:
-                        #figure out if need to calculate to more decimal places
-                        AF_avg.append(np.mean(data_AF))
-                        AP_avg.append(np.mean(data_AP))
-                        ts_MT.append(intv)
-                        data_AF, data_AP = [],[]
-                        check = intv
+                    #figure out if need to calculate to more decimal places
+                    AF_avg.append(np.mean(data_AF))
+                    AP_avg.append(np.mean(data_AP))
+                    ts_MT.append(intv)
+                    data_AF, data_AP = [],[]
+                    check = intv
                 else:
                         pass
                 
@@ -62,7 +62,7 @@ def FT_1(port_name, b, t, interval):
                 intv = round(time.time() - start)           
                 FT_1_str = str(FT_1_port.read(6))
                 data_FT_1.append(float(FT_1_str[2:8]))
-                #determine why duplicates are occassionally occurring
+
                 if intv != 0 and intv%interval == 0 and i%10 == 0 and check != intv:
                        FT_1_avg.append(np.mean(data_FT_1))
                        ts_FT_1.append(intv)
@@ -110,7 +110,7 @@ def FT_2(port_name, b, t, interval):
                 intv = round(time.time() - start)           
                 FT_2_str = str(FT_2_port.read(6))
                 data_FT_2.append(float(FT_2_str[2:8]))
-                #determine why duplicates are occassionally occurring
+
                 if intv != 0 and intv%interval == 0 and i%10 == 0:
                        FT_2_avg.append(np.mean(data_FT_2))
                        ts_FT_2.append(intv)
