@@ -4,7 +4,7 @@ import numpy as np
 from math import floor
 from threading import Thread
 import pandas as pd
-        
+
 lap = 10
 name = ["COM3", "COM4", "COM5", "COM6"]
 baud_rate = [9600, 2400, 9600, 2400]
@@ -14,6 +14,36 @@ start = time.time()
 AF_avg, AP_avg, FT_1_avg, sO2v_avg, hct_avg, FT_2_avg = [],[],[],[],[],[]
 ts_MT, ts_FT_1, ts_BT, ts_FT_2 = [],[],[],[]
 
+def rearrange(str):   
+        ordered = []
+        new_str = ""
+        l = len(str)
+      
+        if str[2] != ".":
+                if str[0] == ".":
+                        for i in range(0,l):
+                                ordered.append(str[(i+4)%l]
+                                new_str += ordered[i]
+                elif str[1] == ".":
+                        for i in range(0,l):
+                                ordered.append(str[(i + 5)%l)
+                                new_str += ordered[i]
+                elif str[3] == ".":
+                        for i in range(0,l):
+                                ordered.append(str[(i + 1)%l])
+                                new_str += ordered[i]
+                elif str[4] == ".":
+                        for i in range(0,l):
+                                ordered.append(str[(i + 2)%l])
+                                new_str += ordered[i]
+                elif str[5] == ".":
+                        for i in range(0,l):
+                                ordered.append(str[(i + 3)%l])
+                                new_str += ordered[i]
+        else:
+                new_str = str
+        return float(new_str)
+        
 def MT(port_name, b, t, interval):
         MT_port = ser.Serial(port_name, baud= b, timeout= t)
         MT_port.write(b"DR 01 0137\r")
@@ -48,20 +78,20 @@ def MT(port_name, b, t, interval):
                     data_AF, data_AP = [],[]
                     check = intv
                 else:
-                        pass
+                    pass
                 
-
 def FT_1(port_name, b, t, interval):
         FT_1_port = ser.Serial(port_name, baud= b, timeout= t)
         data_FT_1 = []
         i = 1
         global FT_1_avg, ts_FT_1
         check = 0        
-        #write function to rearrange data if stream is 'offshifted'
+       
         while True:
                 intv = round(time.time() - start)           
                 FT_1_str = str(FT_1_port.read(6))
-                data_FT_1.append(float(FT_1_str[2:8]))
+                   
+                data_FT_1.append(rearrange(FT_1_str[2:8]))
 
                 if intv != 0 and intv%interval == 0 and i%10 == 0 and check != intv:
                        FT_1_avg.append(np.mean(data_FT_1))
@@ -73,7 +103,6 @@ def FT_1(port_name, b, t, interval):
                        pass
                 i += 1
                 
-
 def BT(port_name, b, t, interval):
         BT_port = ser.Serial(port_name, baud= b, timeout= t)
         N = 1
@@ -109,7 +138,7 @@ def FT_2(port_name, b, t, interval):
         while True:
                 intv = round(time.time() - start)           
                 FT_2_str = str(FT_2_port.read(6))
-                data_FT_2.append(float(FT_2_str[2:8]))
+                data_FT_2.append(rearrange(FT_2_str[2:8]))
 
                 if intv != 0 and intv%interval == 0 and i%10 == 0:
                        FT_2_avg.append(np.mean(data_FT_2))
@@ -121,7 +150,6 @@ def FT_2(port_name, b, t, interval):
                        pass
                 i += 1
         
-
 MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o, lap),)
 FT_1_thread = Thread(target= FT_1, args= (name[1], baud_rate[1], t_o, lap),)
 BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o, lap),)
