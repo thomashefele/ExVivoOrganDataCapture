@@ -134,7 +134,7 @@ def FT_2(port_name, b, t, interval):
         i = 1
         global FT_2_avg, ts_FT_2
         check = 0
-        #write function to rearrange data if stream is 'offshifted'     
+           
         while True:
                 intv = round(time.time() - start)           
                 FT_2_str = str(FT_2_port.read(6))
