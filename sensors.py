@@ -3,9 +3,7 @@
 import serial as ser
 import time
 import numpy as np
-from math import floor
 from threading import Thread
-import pandas as pd
 
 #---------------------------
 #MedTronic sensor
@@ -143,4 +141,13 @@ with ser.Serial("COM7", 9600, timeout= 1000) as iStat_port:
         while True:         
                 iStat_str = str(iStat_port.read())
                 ts_iStat = time.time()
-                print(iStat_str, ts_iStat)                        
+                print(iStat_str, ts_iStat)
+
+#---------------------------
+#Piccolo
+        
+with ser.Serial("COM8", 9600, timeout= 1000) as Port_olo:
+        while True:                               
+                pic_str = str(iStat_port.read())
+                ts_pic = time.time()
+                print(pic_str, ts_pic)
