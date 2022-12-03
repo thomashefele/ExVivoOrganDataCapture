@@ -59,10 +59,10 @@ def data_input(key):
         #conditional for executing the loop again
         new_input = input("Enter a new set of data? (Y/N) ")
 
-        check = None
+        check = 1
 
         if new_input == "Y" or new_input == "N":
-            check = 1
+            pass
         else:
             check = 0
             while check == 0:
