@@ -50,11 +50,13 @@ while (new_input == "Y"):
     #conditional for executing the loop again
     new_input = input("Enter a new set of data? (Y/N)")
 
-    if new_input != "Y":
+    while new_input != "Y" or new_input != "N":
         print("Invalid entry. Try again.")
         new_input = input("Enter a new set of data? (Y/N) ")
 
     if new_input == "Y":
         system("clear")
+    elif new_input == "N":
+        break
     else:
         pass
