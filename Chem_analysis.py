@@ -58,7 +58,7 @@ while (new_input == "Y"):
         check = 0
         while check == 0:
             print("Invalid entry. Try again.")
-            new_input = input("Enter a new set of data? (Y/N)")
+            new_input = input("Enter a new set of data? (Y/N) ")
             
             if new_input == "Y" or new_input == "N":
                 check = 1
