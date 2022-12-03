@@ -51,7 +51,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                 #MedTronic console sensor function
                 def MT(port_name, b, t):
                         with ser.Serial(port_name, baud= b, timeout= t) as MT_port:                                              
-                                MT_port.write(b"DR 01 0137\r")
+                                MT_port.write(b"DR 05 013B\r")
                                 data_AF, data_AP, ts_MT = None, None, None
 
                                 while True:
@@ -94,7 +94,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                                                 if i%10 == 0 and check != intv:                                                                                                                           
                                                         if measure == "km":                           
                                                                 cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
-                                                        elif measure = "uo":
+                                                        elif measure == "uo":
                                                                 cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [urine output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                                                         i = 1
                                                         check = intv
@@ -117,9 +117,9 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                                         cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id}, {ts_BT}, {data_sO2v}, {data_hct})")
 
                 #establish threads, run threads, and end threads
-                MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o, lap),)
+                MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
                 FT_1_thread = Thread(target= FT, args= (name[1], baud_rate[1], t_o, lap, "km"),)
-                BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o, lap),)
+                BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
                 FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
 
                 MT_thread.start()
