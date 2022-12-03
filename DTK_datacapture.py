@@ -1,5 +1,5 @@
 import serial as ser
-from time import localtime, asctime
+from time import localtime, asctime, time
 from  numpy import mean
 import pyodbc 
 from threading import Thread
@@ -53,6 +53,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
             with ser.Serial(port_name, baud= b, timeout= t) as MT_port:                                              
                 MT_port.write(b"DR 05 013B\r")
                 data_AF, data_AP, ts_MT = None, None, None
+                global STOP
 
                 while True:
                     MT_str = str(MT_port.read(35))
@@ -74,13 +75,19 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         data_AP = float(AP_str[0:4]))
 
                     cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({unos_id}, {ts_MT}, {data_AF}, {data_AP})")
+                                                
+                    if STOP = True:
+                        break
+                                           
         #force transducer sensor function
         def FT(port_name, b, t, interval, measure):
             with ser.Serial(port_name, baud= b, timeout= t) as FT_port:
                 data_FT = []
-                FT_avg, ts_FT = None, None                                   
+                FT_avg, ts_FT = None, None
+                global STOP
                 i = 1
-                check = 0        
+                check = 0
+                                           
                 while True:
                     intv = round(time() - start)                                                                                                 
 
@@ -101,11 +108,16 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                             i = 1
                             check = intv
                         else:
-                            pass                                              
+                            pass
+                       
+                    if STOP = True:
+                        break
+                                           
         #MedTronic BioTrend sensor function                                                  
         def BT(port_name, b, t):
             with ser.Serial(port_name, baud= b, timeout= t) as BT_port:
                 data_sO2v, data_hct, ts_BT = None, None, None
+                global STOP
 
                 while True:
                     BT_str = str(BT_port.read(43))
@@ -118,17 +130,29 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                     if BT_str[20:22] == "--":
                         data_hct = 0
                     cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id}, {ts_BT}, {data_sO2v}, {data_hct})")
+                                           
+                    if STOP = True:
+                        break
 
         #establish threads, run threads, and end threads
         MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
         FT_1_thread = Thread(target= FT, args= (name[1], baud_rate[1], t_o, lap, "km"),)
         BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
         FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
-
+                                           
+        STOP = False
+        perf_time = 28800
+        t_start = time()
+        del_t = 0
+                                           
         MT_thread.start()
         FT_1_thread.start()
         BT_thread.start()
         FT_2_thread.start()
+                                           
+        while del_t < perf_time:                                
+            del_t = time()-t_start       
+        STOP = True
 
         MT_thread.join()
         FT_1_thread.join()
