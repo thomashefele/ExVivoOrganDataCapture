@@ -95,9 +95,9 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                             ts_FT = asctime(localtime())
 
                             if measure == "km":                           
-                                cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
+                                cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                             elif measure == "uo":
-                                cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [urine output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
+                                cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                             i = 1
                             check = intv
                         else:
