@@ -46,6 +46,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         new_str += ordered[i]
             else:
                     new_str = str
+                                           
             return float(new_str)
 
         #MedTronic console sensor function
@@ -90,26 +91,27 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                                            
                 while True:
                     intv = round(time() - start)                                                                                                 
-
-                    if intv != 0 and intv%interval == 0:
-                        FT_1_str = str(FT_1_port.read(6))    
+                    FT_1_str = str(FT_1_port.read(6))  
+                    
+                    if intv != 0 and intv%interval == 0:  
                         data_FT.append(float(rearrange(FT_1_str[2:8])))
-                        FT_avg = mean(data_FT)
-                        i += 1
-                        check = intv
 
                         if i%10 == 0 and check != intv:
                             ts_FT = asctime(localtime())
+                            FT_avg = mean(data_FT)
 
                             if measure == "km":                           
                                 cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                             elif measure == "uo":
                                 cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
-                            i = 1
-                            check = intv
+                            
+                           data_FT = []
+                           i = 1
+                           check = intv               
                         else:
                             pass
-                       
+                        i += 1
+                        
                     if STOP = True:
                         break
                                            
@@ -143,7 +145,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
         STOP = False
         perf_time = 28800
         t_start = time()
-        del_t = 0
+        del_t = None
                                            
         MT_thread.start()
         FT_1_thread.start()
