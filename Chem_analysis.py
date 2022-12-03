@@ -27,7 +27,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
 		while (new_input == "Y"):
 			time_stamp = asctime(time())
 			#iStat measurements
-			print("iStat Measurements:\n)
+			print("iStat Measurements:\n")
 			pH = data_input("pH: ")
 			PCO2 = data_input("PCO_2: ")
 			PO2 = data_input("PO_2: ")
@@ -61,12 +61,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
 				print("Invalid entry. Try again.\n")
 			       	new_input = input("Enter a new set of data? (Y/N) ")
 				       
-		       if (new_input == "Y"):
+		       	if (new_input == "Y"):
 				system("cls")
-		       else:
+		      	else:
 				pass
-			       	
-		       	
-	     	
-	     	
-	     	
