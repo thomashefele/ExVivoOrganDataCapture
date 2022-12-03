@@ -48,7 +48,7 @@ while (new_input == "Y"):
     TP = data_input("TB: ")
     #cursor.execute(f"INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {time_stamp}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP}))
     #conditional for executing the loop again
-    new_input = input("Enter a new set of data? (Y/N)")
+    new_input = input("Enter a new set of data? (Y/N) ")
 
     while new_input != "Y" or new_input != "N":
         print("Invalid entry. Try again.")
