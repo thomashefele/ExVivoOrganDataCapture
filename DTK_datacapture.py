@@ -5,7 +5,6 @@ import pyodbc
 from threading import Thread
 
 #establish database connection
-unos_id = None
 server = "dtk-server.database.windows.net"
 database = "perf-data"
 username = "dtk_lab"
@@ -13,11 +12,11 @@ password = "data-collection1"
 with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn:
     with cnxn.cursor() as cursor:
         #set up info needed for threads
+        unos_id = cnxn.execute("SELECT UNOS_ID FROM dbo.istat_t;")
         lap = 5
         name = ["COM3", "COM4", "COM5", "COM6"]
         baud_rate = [9600, 2400, 9600, 2400]
         t_o = 1000
-        start = asctime(localtime())
         #needed for force transducer, as sometimes it prints in a "shifted" format
         def rearrange(str):   
             ordered = []
@@ -75,7 +74,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         data_AF = float(AF_str[0:5]))
                         data_AP = float(AP_str[0:4]))
 
-                    cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({unos_id}, {ts_MT}, {data_AF}, {data_AP})")
+                    cnxn.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({unos_id}, {ts_MT}, {data_AF}, {data_AP})")
                                                 
                     if STOP = True:
                         break
@@ -84,6 +83,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
         def FT(port_name, b, t, interval, measure):
             with ser.Serial(port_name, baud= b, timeout= t) as FT_port:
                 data_FT = []
+                start = time()
                 FT_avg, ts_FT = None, None
                 global STOP
                 i = 1
@@ -101,9 +101,9 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                             FT_avg = mean(data_FT)
 
                             if measure == "km":                           
-                                cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
+                                cnxn.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                             elif measure == "uo":
-                                cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
+                                cnxn.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({unos_id}, {ts_FT}, {FT_avg})")
                             
                            data_FT = []
                            i = 1
@@ -131,7 +131,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         data_sO2v = 0                                              
                     if BT_str[20:22] == "--":
                         data_hct = 0
-                    cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id}, {ts_BT}, {data_sO2v}, {data_hct})")
+                    cnxn.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id}, {ts_BT}, {data_sO2v}, {data_hct})")
                                            
                     if STOP = True:
                         break
