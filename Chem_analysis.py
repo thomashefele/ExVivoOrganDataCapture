@@ -3,7 +3,6 @@ from time import localtime, asctime, sleep
 import pyodbc
 
 #establish database connection
-unos_id = None
 server = "dtk-server.database.windows.net"
 database = "perf-data"
 username = "dtk_lab"
@@ -19,6 +18,16 @@ def data_input(key):
         print("Invalid data type. Please re-enter with a float data type")
         var = data_input(key)
     return var
+
+def id():
+    try:
+        unos_id = int(input("Enter the UNOS ID: "))
+    except ValueError:
+        print("Invalid data type. Please re-enter with an integer data type")
+        unos_id = id()
+    return unos_id
+
+unos_id = id()
 
 new_input = "Y"
 
