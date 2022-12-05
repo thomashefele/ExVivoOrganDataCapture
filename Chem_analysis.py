@@ -1,15 +1,16 @@
-from os import system, name
-from time import localtime, asctime, sleep
+from os import system, name 
+from datetime import datetime 
+from time import sleep 
 import pyodbc
 
-#establish database connection
-server = "dtk-server.database.windows.net"
-database = "perf-data"
-username = "dtk_lab"
-password = "data-collection1"
-with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn:
-    with cnxn.cursor() as cursor:
+#establish database connection 
+server = "dtk-server.database.windows.net" 
+database = "perf-data" 
+username = "dtk_lab" 
+password = "data-collection1" 
 
+with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn: 
+    with cnxn.cursor() as cursor:
         #define function for inputting data and re-prompting if data is invalid
         def data_input(key):
             try:
@@ -32,7 +33,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
         new_input = "Y"
 
         while (new_input == "Y"):
-            time_stamp = asctime(localtime())
+            time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(time_stamp)
             sleep(1)
             #iStat measurements
@@ -46,7 +47,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
             BE = data_input("BE: ")
             sO2 = data_input("sO2: ")
             Hb = data_input("Hb: ")
-            cnxn.execute(f"INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [tco2], [hco3], [be], [so2], [hb]) VALUES({unos_id}, {time_stamp}, {pH}, {PCO2}, {PO2}, {TCO2_iStat}, {HCO3}, {BE}, {sO2}, {Hb}))
+            cnxn.execute(f"INSERT INTO dbo.istat_t([UNOS_ID], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES({unos_id}, {pH}, {PCO2}, {PO2}, {TCO2_iStat}, {HCO3}, {BE}, {sO2}, {Hb});")
             #Piccolo measurements
             print("Piccolo Measurements:")
             sleep(1)
@@ -64,7 +65,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
             TBIL = data_input("TBIL: ")
             ALB = data_input("ALB: ")
             TP = data_input("TB: ")
-            cnxn.execute(f"INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {time_stamp}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP}))
+            cnxn.execute(f"INSERT INTO dbo.pic_t([UNOS_ID], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP});")
             #conditional for executing the loop again
             new_input = input("Enter a new set of data? (Y/N) ")
 
@@ -82,7 +83,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         check = 1
 
             if new_input == "Y":
-                system("clear")
+                system("cls")
 
             elif new_input == "N":
                 break
