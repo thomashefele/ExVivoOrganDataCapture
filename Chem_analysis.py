@@ -32,7 +32,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
         new_input = "Y"
 
         while (new_input == "Y"):
-            time_stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            time_stamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             print(time_stamp)
             sleep(1)
             #iStat measurements
@@ -65,6 +65,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
             TP = data_input("TB: ")
             with cnxn.cursor() as cursor:
                 cursor.execute(f"INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES({unos_id}, {time_stamp}, {pH}, {PCO2}, {PO2}, {TCO2_iStat}, {HCO3}, {BE}, {sO2}, {Hb}); INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [[Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {time_stamp}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP});")
+                cnxn.commit()
             #conditional for executing the loop again
             new_input = input("Enter a new set of data? (Y/N) ")
 
