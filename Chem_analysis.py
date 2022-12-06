@@ -31,7 +31,7 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
 
         new_input = "Y"
 
-        while (new_input == "Y"):
+        while new_input == "Y":
             time_stamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             print(time_stamp)
             sleep(1)
