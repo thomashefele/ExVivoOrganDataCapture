@@ -9,7 +9,8 @@ database = "perf-data"
 username = "dtk_lab" 
 password = "data-collection1" 
 
-with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn:   
+with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn:
+    with cnxn.cursor() as cursor:    
         #define function for inputting data and re-prompting if data is invalid
         def data_input(key):
             try:
@@ -63,9 +64,8 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
             TBIL = data_input("TBIL: ")
             ALB = data_input("ALB: ")
             TP = data_input("TB: ")
-            with cnxn.cursor() as cursor:
-                cursor.execute(f"INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES({unos_id}, {time_stamp}, {pH}, {PCO2}, {PO2}, {TCO2_iStat}, {HCO3}, {BE}, {sO2}, {Hb}); INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [[Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {time_stamp}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP});")
-                cnxn.commit()
+            cursor.execute(f"INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES({unos_id}, {time_stamp}, {pH}, {PCO2}, {PO2}, {TCO2_iStat}, {HCO3}, {BE}, {sO2}, {Hb}); INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [[Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES({unos_id}, {time_stamp}, {Na}, {K}, {TCO2_Pic}, {Cl}, {Glu}, {Ca}, {BUN}, {Cre}, {eGFR}, {ALP}, {AST}, {TBIL}, {ALB}, {TP});")
+            cnxn.commit()
             #conditional for executing the loop again
             new_input = input("Enter a new set of data? (Y/N) ")
 
