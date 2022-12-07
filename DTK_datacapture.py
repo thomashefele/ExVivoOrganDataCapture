@@ -106,7 +106,7 @@ def FT(port_name, b, t, interval, measure):
 
                                             if i%10 == 0 and check != intv:
                                                 ts_FT = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                                                FT_avg = mean(data_FT)
+                                                FT_avg = round(mean(data_FT), 3)
                                                 if measure == "km":                           
                                                         cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id[0]}, '{ts_FT}', {FT_avg});")
                                                 elif measure == "uo":
@@ -144,9 +144,10 @@ def BT(port_name, b, t):
 #establish threads, run threads, and end threads
 MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
 FT_1_thread = Thread(target= FT, args= (name[1], baud_rate[1], t_o, lap, "km"),)
-#BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
-#FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
+BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
+FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
 
+#STOP and subsequent while loop is used as a switch to kill threads when the perfusion time limit has been reached
 STOP = False
 perf_time = 100
 t_start = time()
@@ -154,16 +155,15 @@ del_t = 0
 
 MT_thread.start()
 FT_1_thread.start()
-#BT_thread.start()
-#FT_2_thread.start()
+BT_thread.start()
+FT_2_thread.start()
 
 while del_t < perf_time:                                
     del_t = time()-t_start
-    sleep(1)
 
 STOP = True
 
 MT_thread.join()
 FT_1_thread.join()
-#BT_thread.join()
-#FT_2_thread.join()
+BT_thread.join()
+FT_2_thread.join()
