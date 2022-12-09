@@ -7,7 +7,7 @@ from threading import Thread
 
 #set up info needed for threads
 lap = 5
-name = ["COM3", "COM4", "COM5", "COM6"]
+name = ["COM3", "COM4", "COM7", "COM6"]
 baud_rate = [9600, 2400, 9600, 2400]
 t_o = 1000
 global unos_id
