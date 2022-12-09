@@ -77,34 +77,15 @@ print(FT_1_avg, ts_FT_1)
 #---------------------------
 #BioTrend - sensor
 
-interval = 10
 start = time.time()
 
-with ser.Serial("COM5", 9600, timeout= 1000) as BT_port:
-        N = 1
-        data_sO2v, data_hct = [],[]                               
-        sO2v_avg, hct_avg, ts_BT = [],[],[]
-        while True:                  
-                intv = time.time() - start   
-                mod = intv%interval 
-                BT_str = str(BT_port.read(43))
-                #change below when data is available during trial perfusion
-                #data_sO2v.append(BT_str[12:14]))
-                #data_hct.append(BT_str[20:22]))
-                #change "0" to data_...[-1] during trial perfusion 
-                if BT_str[12:14] == "--" and BT_str[20:22] == "--":
-                        data_sO2v.append(0)
-                        data_hct.append(0)               
-                if mod >= 5 and mod <= 10:
-                       sO2v_avg.append(np.mean(data_sO2v))
-                       hct_avg.append(np.mean(data_hct))         
-                       ts_BT.append(10*N)
-                       data_FT_1 = []
-                       N += 1
-                else:
-                       pass
+BT_port = ser.Serial("COM5", 9600, timeout= 1000)
 
-        print(sO2v_avg, hct_avg, ts_BT)                         
+while True:                  
+        intv = time.time() - start   
+        mod = intv%interval 
+        BT_str = str(BT_port.read(43))
+        print(BT_str)                         
                          
 #---------------------------
 #urine output - force transducer
@@ -133,21 +114,3 @@ with ser.Serial("COM6", 2400, timeout= 1000) as FT_port_2:
                 i += 1
 
         print(FT_2_avg, ts_FT_2)
-                         
-#---------------------------
-#iStat                   
-
-with ser.Serial("COM7", 9600, timeout= 1000) as iStat_port:
-        while True:         
-                iStat_str = str(iStat_port.read())
-                ts_iStat = time.time()
-                print(iStat_str, ts_iStat)
-
-#---------------------------
-#Piccolo
-        
-with ser.Serial("COM8", 9600, timeout= 1000) as Port_olo:
-        while True:                               
-                pic_str = str(iStat_port.read())
-                ts_pic = time.time()
-                print(pic_str, ts_pic)
