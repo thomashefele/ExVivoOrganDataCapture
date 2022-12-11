@@ -11,6 +11,7 @@ name = ["COM3", "COM4", "COM7", "COM6"]
 baud_rate = [9600, 2400, 9600, 2400]
 t_o = 1000
 global unos_id
+global STOP
 
 #establish database connection
 server = "dtk-server.database.windows.net"
@@ -61,7 +62,6 @@ def MT(port_name, b, t):
             with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
                 MT_port.write(b"DR 05 013B\r")
                 data_AF, data_AP, ts_MT = None, None, None
-                global STOP
 
                 while STOP == False:
                     MT_str = str(MT_port.read(35))
@@ -93,7 +93,6 @@ def FT(port_name, b, t, interval, measure):
                                 data_FT = []
                                 start = time()
                                 FT_avg, ts_FT = None, None
-                                global STOP
                                 i = 1
                                 check = 0
 
@@ -107,6 +106,7 @@ def FT(port_name, b, t, interval, measure):
                                             if i%10 == 0 and check != intv:
                                                 ts_FT = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                                                 FT_avg = round(mean(data_FT), 3)
+                                                
                                                 if measure == "km":                           
                                                         cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id[0]}, '{ts_FT}', {FT_avg});")
                                                 elif measure == "uo":
@@ -125,45 +125,47 @@ def BT(port_name, b, t):
         with cnxn_BT.cursor() as cursor:
             with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
                 data_sO2v, data_hct, ts_BT = None, None, None
-                global STOP
 
                 while STOP == False:
                     BT_str = str(BT_port.read(43))
+                    
                     ts_BT = datetime.now().strftime('%Y-%m-%d %H:%M:%S')                           
-                    data_sO2v = float(BT_str[12:14])
-                    data_hct = float(BT_str[20:22])
 
                     if BT_str[12:14] == "--":
-                        data_sO2v = 0                                              
+                        data_sO2v = 50
+                    else:
+                        data_sO2v = float(BT_str[12:14])
                     if BT_str[20:22] == "--":
-                        data_hct = 0
+                        data_hct = 40
+                    else:
+                        data_hct = float(BT_str[20:22])
    
                     cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id[0]}, '{ts_BT}', {data_sO2v}, {data_hct});")
                     cnxn_BT.commit()
-
+                
 #establish threads, run threads, and end threads
-MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
+#MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
 FT_1_thread = Thread(target= FT, args= (name[1], baud_rate[1], t_o, lap, "km"),)
 BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
 FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
 
-#STOP and subsequent while loop is used as a switch to kill threads when the perfusion time limit has been reached
 STOP = False
-perf_time = 100
+perf_time = 30000
 t_start = time()
 del_t = 0
 
-MT_thread.start()
+#MT_thread.start()
 FT_1_thread.start()
 BT_thread.start()
 FT_2_thread.start()
 
 while del_t < perf_time:                                
     del_t = time()-t_start
+    sleep(1)
 
 STOP = True
 
-MT_thread.join()
+#MT_thread.join()
 FT_1_thread.join()
 BT_thread.join()
 FT_2_thread.join()
