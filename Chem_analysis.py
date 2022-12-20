@@ -1,7 +1,9 @@
-from os import system, name 
+import os
+import platform
 from datetime import datetime 
 from time import sleep 
 import pyodbc
+
 
 #establish database connection 
 server = "dtk-server.database.windows.net" 
@@ -83,7 +85,12 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
                         check = 1
 
             if new_input == "Y":
-                system("cls")
+                OS_name = platform.system()
+                
+                if OS_name == "Windows":
+                    os.system("cls")
+                if OS_name == ("Darwin" or "Linux"):
+                    os.system("clear")
 
             elif new_input == "N":
                 break
