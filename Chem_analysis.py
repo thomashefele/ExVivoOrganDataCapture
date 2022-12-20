@@ -22,9 +22,9 @@ with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+'
 
         def id():
             try:
-                unos_id = int(input("Enter the UNOS ID: "))
+                unos_id = input("Enter the UNOS ID: "))
             except ValueError:
-                print("Invalid data type. Please re-enter with an integer data type")
+                print("Invalid data type. Please re-enter UNOS ID")
                 unos_id = id()
             return unos_id
 
