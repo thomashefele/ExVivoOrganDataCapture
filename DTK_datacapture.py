@@ -132,11 +132,11 @@ def BT(port_name, b, t):
                     ts_BT = datetime.now().strftime('%Y-%m-%d %H:%M:%S')                           
 
                     if BT_str[12:14] == "--":
-                        data_sO2v = 50
+                        data_sO2v = 0
                     else:
                         data_sO2v = float(BT_str[12:14])
                     if BT_str[20:22] == "--":
-                        data_hct = 40
+                        data_hct = 0
                     else:
                         data_hct = float(BT_str[20:22])
    
