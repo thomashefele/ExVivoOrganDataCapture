@@ -82,7 +82,7 @@ def MT(port_name, b, t):
                         data_AF = float(AF_str[0:6])
                         data_AP = float(AP_str[0:4])
 
-                    cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({row[0]}, '{ts_MT}', {data_AF}, {data_AP});")
+                    cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{row[0]}', '{ts_MT}', {data_AF}, {data_AP});")
                     cnxn_MT.commit()
 
 #force transducer sensor function
@@ -108,9 +108,9 @@ def FT(port_name, b, t, interval, measure):
                                                 FT_avg = round(mean(data_FT), 3)
                                                 
                                                 if measure == "km":                           
-                                                        cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({row[0]}, '{ts_FT}', {FT_avg});")
+                                                        cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{row[0]}', '{ts_FT}', {FT_avg});")
                                                 elif measure == "uo":
-                                                        cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({row[0]}, '{ts_FT}', {FT_avg});")
+                                                        cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{row[0]}', '{ts_FT}', {FT_avg});")
                                                 cnxn_FT.commit()
                                                 data_FT = []
                                                 i = 1
@@ -140,7 +140,7 @@ def BT(port_name, b, t):
                     else:
                         data_hct = float(BT_str[20:22])
    
-                    cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({row[0]}, '{ts_BT}', {data_sO2v}, {data_hct});")
+                    cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{row[0]}', '{ts_BT}', {data_sO2v}, {data_hct});")
                     cnxn_BT.commit()
                 
 #establish threads, run threads, and end threads
