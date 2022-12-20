@@ -10,7 +10,7 @@ lap = 5
 name = ["COM3", "COM4", "COM7", "COM6"]
 baud_rate = [9600, 2400, 9600, 2400]
 t_o = 1000
-global unos_id
+global row
 global STOP
 
 #establish database connection
@@ -22,7 +22,7 @@ password = "data-collection1"
 with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn_unos:
         with cnxn_unos.cursor() as cursor:
                 cursor.execute("SELECT UNOS_ID FROM dbo.istat_t;")
-                unos_id = cursor.fetchone()
+                row = cursor.fetchone()
                 
 #needed for force transducer, as sometimes it prints in a "shifted" format
 def rearrange(str):
@@ -82,7 +82,7 @@ def MT(port_name, b, t):
                         data_AF = float(AF_str[0:6])
                         data_AP = float(AP_str[0:4])
 
-                    cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({unos_id[0]}, '{ts_MT}', {data_AF}, {data_AP});")
+                    cursor.execute(f"INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({row[0]}, '{ts_MT}', {data_AF}, {data_AP});")
                     cnxn_MT.commit()
 
 #force transducer sensor function
@@ -108,9 +108,9 @@ def FT(port_name, b, t, interval, measure):
                                                 FT_avg = round(mean(data_FT), 3)
                                                 
                                                 if measure == "km":                           
-                                                        cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({unos_id[0]}, '{ts_FT}', {FT_avg});")
+                                                        cursor.execute(f"INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({row[0]}, '{ts_FT}', {FT_avg});")
                                                 elif measure == "uo":
-                                                        cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({unos_id[0]}, '{ts_FT}', {FT_avg});")
+                                                        cursor.execute(f"INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({row[0]}, '{ts_FT}', {FT_avg});")
                                                 cnxn_FT.commit()
                                                 data_FT = []
                                                 i = 1
@@ -140,11 +140,11 @@ def BT(port_name, b, t):
                     else:
                         data_hct = float(BT_str[20:22])
    
-                    cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({unos_id[0]}, '{ts_BT}', {data_sO2v}, {data_hct});")
+                    cursor.execute(f"INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({row[0]}, '{ts_BT}', {data_sO2v}, {data_hct});")
                     cnxn_BT.commit()
                 
 #establish threads, run threads, and end threads
-#MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
+MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o),)
 FT_1_thread = Thread(target= FT, args= (name[1], baud_rate[1], t_o, lap, "km"),)
 BT_thread = Thread(target= BT, args= (name[2], baud_rate[2], t_o),)
 FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[3], t_o, lap, "uo"),)
@@ -154,7 +154,7 @@ perf_time = 30000
 t_start = time()
 del_t = 0
 
-#MT_thread.start()
+MT_thread.start()
 FT_1_thread.start()
 BT_thread.start()
 FT_2_thread.start()
@@ -165,7 +165,7 @@ while del_t < perf_time:
 
 STOP = True
 
-#MT_thread.join()
+MT_thread.join()
 FT_1_thread.join()
 BT_thread.join()
 FT_2_thread.join()
