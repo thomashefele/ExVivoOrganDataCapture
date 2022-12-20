@@ -4,7 +4,6 @@ from datetime import datetime
 from time import sleep 
 import pyodbc
 
-
 #establish database connection 
 server = "dtk-server.database.windows.net" 
 database = "perf-data" 
