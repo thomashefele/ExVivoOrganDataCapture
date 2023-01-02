@@ -1,13 +1,20 @@
+import platform, system, pyodbc
 import serial as ser
 from time import time, sleep
 from datetime import datetime
 from numpy import mean
-import pyodbc 
 from threading import Thread
 
 #set up info needed for threads
 lap = 5
-name = ["COM3", "COM4", "COM7", "COM6"]
+name = []
+OS_name = platform.system()
+if OS_name == "Windows":
+    name = ["COM3", "COM4", "COM7", "COM6"]
+if OS_name == ("Darwin" or "Linux"):
+    #for example:
+    name = ["ttyS0", "ttyS1", "ttyS2", "ttyS3"]
+    #ideally, the goal would be to write code that retreives the serial port names and the corresponding devices from the OS, but this is not a vital function
 baud_rate = [9600, 2400, 9600, 2400]
 t_o = 1000
 global row
@@ -21,7 +28,7 @@ password = "data-collection1"
 
 with pyodbc.connect('DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password) as cnxn_unos:
         with cnxn_unos.cursor() as cursor:
-                cursor.execute("SELECT UNOS_ID FROM dbo.istat_t;")
+                cursor.execute("SELECT LAST(UNOS_ID) FROM dbo.istat_t;")
                 row = cursor.fetchone()
                 
 #needed for force transducer, as sometimes it prints in a "shifted" format
@@ -31,24 +38,24 @@ def rearrange(str):
     l = len(str)
     if str[2] != ".":
         if str[0] == ".":
-            for i in range(0,l):
+            for i in range(l):
                 ordered.append(str[(i+4)%l])
                 new_str += ordered[i]
         elif str[1] == ".":
-            for i in range(0,l):
-                ordered.append(str[(i + 5)%l])
+            for i in range(l):
+                ordered.append(str[(i+5)%l])
                 new_str += ordered[i]
         elif str[3] == ".":
-            for i in range(0,l):
-                ordered.append(str[(i + 1)%l])
+            for i in range(l):
+                ordered.append(str[(i+1)%l])
                 new_str += ordered[i]
         elif str[4] == ".":
-            for i in range(0,l):
-                ordered.append(str[(i + 2)%l])
+            for i in range(l):
+                ordered.append(str[(i+2)%l])
                 new_str += ordered[i]
         elif str[5] == ".":
-            for i in range(0,l):
-                ordered.append(str[(i + 3)%l])
+            for i in range(l):
+                ordered.append(str[(i+3)%l])
                 new_str += ordered[i]
     else:
         new_str = str
