@@ -6,8 +6,7 @@ start = time()
 lap = 0
 interval = 300
 
-#connections to Azure
-#establish database connection
+#Establish database connection
 dsn = 'DTKserverdatasource'
 user = 'dtk_lab@dtk-server'
 password = 'data-collection1'
