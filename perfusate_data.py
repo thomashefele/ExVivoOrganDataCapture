@@ -1,6 +1,11 @@
 from tkinter import *
 from tkinter import ttk
-import pyodbc
+import pyodbc, os, platform, sys
+
+if platform.system() == "Linux":
+    if os.environ.get('DISPLAY','') == '':
+        print('no display found. Using :0.0')
+        os.environ.__setitem__('DISPLAY', ':0.0')
 
 #Establish database connection
 dsn = 'DTKserverdatasource'
