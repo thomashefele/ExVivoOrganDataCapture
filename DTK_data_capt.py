@@ -154,7 +154,7 @@ def MT(port_name, b, t):
                                 data_AF = float(AF_str[0:6])
                                 data_AP = float(AP_str[0:4])
                                 
-                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP))
+                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP)
                     cursor.execute(execstr)        
                     cnxn_MT.commit()
 
