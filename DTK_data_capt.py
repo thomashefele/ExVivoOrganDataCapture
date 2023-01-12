@@ -90,7 +90,6 @@ def rearrange(str):
 def data_check(data_str):
         sO2_start = data_str.find("SO2=")
         hct_start = data_str.find("HCT=")
-        check = True
         
         try:
                 O2_str = data_str[sO2_start+5, sO2_start+7]
@@ -114,7 +113,7 @@ def data_check(data_str):
         except (IndexError, TypeError):
                 hct = nan
                 
-        return O2_sat, hct, check
+        return O2_sat, hct
 
 #This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
 #"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
@@ -172,7 +171,7 @@ def BT(port_name, b, t):
                         data_sO2v, data_hct = nan, nan
                         sleep_alert("biotrend")
                     else:
-                        data_sO2v, data_hct, asleep = data_check(BT_str)
+                        data_sO2v, data_hct = data_check(BT_str)
                         
                     execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_sO2v, data_hct)
                     cursor.execute(execstr)
