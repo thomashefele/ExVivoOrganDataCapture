@@ -18,18 +18,13 @@ from threading import Thread
 lap = 5
 ports = serial.tools.list_ports.comports()
 name = []
-baud_rate, t_o = [2400, 9600], [5.5, 0.5]
+baud_rate, t_o = [9600, 2400], [5.5, 0.5]
 
 for dev,descr,hwid in sorted(ports):
         if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
                 name.append(dev)
         else:
                 pass
-
-MT_set = [name[0], baud_rate[0], t_o[0]]
-BT_set = [name[1], baud_rate[0], t_o[0]]
-FT_1_set = [name[2], baud_rate[1], t_o[1], lap, "km"]
-FT_2_set = [name[3], baud_rate[1], t_o[1], lap, "uo"]
 global row
 global STOP
 global nan
@@ -238,17 +233,17 @@ def degunker(port_name, b, t):
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
                 
-degunk_thread = Thread(target= degunker, args= (*BT_set),)
+degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
 degunk_thread.start()
 degunk_thread.join()
 
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
 #termination of the loops of each function.
-MT_thread = Thread(target= MT, args= (*MT_set),)
-BT_thread = Thread(target= BT, args= (*BT_set),)
-FT_1_thread = Thread(target= FT, args= (*FT_1_set),)
-FT_2_thread = Thread(target= FT, args= (*FT_2_set),)
+MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[0]),)
+FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[1], lap, "km"),)
+FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[1], lap, "uo"),)
 
 STOP = False
 perf_time = 30000
