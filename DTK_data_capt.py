@@ -1,7 +1,7 @@
 import serial as ser
 import numpy as np
 import pyttsx3 as t2a
-import pyodbc, serial.tools.list_ports
+import pyodbc, serial.tools.list_ports, platform
 from time import time, sleep
 from threading import Thread
 
@@ -35,11 +35,21 @@ global nan
 nan = float("nan")
 
 #Establish database connection
-dsn = 'DTKserverdatasource'
-user = 'dtk_lab@dtk-server'
-password = 'data-collection1'
-database = 'perf-data'
-connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
+connString = ""
+OS = platform.system()
+
+if OS == "Linux":
+    dsn = 'DTKserverdatasource'
+    user = 'dtk_lab@dtk-server'
+    password = 'data-collection1'
+    database = 'perf-data'
+    connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
+elif OS == "Windows":
+    server = "dtk-server.database.windows.net"
+    database = "perf-data"
+    username = "dtk_lab"
+    password = "data-collection1"
+    connString = 'DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password
 
 #This block of code retrieves the UNOS ID from the organ donor database so that it may be associated to all other data collected.
 with pyodbc.connect(connString) as cnxn_unos:
