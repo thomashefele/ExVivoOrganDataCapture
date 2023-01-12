@@ -236,8 +236,7 @@ def FT(port_name, b, t, interval, measure):
 #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character (\x00) at the
 #beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start up anomaly). The "degunker"
 #function below opens an initial thread to read the abnormal data line and then closes, allowing the subsequent "BT" function to read data without any
-#hexadecimal abnormalities.
-print("Degunker running")                                 
+#hexadecimal abnormalities.                                
 def degunker(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
             diff = 0
@@ -250,6 +249,7 @@ print("Degunker running")
 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
 degunk_thread.start()
 degunk_thread.join()
+print("Degunker closed") 
 
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
