@@ -1,7 +1,7 @@
 import serial as ser
 import numpy as np
 import pyttsx3 as t2a
-import pyodbc, os, platform, serial.tools.list_ports
+import pyodbc, serial.tools.list_ports
 from time import time, sleep
 from threading import Thread
 
@@ -16,27 +16,26 @@ from threading import Thread
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
 lap = 5
-os_name = platform.system()
 ports = serial.tools.list_ports.comports()
 name = []
-baud_rate = [2400, 9600]
-if os_name == "Windows":
-        for dev,descr,hwid in sorted(ports):
-                if dev.find("COM") == -1:
-                        pass
-                else:
-                        name.append(dev)
-elif os_name == ("Linux" or "Darwin"):
-        for dev,descr,hwid in sorted(ports):
-                if dev.find("USB") == -1:
-                        pass
-                else:
-                        name.append(dev)
-t_o = 1000
+baud_rate, t_o = [2400, 9600], [5.5, 0.5]
+
+for dev,descr,hwid in sorted(ports):
+        if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
+                name.append(dev)
+        else:
+                pass
+
+MT_set = [name[0], baud_rate[0], t_o[0]]
+BT_set = [name[1], baud_rate[0], t_o[0]]
+FT_1_set = [name[2], baud_rate[1], t_o[1], lap, "km"]
+FT_2_set = [name[3], baud_rate[1], t_o[1], lap, "uo"]
 global row
 global STOP
 global nan
 nan = float("nan")
+global null_input
+null_input = "b\'\'"
 
 #Establish database connection
 dsn = 'DTKserverdatasource'
@@ -51,7 +50,8 @@ with pyodbc.connect(connString) as cnxn_unos:
                 cursor.execute("SELECT TOP 1 UNOS_ID FROM dbo.organ_t ORDER BY time_stamp DESC;") 
                 row = cursor.fetchone()
                 
-#Needed for force transducer, as sometimes it prints in a "shifted" format and thus the data needs to be rearranged into the proper format.
+#Needed for force transducer, as sometimes it prints in a "shifted" format due to an initial hexadecimal present and thus the data needs to be rearranged
+#into the proper format.
 def rearrange(str):
     ordered = []
     new_str = ""
@@ -119,26 +119,11 @@ def data_check(data_str):
 #This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
 #"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
 #only for the Biotrend console, as it can report "nan" for hexadecimal anomalies or if the values sent are "--."
-def sleep_alert(*args, sensor, snooze= True):
-    for i in args:
-        if i == nan:
-                if sensor = "biotrend":
-                        if snooze is True:
-                                pass
-                        else:
-                                alert = "Check the " + sensor
-                                eng = t2a.init()
-                                engine.say(alert)
-                                engine.runAndWait()
-                                break              
-                else:
-                        alert = "The " + sensor + " sensor has fallen asleep"
-                        eng = t2a.init()
-                        engine.say(alert)
-                        engine.runAndWait()
-                        break
-        else:
-                pass
+def sleep_alert(sensor):
+        alert = "The " + sensor + " sensor has fallen asleep"
+        eng = t2a.init()
+        eng.say(alert)
+        eng.runAndWait()
 
 #Medtronic Bioconsole sensor function. The MT_port.write method allows one to send a command to the Bioconsole in order to set the data rate output.
 def MT(port_name, b, t):
@@ -148,26 +133,29 @@ def MT(port_name, b, t):
                 MT_port.write(b"DR 05 013B\r")
 
                 while STOP == False:
-                    data_AF, data_AP = nan, nan
-                    MT_str = str(MT_port.read(35))                            
-                    AF_str = MT_str[5:8] + "." + MT_str[8:10]
-                    AP_str = MT_str[11:15]
-
-                    if MT_str[5] == "+" and MT_str[11] == "+":
-                        data_AF = float(AF_str[1:6])
-                        data_AP = float(AP_str[1:4])
-                    elif MT_str[5] == "+" and MT_str[11] != "+":
-                        data_AF = float(AF_str[1:6])
-                        data_AP = float(AP_str[0:4])
-                    elif MT_str[5] != "+" and MT_str[11] == "+":
-                        data_AF = float(AF_str[0:6])
-                        data_AP = float(AP_str[1:4])
-                    else:
-                        data_AF = float(AF_str[0:6])
-                        data_AP = float(AP_str[0:4])
+                    MT_str = str(MT_port.read(35)) 
                         
-                    sleep_alert(data_AF, data_AP, sensor= "bioconsole")
-                    execstr = 'INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({}, GETDATE(), {}, {});'.format(row[0], data_AF, data_AP))
+                    if MT_str == null_input:
+                        data_AF, data_AP = nan, nan
+                        sleep_alert("biotrend")
+                    else:                    
+                        AF_str = MT_str[5:8] + "." + MT_str[8:10]
+                        AP_str = MT_str[11:15]
+
+                        if MT_str[5] == "+" and MT_str[11] == "+":
+                                data_AF = float(AF_str[1:6])
+                                data_AP = float(AP_str[1:4])
+                        elif MT_str[5] == "+" and MT_str[11] != "+":
+                                data_AF = float(AF_str[1:6])
+                                data_AP = float(AP_str[0:4])
+                        elif MT_str[5] != "+" and MT_str[11] == "+":
+                                data_AF = float(AF_str[0:6])
+                                data_AP = float(AP_str[1:4])
+                        else:
+                                data_AF = float(AF_str[0:6])
+                                data_AP = float(AP_str[0:4])
+                                
+                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP))
                     cursor.execute(execstr)        
                     cnxn_MT.commit()
 
@@ -178,11 +166,15 @@ def BT(port_name, b, t):
             with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
 
                 while STOP == False:
-                    data_sO2v, data_hct, asleep = nan, nan, False
-                    BT_str = str(BT_port.read(43))                          
-                    data_sO2v, data_hct, asleep = data_check(BT_str)
-                    sleep_alert(data_sO2v, data_hct, sensor= "biotrend", snooze= asleep)
-                    execstr = 'INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({}, GETDATE(), {}, {});'.format(row[0], data_sO2v, data_hct)
+                    BT_str = str(BT_port.read(43))
+                
+                    if BT_str == null_input:
+                        data_sO2v, data_hct = nan, nan
+                        sleep_alert("biotrend")
+                    else:
+                        data_sO2v, data_hct, asleep = data_check(BT_str)
+                        
+                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_sO2v, data_hct)
                     cursor.execute(execstr)
                     cnxn_BT.commit()
           
@@ -202,23 +194,30 @@ def FT(port_name, b, t, interval, measure):
                                 check = 0
 
                                 while STOP == False:
-                                        FT_avg = nan
                                         intv = round(time() - start)                                                                                           
                                         FT_str = str(FT_port.read(6))
 
-                                        if intv != 0 and intv%interval == 0:  
-                                            data_FT.append(float(rearrange(FT_str[2:8])))
+                                        if intv != 0 and intv%interval == 0:                                                                                    
+                                                
+                                            if FT_str == null_input:
+                                                data_FT.append(nan)
+                                            else:
+                                                data_FT.append(float(rearrange(FT_str[2:8])))
 
                                             if i%10 == 0 and check != intv:
                                                 
                                                 FT_avg = round(np.mean(data_FT), 3)
-                                                sleep_alert(FT_avg, sensor= "force transducer")
                                                 
+                                                if np.isnan(FT_avg):
+                                                        sleep_alert("force transducer")
+                                                else:
+                                                        pass
+
                                                 if measure == "km":
-                                                        execstr = 'INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({}, GETDATE(), {});'.format(row[0], FT_avg)
+                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 elif measure == "uo":
-                                                        execstr = 'INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES({}, GETDATE(), {});'.format(row[0], FT_avg)
+                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 cnxn_FT.commit()
                                                 del data_FT[:]
@@ -237,21 +236,20 @@ def degunker(port_name, b, t):
             diff = 0
             start = time()
             while diff < 10:
-                BT_str = str(BT_port.read(43))
-                print(BT_str)
+                BT_str = str(degunk_port.read(43))
                 diff = time() - start
                 
-degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[1], t_o),)
+degunk_thread = Thread(target= degunker, args= (*BT_set),)
 degunk_thread.start()
 degunk_thread.join()
 
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
 #termination of the loops of each function.
-MT_thread = Thread(target= MT, args= (name[0], baud_rate[1], t_o),)
-BT_thread = Thread(target= BT, args= (name[1], baud_rate[1], t_o),)
-FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[0], t_o, lap, "km"),)
-FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[0], t_o, lap, "uo"),)
+MT_thread = Thread(target= MT, args= (*MT_set),)
+BT_thread = Thread(target= BT, args= (*BT_set),)
+FT_1_thread = Thread(target= FT, args= (*FT_1_set),)
+FT_2_thread = Thread(target= FT, args= (*FT_2_set),)
 
 STOP = False
 perf_time = 30000
