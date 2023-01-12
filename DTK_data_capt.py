@@ -15,16 +15,18 @@ from threading import Thread
 #from this, the devices will be assigned sequentially and then this sequence can be retreived via the conditional below for the threadings, allowing for
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
-lap = 5
-baud_rate, t_o, name = [9600, 2400], [5.5, 0.5], []
+Ndev, lap = 0, 5
+baud_rate, t_o = [9600, 2400], [5.1, 5.2, 0.2, 0.2]
 
-while len(name) != 4:
+while Ndev != 4:
+        name = []
         ports = serial.tools.list_ports.comports()
         for dev,descr,hwid in sorted(ports):
                 if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
                         name.append(dev)
                 else:
                         pass
+        Ndev = len(name)
 global row
 global STOP
 global null_input
@@ -77,6 +79,17 @@ def rearrange(str):
 
     return float(new_str)
 
+#This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
+#"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
+#only for the Biotrend console, as it can report "nan" for hexadecimal anomalies or if the values sent are "--."
+def sleep_alert(sensor):
+        alert = sensor + "asleep!"
+        eng = t2a.init()
+        eng.setProperty('rate', 125)
+        eng.say(alert)
+        eng.runAndWait()
+        eng = None
+
 #This function parses the data output from the Biotrend device to retreive the venous sO2 and the hematocrit during perfusion. Due to the presence of
 #hexadecimal characters at times at the beginning of the data output, this function searches for certain characters and then locates the values based on
 #those characters. This is in contrast to other functions which parses the known indices of values and reports at those indices. It has been encountered in
@@ -85,6 +98,7 @@ def rearrange(str):
 def data_check(data_str):
     
     if data_str == null_input:
+        
         O2_sat, hct = nan, nan
     else:
         sO2_start = data_str.find("SO2=")
@@ -113,16 +127,6 @@ def data_check(data_str):
                 hct = nan
                 
     return O2_sat, hct
-
-#This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
-#"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
-#only for the Biotrend console, as it can report "nan" for hexadecimal anomalies or if the values sent are "--."
-def sleep_alert(sensor):
-        alert = sensor + "asleep!"
-        eng = t2a.init()
-        eng.setProperty('rate', 125)
-        eng.say(alert)
-        eng.runAndWait() 
 
 #Medtronic Bioconsole sensor function. The MT_port.write method allows one to send a command to the Bioconsole in order to set the data rate output.
 def MT(port_name, b, t):
@@ -171,7 +175,6 @@ def BT(port_name, b, t):
                     data_sO2v, data_hct = data_check(BT_str)
                 
                     if np.isnan(data_sO2v) or np.isnan(data_hct):
-                        sleep_alert("biotrend")
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                         cursor.execute(execstr)
                     else:
@@ -202,35 +205,36 @@ def FT(port_name, b, t, interval, measure):
                                         if intv != 0 and intv%interval == 0:                                                                                    
                                                 
                                             if FT_str == null_input:
-                                                data_FT.append(nan)
+                                                pass
                                             else:
                                                 data_FT.append(float(rearrange(FT_str[2:8])))
 
-                                            if i%10 == 0 and check != intv:
-                                                
-                                                FT_avg = round(np.mean(data_FT), 3)
-                                                
+                                            if i%10 == 0 and check != intv:                                                                                            
                                                 if measure == "km":
-                                                    if np.isnan(FT_avg):
+                                                    if data_FT == []:
                                                         sleep_alert("force transducer")
                                                         execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                         cursor.execute(execstr)
                                                     else:
+                                                        FT_avg = round(np.mean(data_FT), 3)
                                                         execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 elif measure == "uo":
-                                                    if np.isnan(FT_avg):
+                                                    if data_FT == []:
+                                                        sleep_alert("force transducer")
                                                         execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                         cursor.execute(execstr)
                                                     else:
+                                                        FT_avg = round(np.mean(data_FT), 3)
                                                         execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 cnxn_FT.commit()
                                                 del data_FT[:]
                                                 i = 1
-                                                check = intv
+                                                check = intv                                        
                                         else:
                                             pass
+                                        
                                         i += 1
                                         
 #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character (\x00) at the
