@@ -244,7 +244,7 @@ def degunker(port_name, b, t):
             while diff < 10:
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
-                print("{} percent complete.".format(10*diff))
+
 print("Degunker running")                   
 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
 degunk_thread.start()
