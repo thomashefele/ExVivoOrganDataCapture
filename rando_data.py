@@ -30,20 +30,20 @@ while lap <= interval:
   #MedTronic data
   data_AF = round(rand.random(), 3)
   data_AP = round(5*rand.random(), 3)
-  cursor_MT.execute('INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES({}, GETDATE(), {}, {});'.format(unos_id, data_AF, data_AP)))
+  cursor_MT.execute("INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_id, data_AF, data_AP)))
   cnxn_MT.commit()
   #Kidney mass data
   data_KM = round(5*rand.random(), 3)
-  cursor_FT1.execute('INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({}, GETDATE(), {});'.format(unos_id, data_KM))
+  cursor_FT1.execute("INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_id, data_KM))
   cnxn_FT1.commit()
   #Urine output data
   data_UO = round(5*rand.random(), 3)
-  cursor_FT2.execute('INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES({}, GETDATE(), {});'.format(unos_id, data_UO))
+  cursor_FT2.execute("INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_id, data_UO))
   cnxn_FT2.commit()
   #Biotrend data
   data_sO2 = round(100*rand.random(), 3)
   data_hct = round(30*rand.random(), 3)
-  cursor_BT.execute('INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES({}, GETDATE(), {}, {});'.format(unos_id, data_sO2v, data_hct))
+  cursor_BT.execute("INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_id, data_sO2v, data_hct))
   cnxn_BT.commit()
   
   sleep(5)
