@@ -16,21 +16,21 @@ from threading import Thread
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
 lap = 5
-ports = serial.tools.list_ports.comports()
-name = []
-baud_rate, t_o = [9600, 2400], [5.5, 0.5]
+baud_rate, t_o, name = [9600, 2400], [5.5, 0.5], []
 
-for dev,descr,hwid in sorted(ports):
-        if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
-                name.append(dev)
-        else:
-                pass
+while len(name) != 4:
+        ports = serial.tools.list_ports.comports()
+        for dev,descr,hwid in sorted(ports):
+                if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
+                        name.append(dev)
+                else:
+                        pass
 global row
 global STOP
-global nan
-nan = float("nan")
 global null_input
 null_input = "b\'\'"
+global nan
+nan = float("nan")
 
 #Establish database connection
 dsn = 'DTKserverdatasource'
@@ -83,6 +83,10 @@ def rearrange(str):
 #the past that hexadecimal characters appear in the middle of the data string, but it has not occurred with the current driver/cable pairing, so the 
 #function below only accounts for the current hexadecimal anomaly encountered.
 def data_check(data_str):
+    
+    if data_str == null_input:
+        O2_sat, hct = nan, nan
+    else:
         sO2_start = data_str.find("SO2=")
         hct_start = data_str.find("HCT=")
         
@@ -108,16 +112,17 @@ def data_check(data_str):
         except (IndexError, TypeError):
                 hct = nan
                 
-        return O2_sat, hct
+    return O2_sat, hct
 
 #This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
 #"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
 #only for the Biotrend console, as it can report "nan" for hexadecimal anomalies or if the values sent are "--."
 def sleep_alert(sensor):
-        alert = "The " + sensor + " sensor has fallen asleep"
+        alert = sensor + "asleep!"
         eng = t2a.init()
+        eng.setProperty('rate', 125)
         eng.say(alert)
-        eng.runAndWait()
+        eng.runAndWait() 
 
 #Medtronic Bioconsole sensor function. The MT_port.write method allows one to send a command to the Bioconsole in order to set the data rate output.
 def MT(port_name, b, t):
@@ -129,9 +134,10 @@ def MT(port_name, b, t):
                 while STOP == False:
                     MT_str = str(MT_port.read(35)) 
                         
-                    if MT_str == null_input:
-                        data_AF, data_AP = nan, nan
-                        sleep_alert("biotrend")
+                    if MT_str == null_input:                  
+                        sleep_alert("bioconsole")
+                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                        cursor.execute(execstr)
                     else:                    
                         AF_str = MT_str[5:8] + "." + MT_str[8:10]
                         AP_str = MT_str[11:15]
@@ -149,9 +155,10 @@ def MT(port_name, b, t):
                                 data_AF = float(AF_str[0:6])
                                 data_AP = float(AP_str[0:4])
                                 
-                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP)
-                    cursor.execute(execstr)        
-                    cnxn_MT.commit()
+                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP)
+                        cursor.execute(execstr)
+                    
+                    cnxn_MT.commit()   
 
 #Medtronic Biotrend sensor function                                                  
 def BT(port_name, b, t):
@@ -161,15 +168,16 @@ def BT(port_name, b, t):
 
                 while STOP == False:
                     BT_str = str(BT_port.read(43))
+                    data_sO2v, data_hct = data_check(BT_str)
                 
-                    if BT_str == null_input:
-                        data_sO2v, data_hct = nan, nan
+                    if np.isnan(data_sO2v) or np.isnan(data_hct):
                         sleep_alert("biotrend")
+                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                        cursor.execute(execstr)
                     else:
-                        data_sO2v, data_hct = data_check(BT_str)
-                        
-                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_sO2v, data_hct)
-                    cursor.execute(execstr)
+                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_sO2v, data_hct)
+                        cursor.execute(execstr)
+                            
                     cnxn_BT.commit()
           
 #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at what time
@@ -202,15 +210,19 @@ def FT(port_name, b, t, interval, measure):
                                                 
                                                 FT_avg = round(np.mean(data_FT), 3)
                                                 
-                                                if np.isnan(FT_avg):
-                                                        sleep_alert("force transducer")
-                                                else:
-                                                        pass
-
                                                 if measure == "km":
+                                                    if np.isnan(FT_avg):
+                                                        sleep_alert("force transducer")
+                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                                                        cursor.execute(execstr)
+                                                    else:
                                                         execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 elif measure == "uo":
+                                                    if np.isnan(FT_avg):
+                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                                                        cursor.execute(execstr)
+                                                    else:
                                                         execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                         cursor.execute(execstr)
                                                 cnxn_FT.commit()
@@ -225,6 +237,7 @@ def FT(port_name, b, t, interval, measure):
 #beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start up anomaly). The "degunker"
 #function below opens an initial thread to read the abnormal data line and then closes, allowing the subsequent "BT" function to read data without any
 #hexadecimal abnormalities.
+print("Degunker running")                                 
 def degunker(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
             diff = 0
@@ -232,7 +245,8 @@ def degunker(port_name, b, t):
             while diff < 10:
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
-                
+                print("{} percent complete.".format(10*diff))
+print("Degunker running")                   
 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
 degunk_thread.start()
 degunk_thread.join()
