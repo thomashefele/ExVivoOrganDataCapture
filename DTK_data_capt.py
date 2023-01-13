@@ -90,8 +90,7 @@ def rearrange(str):
     return float(new_str)
 
 #This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
-#"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor. The "snooze" parameter is
-#only for the Biotrend console, as it can report "nan" for hexadecimal anomalies or if the values sent are "--."
+#"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor.
 def sleep_alert(sensor):
         alert = sensor + "asleep!"
         eng = t2a.init()
@@ -288,8 +287,3 @@ while del_t < perf_time:
     sleep(1)
 
 STOP = True
-
-MT_thread.join()
-BT_thread.join()
-FT_1_thread.join()
-FT_2_thread.join()
