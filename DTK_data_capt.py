@@ -167,7 +167,7 @@ def MT(port_name, b, t):
                     MT_str = str(MT_port.read(35)) 
                         
                     if MT_str == null_input:                  
-                        sleep_alert("bioconsole")
+                        #sleep_alert("bioconsole")
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                         cursor.execute(execstr)
                     else:                    
