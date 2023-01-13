@@ -292,20 +292,20 @@ print("Degunker closed")
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
 #termination of the loops of each function.
-MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
-BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[0]),)
+#MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+#BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[0]),)
 FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[1], lap, "km"),)
-FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[1], lap, "uo"),)
+#FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[1], lap, "uo"),)
 
 STOP = False
 perf_time = 30000
 t_start = time()
 del_t = 0
 
-MT_thread.start()
-BT_thread.start()
+#MT_thread.start()
+#BT_thread.start()
 FT_1_thread.start()
-FT_2_thread.start()
+#FT_2_thread.start()
 
 while del_t < perf_time:                                
     del_t = time()-t_start
