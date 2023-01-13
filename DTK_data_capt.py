@@ -93,11 +93,30 @@ def rearrange(str):
 #"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor.
 def sleep_alert(sensor):
         alert = sensor + "asleep!"
-        eng = t2a.init()
-        eng.setProperty('rate', 125)
-        eng.say(alert)
-        eng.runAndWait()
-        eng = None
+        if sensor == "bioconsole":
+            bc = t2a.init()
+            bc.setProperty('rate', 125)
+            bc.say(alert)
+            bc.runAndWait()
+            bc = None
+        if sensor == "biotrend":
+            bt = t2a.init()
+            bt.setProperty('rate', 125)
+            bt.say(alert)
+            bt.runAndWait()
+            bt = None
+        if sensor == "kidney weight":
+            kw = t2a.init()
+            kw.setProperty('rate', 125)
+            kw.say(alert)
+            kw.runAndWait()
+            kw = None
+        if sensor == "urine output":
+            urn = t2a.init()
+            urn.setProperty('rate', 125)
+            urn.say(alert)
+            urn.runAndWait()
+            urn = None
 
 #This function parses the data output from the Biotrend device to retreive the venous sO2 and the hematocrit during perfusion. Due to the presence of
 #hexadecimal characters at times at the beginning of the data output, this function searches for certain characters and then locates the values based on
@@ -107,7 +126,7 @@ def sleep_alert(sensor):
 def data_check(data_str):
     
     if data_str == null_input:
-        
+        sleep_alert("biotrend")
         O2_sat, hct = nan, nan
     else:
         sO2_start = data_str.find("SO2=")
@@ -183,8 +202,14 @@ def BT(port_name, b, t):
                     BT_str = str(BT_port.read(43))
                     data_sO2v, data_hct = data_check(BT_str)
                 
-                    if np.isnan(data_sO2v) or np.isnan(data_hct):
+                    if np.isnan(data_sO2v) and np.isnan(data_hct):
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                        cursor.execute(execstr)
+                    elif np.isnan(data_sO2v) is True and np.isnan(data_hct) is False:
+                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(row[0], data_hct)
+                        cursor.execute(execstr)
+                    elif np.isnan(data_sO2v) is False and np.isnan(data_hct) is True:
+                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(row[0], data_sO2v)
                         cursor.execute(execstr)
                     else:
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_sO2v, data_hct)
@@ -204,48 +229,48 @@ def FT(port_name, b, t, interval, measure):
                         with ser.Serial(port_name, baudrate= b, timeout= t) as FT_port:
                                 data_FT = []
                                 start = time()
-                                i = 1
-                                check = 0
+                                i, check = 1, 0
 
                                 while STOP == False:
-                                        intv = round(time() - start)                                                                                           
-                                        FT_str = str(FT_port.read(6))
-
-                                        if intv != 0 and intv%interval == 0:                                                                                    
-                                                
-                                            if FT_str == null_input:
-                                                pass
-                                            else:
-                                                data_FT.append(float(rearrange(FT_str[2:8])))
-
-                                            if i%10 == 0 and check != intv:                                                                                            
-                                                if measure == "km":
-                                                    if data_FT == []:
-                                                        sleep_alert("force transducer")
-                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
-                                                        cursor.execute(execstr)
-                                                    else:
-                                                        FT_avg = round(np.mean(data_FT), 3)
-                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
-                                                        cursor.execute(execstr)
-                                                elif measure == "uo":
-                                                    if data_FT == []:
-                                                        sleep_alert("force transducer")
-                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
-                                                        cursor.execute(execstr)
-                                                    else:
-                                                        FT_avg = round(np.mean(data_FT), 3)
-                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
-                                                        cursor.execute(execstr)
-                                                cnxn_FT.commit()
-                                                del data_FT[:]
-                                                i = 1
-                                                check = intv                                        
+                                    intv = round(time() - start)                                                                                           
+                                    FT_str = str(FT_port.read(6))
+                
+                                    if intv != 0 and intv%5 == 0:
+                                        if FT_str == null_input:
+                                            data_FT.append(nan)
                                         else:
-                                            pass
-                                        
+                                            data_FT.append(float(rearrange(FT_str[2:8])))
+
+                                        if (i == 10 and check != intv) or (data_FT.count(nan) != 0 and check != intv):
+                                            FT_avg = round(np.mean(data_FT), 3)
+                                            if measure == "km":
+                                                if np.isnan(FT_avg):
+                                                    sleep_alert("kidney weight")
+                                                    execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                                                    cursor.execute(execstr)
+                                                else:
+                                                    execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
+                                                    cursor.execute(execstr)
+                                            elif measure == "uo":
+                                                if np.isnan(FT_avg):
+                                                    sleep_alert("urine output")
+                                                    execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
+                                                    cursor.execute(execstr)
+                                                else:
+                                                    execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
+                                                    cursor.execute(execstr)
+                                            cnxn_FT.commit()
+                                            i, check = 0, intv
+                                            del data_FT[:]
+
+                                        if data_FT.count(nan) != 0:
+                                            del data_FT[:]
+                                            i = 0
+
                                         i += 1
-                                        
+                                    else:
+                                        pass
+                                      
 #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character (\x00) at the
 #beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start up anomaly). The "degunker"
 #function below opens an initial thread to read the abnormal data line and then closes, allowing the subsequent "BT" function to read data without any
