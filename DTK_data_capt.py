@@ -245,7 +245,7 @@ def FT(port_name, b, t, interval, measure):
                                             FT_avg = round(np.mean(data_FT), 3)
                                             if measure == "km":
                                                 if np.isnan(FT_avg):
-                                                    sleep_alert("kidney weight")
+                                                    #sleep_alert("kidney weight")
                                                     execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
@@ -253,7 +253,7 @@ def FT(port_name, b, t, interval, measure):
                                                     cursor.execute(execstr)
                                             elif measure == "uo":
                                                 if np.isnan(FT_avg):
-                                                    sleep_alert("urine output")
+                                                    #sleep_alert("urine output")
                                                     execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
