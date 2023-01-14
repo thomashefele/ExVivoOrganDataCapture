@@ -1,11 +1,9 @@
-import serial as ser
-import numpy as np
-import pyttsx3 as t2a
+import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, platform
 from time import time, sleep
 from threading import Thread
 
-#set up info needed for threads:
+#Set up info needed for threads:
 #The baud rates for the force transducers are 2400 and 9600 while conditionals below retreive the serial port names. The os assigns port names
 #incrementally and can retreive the serial no. of each driver for each USB port. However, it is not possible to discern which serial no. belongs
 #to which cable, so the alternative is plugging the devices in the following order:
@@ -15,10 +13,10 @@ from threading import Thread
 #from this, the devices will be assigned sequentially and then this sequence can be retreived via the conditional below for the threadings, allowing for
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
-Ndev, lap = 0, 5
-baud_rate, t_o = [9600, 2400], [5.1, 5.2, 0.2, 0.2]
+Nusb, lap = 0, 5
+baud_rate, t_o = [9600, 2400], [5.1, 5.2, 0.2]
 
-while Ndev != 4:
+while Nusb != 4:
         name = []
         ports = serial.tools.list_ports.comports()
         for dev,descr,hwid in sorted(ports):
@@ -26,39 +24,49 @@ while Ndev != 4:
                         name.append(dev)
                 else:
                         pass
-        Ndev = len(name)
+        Nusb = len(name)
+
 global row
 global STOP
 global null_input
 null_input = "b\'\'"
 global nan
 nan = float("nan")
+global aud
+global N
 
 #Establish database connection
 connString = ""
 OS = platform.system()
 
 if OS == "Linux":
-    dsn = 'DTKserverdatasource'
-    user = 'dtk_lab@dtk-server'
-    password = 'data-collection1'
-    database = 'perf-data'
-    connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
+    dsn = "DTKserverdatasource"
+    user = "dtk_lab@dtk-server"
+    password = "data-collection1"
+    database = "perf-data"
+    connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
 elif OS == "Windows":
     server = "dtk-server.database.windows.net"
     database = "perf-data"
     username = "dtk_lab"
     password = "data-collection1"
-    connString = 'DRIVER={SQL Server};SERVER='+server+';DATABASE='+database+';UID='+username+';PWD='+ password
+    connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
 
 #This block of code retrieves the UNOS ID from the organ donor database so that it may be associated to all other data collected.
 with pyodbc.connect(connString) as cnxn_unos:
         with cnxn_unos.cursor() as cursor:
                 cursor.execute("SELECT TOP 1 UNOS_ID FROM dbo.organ_t ORDER BY time_stamp DESC;") 
                 row = cursor.fetchone()
-                
-#Needed for force transducer, as sometimes it prints in a "shifted" format due to an initial hexadecimal present and thus the data needs to be rearranged
-#into the proper format.
+
+#This initializes the warning sound to be played if a sensor falls asleep
+N = 44100
+x = np.linspace(0, T,  N, False)
+aud = np.sin(600 * x * 2 * np.pi)
+aud *= 32767/np.max(np.abs(aud))
+aud = aud.astype(np.int16)
+
+#Needed for force transducer, as sometimes it prints in a "shifted" format due to an initial hexadecimal that occasionally appears and thus the data needs 
+#to be rearranged into the proper format.
 def rearrange(str):
     ordered = []
     new_str = ""
@@ -89,35 +97,6 @@ def rearrange(str):
 
     return float(new_str)
 
-#This function is used to determine if a sensor has fallen asleep or not. If the former, an audio alert is generated. The default values of each sensor are
-#"nan"; this only changes if the sensor is awake, in which case the values will be changed to the data being sent by the sensor.
-def sleep_alert(sensor):
-        alert = sensor + "asleep!"
-        if sensor == "bioconsole":
-            bc = t2a.init()
-            bc.setProperty('rate', 125)
-            bc.say(alert)
-            bc.runAndWait()
-            bc = None
-        if sensor == "biotrend":
-            bt = t2a.init()
-            bt.setProperty('rate', 125)
-            bt.say(alert)
-            bt.runAndWait()
-            bt = None
-        if sensor == "kidney weight":
-            kw = t2a.init()
-            kw.setProperty('rate', 125)
-            kw.say(alert)
-            kw.runAndWait()
-            kw = None
-        if sensor == "urine output":
-            urn = t2a.init()
-            urn.setProperty('rate', 125)
-            urn.say(alert)
-            urn.runAndWait()
-            urn = None
-
 #This function parses the data output from the Biotrend device to retreive the venous sO2 and the hematocrit during perfusion. Due to the presence of
 #hexadecimal characters at times at the beginning of the data output, this function searches for certain characters and then locates the values based on
 #those characters. This is in contrast to other functions which parses the known indices of values and reports at those indices. It has been encountered in
@@ -126,7 +105,7 @@ def sleep_alert(sensor):
 def data_check(data_str):
     
     if data_str == null_input:
-        sleep_alert("biotrend")
+        alert = sa.play_buffer(aud, 1, 2, N)
         O2_sat, hct = nan, nan
     else:
         sO2_start = data_str.find("SO2=")
@@ -166,8 +145,8 @@ def MT(port_name, b, t):
                 while STOP == False:
                     MT_str = str(MT_port.read(35)) 
                         
-                    if MT_str == null_input:                  
-                        #sleep_alert("bioconsole")
+                    if MT_str == null_input:
+                        alert = sa.play_buffer(aud, 1, 2, N)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                         cursor.execute(execstr)
                     else:                    
@@ -220,7 +199,7 @@ def BT(port_name, b, t):
 #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at what time
 #interval at which we want to collect data (i.e. every x seconds). At the interval mark, the function iterates over the 10 data points sent, appends them
 #to a data array and reports the average of these values as the value for that interval. At times, the force transducer (for an unknown reason) will report
-#two averages (both are the same, so there is no error technically, we just want to avoid redundanceies in data reporting. In order to circumvent this 
+#two averages. (Both are the same, so there is no error technically, we just want to avoid redundanceies in data reporting) In order to circumvent this 
 #anomaly, I set a "check" that is set equal to the time interval at the end of the first data reporting. If a second, anomalous average is present, it will
 #not be reported as the check is now equal to the interval, which causes the data reporting to be bypassed due to the first "if" conditional.
 def FT(port_name, b, t, interval, measure):
@@ -234,7 +213,7 @@ def FT(port_name, b, t, interval, measure):
                                 while STOP == False:
                                     intv = round(time() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
-                
+                               
                                     if intv != 0 and intv%5 == 0:
                                         if FT_str == null_input:
                                             data_FT.append(nan)
@@ -243,17 +222,19 @@ def FT(port_name, b, t, interval, measure):
 
                                         if (i == 10 and check != intv) or (data_FT.count(nan) != 0 and check != intv):
                                             FT_avg = round(np.mean(data_FT), 3)
+                                            sleepy = np.isnan(FT_avg)
+                                        
                                             if measure == "km":
-                                                if np.isnan(FT_avg):
-                                                    #sleep_alert("kidney weight")
+                                                if sleepy:
+                                                    alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
                                                     execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(row[0], FT_avg)
                                                     cursor.execute(execstr)
                                             elif measure == "uo":
-                                                if np.isnan(FT_avg):
-                                                    #sleep_alert("urine output")
+                                                if sleepy:
+                                                    alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
@@ -262,11 +243,11 @@ def FT(port_name, b, t, interval, measure):
                                             cnxn_FT.commit()
                                             i, check = 0, intv
                                             del data_FT[:]
-
-                                        if data_FT.count(nan) != 0:
+                                        
+                                        if data_FT.count(nan) != 0 and check == intv:
+                                            i = 0 
                                             del data_FT[:]
-                                            i = 0
-
+                                            
                                         i += 1
                                     else:
                                         pass
@@ -282,30 +263,28 @@ def degunker(port_name, b, t):
             while diff < 10:
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
-
-print("Degunker running")                   
+                 
 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
 degunk_thread.start()
-degunk_thread.join()
-print("Degunker closed") 
+degunk_thread.join() 
 
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
 #termination of the loops of each function.
-#MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
-#BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[0]),)
-FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[1], lap, "km"),)
-#FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[1], lap, "uo"),)
+MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
+FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
+FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
 
 STOP = False
 perf_time = 30000
 t_start = time()
 del_t = 0
 
-#MT_thread.start()
-#BT_thread.start()
+MT_thread.start()
+BT_thread.start()
 FT_1_thread.start()
-#FT_2_thread.start()
+FT_2_thread.start()
 
 while del_t < perf_time:                                
     del_t = time()-t_start
