@@ -15,7 +15,7 @@ if OS == "Linux":
         database = 'perf-data'
         connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
         
-elif OS == "Windows:
+elif OS == "Windows":
         server = "dtk-server.database.windows.net"
         database = "perf-data"
         username = "dtk_lab"
