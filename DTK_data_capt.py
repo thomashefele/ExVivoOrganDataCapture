@@ -26,14 +26,8 @@ while Nusb != 4:
                         pass
         Nusb = len(name)
 
-global row
-global STOP
-global null_input
 null_input = "b\'\'"
-global nan
 nan = float("nan")
-global aud
-global N
 
 #Establish database connection
 connString = ""
@@ -288,6 +282,5 @@ FT_2_thread.start()
 
 while del_t < perf_time:                                
     del_t = time()-t_start
-    sleep(1)
 
 STOP = True
