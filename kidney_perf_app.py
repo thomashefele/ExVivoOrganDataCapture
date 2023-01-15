@@ -310,10 +310,10 @@ def BT(port_name, b, t):
                     if np.isnan(data_sO2v) and np.isnan(data_hct):
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
-                    elif np.isnan(data_sO2v) is True and np.isnan(data_hct) is False:
+                    elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_hct)
                         cursor.execute(execstr)
-                    elif np.isnan(data_sO2v) is False and np.isnan(data_hct) is True:
+                    elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_sO2v)
                         cursor.execute(execstr)
                     else:
