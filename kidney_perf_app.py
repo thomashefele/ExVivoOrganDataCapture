@@ -29,7 +29,7 @@ def port_detect():
     
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_win, text= "No sensors connected".format(Nusb)).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.6, anchor= CENTER)
         elif Nusb == 1:
             Label(port_win, text= "Only 1 sensor is connected:\n- Medtronic Bioconsole".format(Nusb)).place(relx= 0.5, rely= 0.6, anchor= CENTER)
         elif Nusb == 2:
