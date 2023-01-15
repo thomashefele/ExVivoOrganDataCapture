@@ -1,7 +1,6 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
-from time import time, sleep
-from datetime import timedelta
+from time import time
 from tkinter import *
 from tkinter import ttk
 from threading import Thread
@@ -79,18 +78,6 @@ def unos_save():
         unos_error()
     else:
         unos_win.destroy()
-
-def realtime():
-    Label(data_tab, text= "Perfusion time: {}".format(timedelta(seconds= round(time()-t_start)))).grid(row= 1, column= 1)
-    Label(data_tab, text= "Qa (L/min): {}, Pa (mmHg): {}".format(data_AF, data_AP), padx= 20).grid(row= 2, column= 1)
-    Label(data_tab, text= "Ven sO2 (%): {}, Hct (%): {}".format(data_sO2v, data_hct), padx= 20).grid(row= 3, column= 1)
-    Label(data_tab, text= "Kidney Weight (kg): {}".format(km_avg), padx= 20).grid(row= 4, column= 1)
-    Label(data_tab, text= "Urine Output (kg): {}".format(uo_avg), padx= 20).grid(row= 5, column= 1)
-    
-    if STOP == True:
-        Label(data_tab, text= "Data collection complete!").grid(row= 7, column= 1)
-    else:
-        data_tab.after(1000, realtime)
 
 def unos_error():
     err_win = Tk()
@@ -425,10 +412,9 @@ def start_collection():
         del_t = time()-t_start
     
     STOP = True
-
-submit_istat = Button(istat_tab, text= "Submit", command= upload_istat).grid(row= 10, column= 2)
-submit_istat = Button(pic_tab, text= "Submit", command= upload_pic).grid(row= 16, column= 2)
-collecting = Button(data_tab, text= "Start Data Collection", command= start_collection).grid(row= 6, column= 1)
-app.after(1000, realtime)
     
+submit_istat = Button(istat_tab, text= "Submit", command= upload_istat).grid(row= 10, column= 2)
+submit_pic = Button(pic_tab, text= "Submit", command= upload_pic).grid(row= 16, column= 2)
+collecting = Button(data_tab, text= "Start Data Collection", command= start_collection).grid(row= 1, column= 1)
+
 app.mainloop()
