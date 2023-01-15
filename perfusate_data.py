@@ -9,11 +9,11 @@ if OS == "Linux":
         print('no display found. Using :0.0')
         os.environ.__setitem__('DISPLAY', ':0.0')
         
-        dsn = 'DTKserverdatasource'
-        user = 'dtk_lab@dtk-server'
-        password = 'data-collection1'
-        database = 'perf-data'
-        connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
+    dsn = 'DTKserverdatasource'
+    user = 'dtk_lab@dtk-server'
+    password = 'data-collection1'
+    database = 'perf-data'
+    connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
         
 elif OS == "Windows":
         server = "dtk-server.database.windows.net"
