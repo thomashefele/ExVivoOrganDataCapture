@@ -391,30 +391,37 @@ degunk_thread.join()
 #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be terminated manually
 #without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. Within each thread, this causes a 
 #termination of the loops of each function. The x.after method updates all the data posted to the database to one main screen.
+
+STOP = False
+AGAIN = True
+perf_time = 30000
+
 def start_collection():
-    MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
-    BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
-    FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
-    FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
+    global AGAIN
+    if AGAIN == True:
+        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.15, anchor= CENTER)
+        
+        MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+        BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
+        FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
+        FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
     
+        MT_thread.start()
+        BT_thread.start()
+        FT_1_thread.start()
+        FT_2_thread.start()
+        AGAIN = False
+    else:
+        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.15, anchor= CENTER)
+
+def q():
     global STOP
-    STOP = False
-    perf_time = 40000
-    t_start = time()
-    del_t = 0
-    
-    MT_thread.start()
-    BT_thread.start()
-    FT_1_thread.start()
-    FT_2_thread.start()
-    
-    while del_t <= perf_time:                                
-        del_t = time()-t_start
-    
     STOP = True
-    
+    Label(data_tab, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.15, anchor= CENTER)
+
 submit_istat = Button(istat_tab, text= "Submit", command= upload_istat).grid(row= 10, column= 2)
 submit_pic = Button(pic_tab, text= "Submit", command= upload_pic).grid(row= 16, column= 2)
 collecting = Button(data_tab, text= "Start Data Collection", command= start_collection).grid(row= 1, column= 1)
+data_tab.after(1000*perf_time, q)
 
 app.mainloop()
