@@ -280,7 +280,7 @@ BT_thread.start()
 FT_1_thread.start()
 FT_2_thread.start()
 
-while del_t < perf_time:                                
+while del_t <= perf_time:                                
     del_t = time()-t_start
 
 STOP = True
