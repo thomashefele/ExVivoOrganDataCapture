@@ -259,25 +259,29 @@ def MT(port_name, b, t):
                         #alert = sa.play_buffer(aud, 1, 2, N)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
-                    else:                    
-                        AF_str = MT_str[5:8] + "." + MT_str[8:10]
-                        AP_str = MT_str[11:15]
+                    else:
+                        try:
+                            AF_str = MT_str[5:8] + "." + MT_str[8:10]
+                            AP_str = MT_str[11:15]
 
-                        if MT_str[5] == "+" and MT_str[11] == "+":
-                                data_AF = float(AF_str[1:6])
-                                data_AP = float(AP_str[1:4])
-                        elif MT_str[5] == "+" and MT_str[11] != "+":
-                                data_AF = float(AF_str[1:6])
-                                data_AP = float(AP_str[0:4])
-                        elif MT_str[5] != "+" and MT_str[11] == "+":
-                                data_AF = float(AF_str[0:6])
-                                data_AP = float(AP_str[1:4])
-                        else:
-                                data_AF = float(AF_str[0:6])
-                                data_AP = float(AP_str[0:4])
+                            if MT_str[5] == "+" and MT_str[11] == "+":
+                                    data_AF = float(AF_str[1:6])
+                                    data_AP = float(AP_str[1:4])
+                            elif MT_str[5] == "+" and MT_str[11] != "+":
+                                    data_AF = float(AF_str[1:6])
+                                    data_AP = float(AP_str[0:4])
+                            elif MT_str[5] != "+" and MT_str[11] == "+":
+                                    data_AF = float(AF_str[0:6])
+                                    data_AP = float(AP_str[1:4])
+                            else:
+                                    data_AF = float(AF_str[0:6])
+                                    data_AP = float(AP_str[0:4])
                                 
-                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
-                        cursor.execute(execstr)
+                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
+                            cursor.execute(execstr)
+                        except (IndexError, ValueError, TypeError):
+                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                            cursor.execute(execstr)
                     
                     cnxn_MT.commit()   
 
@@ -331,7 +335,7 @@ def FT(port_name, b, t, interval, measure):
                                     intv = round(time() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
                                
-                                    if intv != 0 and intv%5 == 0:
+                                    if intv != 0 and (intv%5 == 0 or ((intv+1)%5 == 0 or (intv-1)%5 == 0):
                                         if FT_str == null_input:
                                             data_FT.append(nan)
                                         else:
