@@ -15,7 +15,7 @@ from threading import Thread
 #from this, the devices will be assigned sequentially and then this sequence can be retreived via the conditional below for the threadings, allowing for
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
-lap, baud_rate, t_o = 5, [9600, 2400], [5.1, 5.2, 0.2]
+lap, baud_rate, t_o = 5, [9600, 2400], [5.15, 5.25, 0.25]
 
 def port_detect():
     name = []
@@ -165,7 +165,8 @@ ALB_txt, TP_txt = StringVar(), StringVar()
 
 #This initializes the warning sound to be played if a sensor falls asleep.
 N = 44100
-x = np.linspace(0, T,  N, False)
+T = 0.25
+x = np.linspace(0, T*N,  N, False)
 aud = np.sin(600 * x * 2 * np.pi)
 aud *= 32767/np.max(np.abs(aud))
 aud = aud.astype(np.int16)
@@ -210,14 +211,14 @@ def rearrange(str):
 def data_check(data_str):
     
     if data_str == null_input:
-        alert = sa.play_buffer(aud, 1, 2, N)
+        #alert = sa.play_buffer(aud, 1, 2, N)
         O2_sat, hct = nan, nan
     else:
         sO2_start = data_str.find("SO2=")
         hct_start = data_str.find("HCT=")
         
         try:
-                O2_str = data_str[sO2_start+5, sO2_start+7]
+                O2_str = data_str[(sO2_start+5):(sO2_start+7)]
                 
                 if O2_str == "--":
                         O2_sat = nan
@@ -228,7 +229,7 @@ def data_check(data_str):
                 O2_sat = nan
                 
         try:
-                hct_str = data_str[hct_start+5, hct_start+7]
+                hct_str = data_str[(sO2_start+5):(sO2_start+7)]
                 
                 if hct_str == "--":
                         hct = nan
@@ -255,7 +256,7 @@ def MT(port_name, b, t):
                         
                     if MT_str == null_input:
                         data_AF, data_AP = nan, nan
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        #alert = sa.play_buffer(aud, 1, 2, N)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
                     else:                    
@@ -343,7 +344,7 @@ def FT(port_name, b, t, interval, measure):
                                                 sleepy = np.isnan(km_avg)
                                                 
                                                 if sleepy:
-                                                    alert = sa.play_buffer(aud, 1, 2, N)
+                                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                                     cursor.execute(execstr)
                                                 else:
@@ -354,7 +355,7 @@ def FT(port_name, b, t, interval, measure):
                                                 sleepy = np.isnan(uo_avg)
                                                 
                                                 if sleepy:
-                                                    alert = sa.play_buffer(aud, 1, 2, N)
+                                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                                     cursor.execute(execstr)
                                                 else:
@@ -384,7 +385,7 @@ def degunker(port_name, b, t):
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
                  
-degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
+degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
 degunk_thread.start()
 degunk_thread.join()
 
@@ -394,7 +395,7 @@ degunk_thread.join()
 
 STOP = False
 AGAIN = True
-perf_time = 30000
+perf_time = 30
 
 def start_collection():
     global AGAIN
