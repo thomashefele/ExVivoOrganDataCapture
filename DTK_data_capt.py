@@ -165,7 +165,7 @@ def MT(port_name, b, t):
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP)
                                 cursor.execute(execstr)
                         except IndexError:
-                                execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE());".format(row[0])
+                                execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                 cursor.execute(execstr)
                     
                     cnxn_MT.commit()   
