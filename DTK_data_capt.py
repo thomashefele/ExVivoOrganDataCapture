@@ -99,7 +99,7 @@ def rearrange(str):
 def data_check(data_str):
     
     if data_str == null_input:
-        alert = sa.play_buffer(aud, 1, 2, N)
+        #alert = sa.play_buffer(aud, 1, 2, N)
         O2_sat, hct = nan, nan
     else:
         sO2_start = data_str.find("SO2=")
@@ -140,7 +140,7 @@ def MT(port_name, b, t):
                     MT_str = str(MT_port.read(35)) 
                         
                     if MT_str == null_input:
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        #alert = sa.play_buffer(aud, 1, 2, N)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                         cursor.execute(execstr)
                     else:                    
@@ -178,10 +178,10 @@ def BT(port_name, b, t):
                     if np.isnan(data_sO2v) and np.isnan(data_hct):
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                         cursor.execute(execstr)
-                    elif np.isnan(data_sO2v) is True and np.isnan(data_hct) is False:
+                    elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(row[0], data_hct)
                         cursor.execute(execstr)
-                    elif np.isnan(data_sO2v) is False and np.isnan(data_hct) is True:
+                    elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(row[0], data_sO2v)
                         cursor.execute(execstr)
                     else:
@@ -220,7 +220,7 @@ def FT(port_name, b, t, interval, measure):
                                         
                                             if measure == "km":
                                                 if sleepy:
-                                                    alert = sa.play_buffer(aud, 1, 2, N)
+                                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
@@ -228,7 +228,7 @@ def FT(port_name, b, t, interval, measure):
                                                     cursor.execute(execstr)
                                             elif measure == "uo":
                                                 if sleepy:
-                                                    alert = sa.play_buffer(aud, 1, 2, N)
+                                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                                     execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                                     cursor.execute(execstr)
                                                 else:
