@@ -18,6 +18,7 @@ from threading import Thread
 lap, baud_rate, t_o = 5, [9600, 2400], [5.15, 5.25, 0.25]
 
 def port_detect():
+    global name
     name = []
     ports = serial.tools.list_ports.comports()
     for dev,descr,hwid in sorted(ports):
