@@ -98,7 +98,10 @@ def upload_istat():
     try:  
         pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
         TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
-        sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get()) 
+        sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
+        execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(row[0], pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
+        cursor.execute(execstr)
+        cnxn_istat.commit()
         Label(istat_tab, text= "Data successfully uploaded!").grid(row= 11, column= 2)
     except ValueError:
         dt_error()
@@ -109,7 +112,10 @@ def upload_pic():
         Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
         BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
         ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
-        ALB, TP = float(ALB_txt.get()), float(TP_txt.get())  
+        ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
+        execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(row[0], Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
+        cursor.execute(execstr)
+        cnxn_pic.commit()   
         Label(pic_tab, text= "Data successfully uploaded!").grid(row= 17, column= 2)       
     except ValueError:
         dt_error()
@@ -127,7 +133,7 @@ unos_win.mainloop()
 #The code below initializes the windows and tabs for the main window of the app. 
 app = Tk()
 app.title("Kidney Perfusion Data")
-app.geometry("300x500")
+app.geometry("300x600")
 tabs = ttk.Notebook(app)
 istat_tab = ttk.Frame(tabs)
 tabs.add(istat_tab, text= "iStat")
@@ -163,6 +169,35 @@ Na_txt, K_txt, TCO2_pic_txt, Cl_txt = StringVar(), StringVar(), StringVar(), Str
 Glu_txt, Ca_txt, BUN_txt, Cre_txt = StringVar(), StringVar(), StringVar(), StringVar()
 eGFR_txt, ALP_txt, AST_txt, TBIL_txt = StringVar(), StringVar(), StringVar(), StringVar()
 ALB_txt, TP_txt = StringVar(), StringVar()
+
+Label(pic_tab, text= "Na: ").grid(row= 2, column= 1)
+Na_e = Entry(pic_tab, text= Na_txt).grid(row= 2, column= 2)
+Label(pic_tab, text= "K: ").grid(row= 3, column= 1)
+K_e = Entry(pic_tab, text= K_txt).grid(row= 3, column= 2)
+Label(pic_tab, text= "TCO2: ").grid(row= 4, column= 1)
+TCO2_pic_e = Entry(pic_tab, text= TCO2_pic_txt).grid(row= 4, column= 2)
+Label(pic_tab, text= "Cl: ").grid(row= 5, column= 1)
+Cl_e = Entry(pic_tab, text= Cl_txt).grid(row= 5, column= 2)
+Label(pic_tab, text= "Glu: ").grid(row= 6, column= 1)
+Glu_e = Entry(pic_tab, text= Glu_txt).grid(row= 6, column= 2)
+Label(pic_tab, text= "Ca: ").grid(row= 7, column= 1)
+Ca_e = Entry(pic_tab, text= Ca_txt).grid(row= 7, column= 2)
+Label(pic_tab, text= "BUN: ").grid(row= 8, column= 1)
+BUN_e = Entry(pic_tab, text= BUN_txt).grid(row= 8, column= 2)
+Label(pic_tab, text= "Cre: ").grid(row= 9, column= 1)
+Cre_e = Entry(pic_tab, text= Cre_txt).grid(row= 9, column= 2)
+Label(pic_tab, text= "eGFR: ").grid(row= 10, column= 1)
+eGFR_e = Entry(pic_tab, text= eGFR_txt).grid(row= 10, column= 2)
+Label(pic_tab, text= "ALP: ").grid(row= 11, column= 1)
+ALP_e = Entry(pic_tab, text= ALP_txt).grid(row= 11, column= 2)
+Label(pic_tab, text= "AST: ").grid(row= 12, column= 1)
+AST_e = Entry(pic_tab, text= AST_txt).grid(row= 12, column= 2)
+Label(pic_tab, text= "TBIL: ").grid(row= 13, column= 1)
+TBIL_e = Entry(pic_tab, text= TBIL_txt).grid(row= 13, column= 2)
+Label(pic_tab, text= "ALB: ").grid(row= 14, column= 1)
+ALB_e = Entry(pic_tab, text= ALB_txt).grid(row= 14, column= 2)
+Label(pic_tab, text= "TP: ").grid(row= 15, column= 1)
+TP_e = Entry(pic_tab, text= TP_txt).grid(row= 15, column= 2)
 
 #This initializes the warning sound to be played if a sensor falls asleep.
 N = 44100
@@ -336,7 +371,7 @@ def FT(port_name, b, t, interval, measure):
                                     intv = round(time() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
                                
-                                    if intv != 0 and (intv%5 == 0 or (intv+1)%5 == 0 or (intv-1)%5 == 0):
+                                    if intv != 0 and intv%5 == 0:
                                         if FT_str == null_input:
                                             data_FT.append(nan)
                                         else:
@@ -400,12 +435,12 @@ degunk_thread.join()
 
 STOP = False
 AGAIN = True
-perf_time = 30
+perf_time = 30000
 
 def start_collection():
     global AGAIN
     if AGAIN == True:
-        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.15, anchor= CENTER)
+        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
         
         MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
         BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -418,12 +453,12 @@ def start_collection():
         FT_2_thread.start()
         AGAIN = False
     else:
-        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.15, anchor= CENTER)
+        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
 def q():
     global STOP
     STOP = True
-    Label(data_tab, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.15, anchor= CENTER)
+    Label(data_tab, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
 submit_istat = Button(istat_tab, text= "Submit", command= upload_istat).grid(row= 10, column= 2)
 submit_pic = Button(pic_tab, text= "Submit", command= upload_pic).grid(row= 16, column= 2)
