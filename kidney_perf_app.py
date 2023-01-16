@@ -30,17 +30,17 @@ def port_detect():
     
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.7, anchor= CENTER)
         elif Nusb == 1:
-            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
         elif Nusb == 2:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
         elif Nusb == 3:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
         else:
             pass
     elif Nusb == 4:
-        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.8, anchor= CENTER)
+        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.7, anchor= CENTER)
         port_win.after(2000, port_win.destroy)
     
 port_win = Tk()
@@ -424,10 +424,10 @@ def FT(port_name, b, t, interval, measure):
 def degunker(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
             diff = 0
-            start = time()
+            start = monotonic()
             while diff < 10:
                 BT_str = str(degunk_port.read(43))
-                diff = time() - start
+                diff = monotonic() - start
                  
 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
 degunk_thread.start()
@@ -444,7 +444,7 @@ perf_time = 30000
 def start_collection():
     global AGAIN
     if AGAIN == True:
-        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
         
         MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
         BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -457,7 +457,7 @@ def start_collection():
         FT_2_thread.start()
         AGAIN = False
     else:
-        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
 def q():
     global STOP
