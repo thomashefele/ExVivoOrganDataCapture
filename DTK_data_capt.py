@@ -54,7 +54,8 @@ with pyodbc.connect(connString) as cnxn_unos:
 
 #This initializes the warning sound to be played if a sensor falls asleep
 N = 44100
-x = np.linspace(0, T,  N, False)
+T = 0.25
+x = np.linspace(0, int(T*N),  N, False)
 aud = np.sin(600 * x * 2 * np.pi)
 aud *= 32767/np.max(np.abs(aud))
 aud = aud.astype(np.int16)
