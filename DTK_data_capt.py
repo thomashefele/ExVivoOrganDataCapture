@@ -14,7 +14,7 @@ from threading import Thread
 #a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices are plugged in (or at 
 #least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
 Nusb, lap = 0, 5
-baud_rate, t_o = [9600, 2400], [5.1, 5.2, 0.2]
+baud_rate, t_o = [9600, 2400], [5.15, 5.25, 0.25]
 
 while Nusb != 4:
         name = []
@@ -107,7 +107,7 @@ def data_check(data_str):
         hct_start = data_str.find("HCT=")
         
         try:
-                O2_str = data_str[sO2_start+5, sO2_start+7]
+                O2_str = data_str[(sO2_start+5):(sO2_start+7)]
                 
                 if O2_str == "--":
                         O2_sat = nan
@@ -118,7 +118,7 @@ def data_check(data_str):
                 O2_sat = nan
                 
         try:
-                hct_str = data_str[hct_start+5, hct_start+7]
+                hct_str = data_str[(hct_start+5):(hct_start+7)]
                 
                 if hct_str == "--":
                         hct = nan
@@ -164,7 +164,7 @@ def MT(port_name, b, t):
                                 
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(row[0], data_AF, data_AP)
                                 cursor.execute(execstr)
-                        except IndexError:
+                        except (IndexError, ValueError, TypeError):
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(row[0])
                                 cursor.execute(execstr)
                     
@@ -213,7 +213,7 @@ def FT(port_name, b, t, interval, measure):
                                     intv = round(time() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
                                
-                                    if intv != 0 and intv%5 == 0:
+                                    if intv != 0 and (intv%5 == 0 or (intv+1)%5 == 0 or (intv-1)%5 == 0):
                                         if FT_str == null_input:
                                             data_FT.append(nan)
                                         else:
@@ -263,7 +263,7 @@ def degunker(port_name, b, t):
                 BT_str = str(degunk_port.read(43))
                 diff = time() - start
                  
-degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[0]),)
+degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
 degunk_thread.start()
 degunk_thread.join() 
 
