@@ -1,6 +1,6 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
-from time import time
+from time import monotonic
 from tkinter import *
 from tkinter import ttk
 from threading import Thread
@@ -30,17 +30,17 @@ def port_detect():
     
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 1:
-            Label(port_win, text= "Only 1 sensor is connected:\n- Medtronic Bioconsole".format(Nusb)).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 2:
-            Label(port_win, text= "Only {} sensors are connected:\n- Medtronic Bioconsole\n- Medtronic Biotrend".format(Nusb)).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 3:
-            Label(port_win, text= "Only {} sensors are connected:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- 1 Force transducer".format(Nusb)).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         else:
             pass
     elif Nusb == 4:
-        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.5, anchor= CENTER)
+        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.8, anchor= CENTER)
         port_win.after(2000, port_win.destroy)
     
 port_win = Tk()
@@ -48,7 +48,7 @@ port_win.title("Start Up")
 port_win.geometry("300x250")
 user_guide = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (any order)"
 Label(port_win, text= user_guide).place(relx= 0.5, rely= 0.2, anchor= CENTER)
-port_check = Button(port_win, text= "Click to check port status", command= port_detect).place(relx= 0.5, rely= 0.4, anchor= CENTER)
+port_check = Button(port_win, text= "Click to check port status", command= port_detect).place(relx= 0.5, rely= 0.5, anchor= CENTER)
 port_win.mainloop()
 
 null_input = "b\'\'"
@@ -95,30 +95,34 @@ def dt_error():
     error.place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
 def upload_istat():
-    try:  
-        pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
-        TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
-        sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
-        execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(row[0], pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
-        cursor.execute(execstr)
-        cnxn_istat.commit()
-        Label(istat_tab, text= "Data successfully uploaded!").grid(row= 11, column= 2)
-    except ValueError:
-        dt_error()
+     with pyodbc.connect(connString) as cnxn_istat:
+        with cnxn_istat.cursor() as cursor:
+            try:  
+                pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
+                TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
+                sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
+                execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
+                cursor.execute(execstr)
+                cnxn_istat.commit()
+                Label(istat_tab, text= "Data successfully uploaded!").grid(row= 11, column= 2)
+            except ValueError:
+                dt_error()
     
 def upload_pic():
-    try:
-        Na, K, TCO2_pic = float(Na_txt.get()), float(K_txt.get()), float(TCO2_pic_txt.get())
-        Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
-        BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
-        ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
-        ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
-        execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(row[0], Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
-        cursor.execute(execstr)
-        cnxn_pic.commit()   
-        Label(pic_tab, text= "Data successfully uploaded!").grid(row= 17, column= 2)       
-    except ValueError:
-        dt_error()
+     with pyodbc.connect(connString) as cnxn_pic:
+        with cnxn_pic.cursor() as cursor:
+            try:
+                Na, K, TCO2_pic = float(Na_txt.get()), float(K_txt.get()), float(TCO2_pic_txt.get())
+                Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
+                BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
+                ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
+                ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
+                execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
+                cursor.execute(execstr)
+                cnxn_pic.commit()   
+                Label(pic_tab, text= "Data successfully uploaded!").grid(row= 17, column= 2)       
+            except ValueError:
+                dt_error()
 
 #The section below establishes the UNOS ID starter window for the app.
 unos_win = Tk()
@@ -133,7 +137,7 @@ unos_win.mainloop()
 #The code below initializes the windows and tabs for the main window of the app. 
 app = Tk()
 app.title("Kidney Perfusion Data")
-app.geometry("300x600")
+app.geometry("300x500")
 tabs = ttk.Notebook(app)
 istat_tab = ttk.Frame(tabs)
 tabs.add(istat_tab, text= "iStat")
@@ -364,11 +368,11 @@ def FT(port_name, b, t, interval, measure):
                                 global uo_avg
                                 km_avg, uo_avg = nan, nan
                                 data_FT = []
-                                start = time()
+                                start = monotonic()
                                 i, check = 1, 0
 
                                 while STOP == False:
-                                    intv = round(time() - start)                                                                                           
+                                    intv = round(monotonic() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
                                
                                     if intv != 0 and intv%5 == 0:
@@ -440,7 +444,7 @@ perf_time = 30000
 def start_collection():
     global AGAIN
     if AGAIN == True:
-        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
+        Label(data_tab, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.2, anchor= CENTER)
         
         MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
         BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -453,7 +457,7 @@ def start_collection():
         FT_2_thread.start()
         AGAIN = False
     else:
-        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.3, anchor= CENTER)
+        Label(data_tab, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.2, anchor= CENTER)
 
 def q():
     global STOP
@@ -462,7 +466,7 @@ def q():
 
 submit_istat = Button(istat_tab, text= "Submit", command= upload_istat).grid(row= 10, column= 2)
 submit_pic = Button(pic_tab, text= "Submit", command= upload_pic).grid(row= 16, column= 2)
-collecting = Button(data_tab, text= "Start Data Collection", command= start_collection).grid(row= 1, column= 1)
+collecting = Button(data_tab, text= "Start Data Collection", command= start_collection).place(relx= 0.5, rely= 0.1, anchor= CENTER)
 data_tab.after(1000*perf_time, q)
 
 app.mainloop()
