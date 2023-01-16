@@ -335,7 +335,7 @@ def FT(port_name, b, t, interval, measure):
                                     intv = round(time() - start)                                                                                           
                                     FT_str = str(FT_port.read(6))
                                
-                                    if intv != 0 and (intv%5 == 0 or ((intv+1)%5 == 0 or (intv-1)%5 == 0):
+                                    if intv != 0 and (intv%5 == 0 or (intv+1)%5 == 0 or (intv-1)%5 == 0):
                                         if FT_str == null_input:
                                             data_FT.append(nan)
                                         else:
