@@ -30,17 +30,17 @@ def port_detect():
     
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.7, anchor= CENTER)
+            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 1:
-            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 2:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         elif Nusb == 3:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
         else:
             pass
     elif Nusb == 4:
-        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.7, anchor= CENTER)
+        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.8, anchor= CENTER)
         port_win.after(2000, port_win.destroy)
     
 port_win = Tk()
@@ -348,7 +348,7 @@ elif Nusb == 4 and unos_ID != "":
             return data
 
         if data_str == null_input:
-            alert = sa.play_buffer(aud, 1, 2, N)
+            #alert = sa.play_buffer(aud, 1, 2, N)
             O2_sat, hct = nan, nan
         else:
             O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
@@ -445,9 +445,8 @@ elif Nusb == 4 and unos_ID != "":
 
                                             if FT_str == null_input:
                                                 pot_m = nan
-                                            else:
-                                                FT_str = str(FT_port.read(6))
-                                                pot_m = float(rearrange(FT_str))
+                                            else:                                                
+                                                pot_m = float(rearrange(FT_str[2:8]))
                                         except (IndexError, ValueError, TypeError):
                                             #alert = sa.play_buffer(aud, 1, 2, N)
                                             pot_m = nan
