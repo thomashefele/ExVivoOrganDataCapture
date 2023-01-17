@@ -495,5 +495,4 @@ if choice != None:
 
             collecting = Button(app, text= "Start Data Collection", command= start_collection).place(relx= 0.5, rely= 0.3, anchor= CENTER)
             app.after(1000*perf_time, q)
-
             app.mainloop()
