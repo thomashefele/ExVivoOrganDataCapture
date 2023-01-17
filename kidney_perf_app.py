@@ -149,6 +149,7 @@ if Nusb != 4 and unos_ID != "":
     tabs.add(istat_tab, text= "iStat")
     pic_tab = ttk.Frame(tabs)
     tabs.add(pic_tab, text= "Piccolo")
+    tabs.pack(expand= 1, fill="both")
 
     #iStat tab
     pH_txt, PCO2_txt, PO2_txt, TCO2_istat_txt = StringVar(), StringVar(), StringVar(), StringVar()
