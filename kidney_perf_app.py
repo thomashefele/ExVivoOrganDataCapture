@@ -30,17 +30,17 @@ def port_detect():
     
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.9, anchor= CENTER)
         elif Nusb == 1:
-            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
         elif Nusb == 2:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
         elif Nusb == 3:
-            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
         else:
             pass
     elif Nusb == 4:
-        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.8, anchor= CENTER)
+        Label(port_win, text= "Data collection ready to commence!").place(relx= 0.5, rely= 0.9, anchor= CENTER)
         port_win.after(2000, port_win.destroy)
     
 port_win = Tk()
