@@ -1,6 +1,6 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
-from time import sleep, monotonic
+from time import monotonic
 from tkinter import *
 from tkinter import ttk
 from threading import Thread
@@ -432,58 +432,60 @@ elif Nusb == 4 and unos_ID != "":
             with pyodbc.connect(connString) as cnxn_FT:
                     with cnxn_FT.cursor() as cursor:
                             with ser.Serial(port_name, baudrate= b, timeout= t) as FT_port:
-                                    data_FT = []
-                                    start = monotonic()
-                                    i, check = 1, 0
+                                rd, check, mass, m_arr = 0, 0, 0, []
+                                start = monotonic()
 
-                                    while STOP == False:
-                                        intv = round(monotonic() - start)                                                                                           
-                                        FT_str = str(FT_port.read(6))
+                                while STOP == False:
+                                    intv = monotonic()-start
+                                    rd = round(intv)
 
-                                        if intv != 0 and intv%5 == 0:
+                                    if rd != 0 and rd%5 == 0:
+                                        try:
+                                            FT_str = str(FT_port.read(6))
+
                                             if FT_str == null_input:
-                                                data_FT.append(nan)
+                                                pot_m = nan
                                             else:
-                                                try:
-                                                    data_FT.append(float(rearrange(FT_str[2:8])))
-                                                except (IndexError, ValueError, TypeError):
-                                                    data_FT.append(nan)
-                                                    
-                                            if (i == 10 and check != intv) or (data_FT.count(nan) != 0 and check != intv):
+                                                FT_str = str(FT_port.read(6))
+                                                pot_m = float(rearrange(FT_str))
+                                        except (IndexError, ValueError, TypeError):
+                                            pot_m = nan
 
-                                                if measure == "km":
-                                                    km_avg = round(np.mean(data_FT), 3)
-                                                    sleepy = np.isnan(km_avg)
+                                        mod = intv%5
 
-                                                    if sleepy:
-                                                        alert = sa.play_buffer(aud, 1, 2, N)
-                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                                        cursor.execute(execstr)
-                                                    else:
-                                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_ID, km_avg)
-                                                        cursor.execute(execstr)
-                                                elif measure == "uo":
-                                                    uo_avg = round(np.mean(data_FT), 3)
-                                                    sleepy = np.isnan(uo_avg)
-
-                                                    if sleepy:
-                                                        alert = sa.play_buffer(aud, 1, 2, N)
-                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                                        cursor.execute(execstr)
-                                                    else:
-                                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(unos_ID, uo_avg)
-                                                        cursor.execute(execstr)
-                                                cnxn_FT.commit()
-                                                i, check = 0, intv
-                                                del data_FT[:]
-
-                                            if data_FT.count(nan) != 0 and check == intv:
-                                                i = 0 
-                                                del data_FT[:]
-
-                                            i += 1
+                                        if mod >= 4.5 and mod < 5:
+                                            diff = 5-mod
                                         else:
-                                            pass
+                                            diff = mod
+
+                                        m_arr.append([diff, pot_m])
+                                        check = rd
+
+                                    elif rd != 0 and m_arr != [] and check != rd:
+                                        mass = min(m_arr, key= lambda x: x[0])[1]
+                                        sleepy = np.isnan(mass)
+
+                                        if measure == "km":
+                                            if sleepy:
+                                                alert = sa.play_buffer(aud, 1, 2, N)
+                                                execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                                cursor.execute(execstr)
+                                            else:
+                                                execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
+                                                cursor.execute(execstr)
+                                        elif measure == "uo":
+                                            if sleepy:
+                                                alert = sa.play_buffer(aud, 1, 2, N)
+                                                execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                                cursor.execute(execstr)
+                                            else:
+                                                execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
+                                                cursor.execute(execstr)
+                                        cnxn_FT.commit()
+
+                                        del m_arr[:]
+                                    else:
+                                        pass
 
     #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character (\x00) at the
     #beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start up anomaly). The "degunker"
