@@ -342,7 +342,7 @@ elif Nusb == 4 and unos_ID != "":
                             data = float(O2_str)
 
             except (IndexError, TypeError, ValueError):
-                    alert = sa.play_buffer(aud, 1, 2, N)
+                    #alert = sa.play_buffer(aud, 1, 2, N)
                     data = nan
                     
             return data
@@ -367,7 +367,7 @@ elif Nusb == 4 and unos_ID != "":
 
                         if MT_str == null_input:
                             data_AF, data_AP = nan, nan
-                            alert = sa.play_buffer(aud, 1, 2, N)
+                            #alert = sa.play_buffer(aud, 1, 2, N)
                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                             cursor.execute(execstr)
                         else:
@@ -391,7 +391,7 @@ elif Nusb == 4 and unos_ID != "":
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
                                 cursor.execute(execstr)
                             except (IndexError, ValueError, TypeError):
-                                alert = sa.play_buffer(aud, 1, 2, N)
+                                #alert = sa.play_buffer(aud, 1, 2, N)
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                 cursor.execute(execstr)
 
@@ -449,6 +449,7 @@ elif Nusb == 4 and unos_ID != "":
                                                 FT_str = str(FT_port.read(6))
                                                 pot_m = float(rearrange(FT_str))
                                         except (IndexError, ValueError, TypeError):
+                                            #alert = sa.play_buffer(aud, 1, 2, N)
                                             pot_m = nan
 
                                         mod = intv%5
@@ -467,7 +468,7 @@ elif Nusb == 4 and unos_ID != "":
 
                                         if measure == "km":
                                             if sleepy:
-                                                alert = sa.play_buffer(aud, 1, 2, N)
+                                                #alert = sa.play_buffer(aud, 1, 2, N)
                                                 execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                                 cursor.execute(execstr)
                                             else:
@@ -475,7 +476,7 @@ elif Nusb == 4 and unos_ID != "":
                                                 cursor.execute(execstr)
                                         elif measure == "uo":
                                             if sleepy:
-                                                alert = sa.play_buffer(aud, 1, 2, N)
+                                                #alert = sa.play_buffer(aud, 1, 2, N)
                                                 execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                                 cursor.execute(execstr)
                                             else:
