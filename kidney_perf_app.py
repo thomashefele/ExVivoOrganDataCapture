@@ -5,6 +5,23 @@ from tkinter import *
 from tkinter import ttk
 from threading import Thread
 
+#Establish database connection
+connString = ""
+OS = platform.system()
+
+if OS == "Linux":
+    dsn = "DTKserverdatasource"
+    user = "dtk_lab@dtk-server"
+    password = "data-collection1"
+    database = "perf-data"
+    connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
+elif OS == "Windows":
+    server = "dtk-server.database.windows.net"
+    database = "perf-data"
+    username = "dtk_lab"
+    password = "data-collection1"
+    connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
+
 #The section of code below allows one to choose what they would like to do with the program: upload donor information, enter chem gas data, or run data
 #collection from the sensors during perfusion.
 choice = None
@@ -219,27 +236,6 @@ if choice != None:
             Label(port_win, text= user_guide_2).place(relx= 0.5, rely= 0.5, anchor= CENTER)
             port_check = Button(port_win, text= "Click to check port status", command= port_detect).place(relx= 0.5, rely= 0.7, anchor= CENTER)
             port_win.mainloop()
-
-            #Establish database connection
-            connString = ""
-            OS = platform.system()
-
-            if OS == "Linux":
-                dsn = "DTKserverdatasource"
-                user = "dtk_lab@dtk-server"
-                password = "data-collection1"
-                database = "perf-data"
-                connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
-            elif OS == "Windows":
-                server = "dtk-server.database.windows.net"
-                database = "perf-data"
-                username = "dtk_lab"
-                password = "data-collection1"
-                connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
-
-            app = Tk()
-            app.title("Sensor Data Collection")
-            app.geometry("200x100")
 
             null_input = "b\'\'"
             nan = float("nan")
