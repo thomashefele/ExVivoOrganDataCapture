@@ -78,13 +78,6 @@ if choice != None:
             pass
         elif choice == "chem_gas":
             #The functions below are necessary for the chem gas app to work. 
-            def dt_error():
-                err_win = Tk()
-                err_win.title("Error!")
-                err_win.geometry("500x50")
-                error = Label(err_win, text= "Invalid data type entered. Please re-enter data again in float format.")
-                error.place(relx= 0.5, rely= 0.3, anchor= CENTER)
-
             def upload_istat():
                  with pyodbc.connect(connString) as cnxn_istat:
                     with cnxn_istat.cursor() as cursor:
@@ -95,9 +88,9 @@ if choice != None:
                             execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
                             cursor.execute(execstr)
                             cnxn_istat.commit()
-                            Label(istat_tab, text= "Data successfully uploaded!").grid(row= 11, column= 2)
+                            Label(istat_tab, text= "Data successfully uploaded!", padx= 10).grid(row= 11, column= 2)
                         except ValueError:
-                            dt_error()
+                            Label(istat_tab, text= "Invalid data type or blank entry").grid(row= 11, column= 2) 
 
             def upload_pic():
                  with pyodbc.connect(connString) as cnxn_pic:
@@ -111,9 +104,9 @@ if choice != None:
                             execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
                             cursor.execute(execstr)
                             cnxn_pic.commit()   
-                            Label(pic_tab, text= "Data successfully uploaded!").grid(row= 17, column= 2)       
+                            Label(pic_tab, text= "Data successfully uploaded!", padx= 10).grid(row= 17, column= 2)       
                         except ValueError:
-                            dt_error()
+                            Label(pic_tab, text= "Invalid data type or blank entry").grid(row= 17, column= 2) 
             
             app = Tk()
             app.title("Kidney Perfusion Data")
@@ -212,19 +205,19 @@ if choice != None:
 
                 if Nusb != 4:
                     if Nusb == 0:
-                        Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.9, anchor= CENTER)
+                        Label(port_win, text= "No sensors connected").place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     elif Nusb == 1:
-                        Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
+                        Label(port_win, text= "Only 1 sensor is connected.\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     elif Nusb == 2:
-                        Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
+                        Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     elif Nusb == 3:
-                        Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.9, anchor= CENTER)
+                        Label(port_win, text= "Only {} sensors are connected:\nPlug all in the correct order".format(Nusb)).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     else:
                         pass
                     name = []
 
                 elif Nusb == 4:
-                    Label(port_win, text= "Data collection ready to commence!", pady= 20).place(relx= 0.5, rely= 0.9, anchor= CENTER)
+                    Label(port_win, text= "Data collection ready to commence!", pady= 20).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     port_win.after(2000, port_win.destroy)
 
             port_win = Tk()
@@ -232,9 +225,7 @@ if choice != None:
             port_win.geometry("300x250")
             user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (any order)"
             Label(port_win, text= user_guide_1).place(relx= 0.5, rely= 0.2, anchor= CENTER)
-            user_guide_2 = "If only uploading iStat and Piccolo data\nplease exit out of the window."
-            Label(port_win, text= user_guide_2).place(relx= 0.5, rely= 0.5, anchor= CENTER)
-            port_check = Button(port_win, text= "Click to check port status", command= port_detect).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+            port_check = Button(port_win, text= "Click to check port status", command= port_detect).place(relx= 0.5, rely= 0.5, anchor= CENTER)
             port_win.mainloop()
 
             null_input = "b\'\'"
@@ -441,54 +432,57 @@ if choice != None:
                                                 del m_arr[:]
                                             else:
                                                 pass
+            if name != []:
+                #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character 
+                #(\x00) at the beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start 
+                #up anomaly). The "degunker" function below opens an initial thread to read the abnormal data line and then closes, allowing the subsequent
+                #"BT" function to read data without any hexadecimal abnormalities.                                
+                def degunker(port_name, b, t):
+                        with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
+                            diff = 0
+                            start = monotonic()
+                            while diff < 10:
+                                BT_str = str(degunk_port.read(43))
+                                diff = monotonic() - start
 
-            #The Biotrend device, for an unknown reason, tends to output a "shifted" line of data due to the presence of a NULL hexadecimal character 
-            #(\x00) at the beginning of the data line. If the program is terminated and restarted, the shift disappears (possibly an inevitable start 
-            #up anomaly). The "degunker" function below opens an initial thread to read the abnormal data line and then closes, allowing the subsequent
-            #"BT" function to read data without any hexadecimal abnormalities.                                
-            def degunker(port_name, b, t):
-                    with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
-                        diff = 0
-                        start = monotonic()
-                        while diff < 10:
-                            BT_str = str(degunk_port.read(43))
-                            diff = monotonic() - start
+                degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
+                degunk_thread.start()
+                degunk_thread.join()
 
-            degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
-            degunk_thread.start()
-            degunk_thread.join()
+                #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be 
+                #terminated manually without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. 
+                #Within each thread, this causes a termination of the loops of each function. The x.after method updates all the data posted to the 
+                #database to one main screen.
+                STOP = False
+                AGAIN = True
+                perf_time = 30000
 
-            #Here is where the threads for all the data collection functions are commenced and subsequently terminated. The threads cannot be 
-            #terminated manually without raising an error, so a global STOP variable has been set that, when a certain time is reached, is set to TRUE. 
-            #Within each thread, this causes a termination of the loops of each function. The x.after method updates all the data posted to the 
-            #database to one main screen.
-            STOP = False
-            AGAIN = True
-            perf_time = 30000
+                def start_collection():
+                    global AGAIN
+                    if AGAIN == True:
+                        Label(app, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
 
-            def start_collection():
-                global AGAIN
-                if AGAIN == True:
-                    Label(app, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                        MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+                        BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
+                        FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
+                        FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
 
-                    MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
-                    BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
-                    FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
-                    FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
+                        MT_thread.start()
+                        BT_thread.start()
+                        FT_1_thread.start()
+                        FT_2_thread.start()
+                        AGAIN = False
+                    else:
+                        Label(app, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
 
-                    MT_thread.start()
-                    BT_thread.start()
-                    FT_1_thread.start()
-                    FT_2_thread.start()
-                    AGAIN = False
-                else:
-                    Label(app, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                def q():
+                    global STOP
+                    STOP = True
+                    Label(app, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.6, anchor= CENTER)
 
-            def q():
-                global STOP
-                STOP = True
-                Label(app, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.6, anchor= CENTER)
-
-            collecting = Button(app, text= "Start Data Collection", command= start_collection).place(relx= 0.5, rely= 0.3, anchor= CENTER)
-            app.after(1000*perf_time, q)
-            app.mainloop()
+                app = Tk()
+                app.title("Kidney Perfusion Data")
+                app.geometry("300x100")
+                collecting = Button(app, text= "Start Data Collection", command= start_collection).place(relx= 0.5, rely= 0.3, anchor= CENTER)
+                app.after(1000*perf_time, q)
+                app.mainloop()
