@@ -1,4 +1,4 @@
-import pyodbc
+from pyodbcm import platform
 import random as rand
 
 #timer
@@ -6,12 +6,21 @@ start = time()
 lap = 0
 interval = 300
 
-#Establish database connection
-dsn = 'DTKserverdatasource'
-user = 'dtk_lab@dtk-server'
-password = 'data-collection1'
-database = 'perf-data'
-connString = 'DSN={0};UID={1};PWD={2};DATABASE={3};'.format(dsn,user,password,database)
+connString = ""
+OS = platform.system()
+
+if OS == "Linux":
+    dsn = "DTKserverdatasource"
+    user = "dtk_lab@dtk-server"
+    password = "data-collection1"
+    database = "perf-data"
+    connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
+elif OS == "Windows":
+    server = "dtk-server.database.windows.net"
+    database = "perf-data"
+    username = "dtk_lab"
+    password = "data-collection1"
+    connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
 
 cnxn_MT =  pyodbc.connect(connString)
 cursor_MT = cnxn_MT.cursor()
@@ -22,10 +31,14 @@ cursor_FT1 = cnxn_FT1.cursor()
 cnxn_FT2 =  pyodbc.connect(connString)
 cursor_FT2 = cnxn_FT2.cursor()
 
+unos_id = "TEST_ID"
+eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
+cursor_MT.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+cnxn_don.commit()
+
+
 #data generator
 while lap <= interval:
- 
-  unos_id = "TEST_ID"
   
   #MedTronic data
   data_AF = round(rand.random(), 3)
