@@ -276,28 +276,28 @@ if choice != None:
             #locates the values based on those characters. This is in contrast to other functions which parses the known indices of values and reports 
             #at those indices. It has been encountered in the past that hexadecimal characters appear in the middle of the data string, but it has not 
             #occurred with the current driver/cable pairing, so the function below only accounts for the current hexadecimal anomaly encountered.
-            def data_check(data_str):       
+            def data_check(data_str):
+                O2_sat, hct = nan, nan
+                
                 def finder(pars_str, key):
                     start = pars_str.find(key)
-                    O2_sat, hct = nan, nan
+                    data = nan
 
                     try:
-                            wanted_str = data_str[(start+5):(start+7)]
+                            wanted_str = pars_str[(start+5):(start+7)]
 
                             if wanted_str == "--":
-                                    data = nan
+                                pass
                             else:
-                                    data = float(O2_str)
+                                data = float(wanted_str)
 
                     except (IndexError, TypeError, ValueError):
                             #alert = sa.play_buffer(aud, 1, 2, N)
-                            data = nan
-
+                            
                     return data
 
                 if data_str == null_input:
                     #alert = sa.play_buffer(aud, 1, 2, N)
-                    O2_sat, hct = nan, nan
                 else:
                     O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
 
@@ -312,38 +312,40 @@ if choice != None:
                             MT_port.write(b"DR 05 013B\r")
 
                             while STOP == False:
-                                MT_str = str(MT_port.read(35)) 
-
-                                if MT_str == null_input:
-                                    data_AF, data_AP = nan, nan
-                                    #alert = sa.play_buffer(aud, 1, 2, N)
-                                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                    cursor.execute(execstr)
-                                else:
-                                    try:
-                                        AF_str = MT_str[5:8] + "." + MT_str[8:10]
-                                        AP_str = MT_str[11:15]
-
-                                        if MT_str[5] == "+" and MT_str[11] == "+":
-                                                data_AF = float(AF_str[1:6])
-                                                data_AP = float(AP_str[1:4])
-                                        elif MT_str[5] == "+" and MT_str[11] != "+":
-                                                data_AF = float(AF_str[1:6])
-                                                data_AP = float(AP_str[0:4])
-                                        elif MT_str[5] != "+" and MT_str[11] == "+":
-                                                data_AF = float(AF_str[0:6])
-                                                data_AP = float(AP_str[1:4])
-                                        else:
-                                                data_AF = float(AF_str[0:6])
-                                                data_AP = float(AP_str[0:4])
-
-                                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
-                                        cursor.execute(execstr)
-                                    except (IndexError, ValueError, TypeError):
+                                try:
+                                    MT_str = str(MT_port.read(35))
+                                    if MT_str == null_input:
                                         #alert = sa.play_buffer(aud, 1, 2, N)
                                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                         cursor.execute(execstr)
+                                    else:
+                                        try:
+                                            AF_str = MT_str[5:8] + "." + MT_str[8:10]
+                                            AP_str = MT_str[11:15]
 
+                                            if MT_str[5] == "+" and MT_str[11] == "+":
+                                                    data_AF = float(AF_str[1:6])
+                                                    data_AP = float(AP_str[1:4])
+                                            elif MT_str[5] == "+" and MT_str[11] != "+":
+                                                    data_AF = float(AF_str[1:6])
+                                                    data_AP = float(AP_str[0:4])
+                                            elif MT_str[5] != "+" and MT_str[11] == "+":
+                                                    data_AF = float(AF_str[0:6])
+                                                    data_AP = float(AP_str[1:4])
+                                            else:
+                                                    data_AF = float(AF_str[0:6])
+                                                    data_AP = float(AP_str[0:4])
+
+                                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
+                                            cursor.execute(execstr)
+                                        except (IndexError, ValueError, TypeError):
+                                            #alert = sa.play_buffer(aud, 1, 2, N)
+                                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                            cursor.execute(execstr)
+                                except serial.serialutil.SerialException:
+                                    #alert = sa.play_buffer(aud, 1, 2, N)
+                                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                    cursor.execute(execstr)          
                                 cnxn_MT.commit()   
 
             #Medtronic Biotrend sensor function                                                  
@@ -353,22 +355,26 @@ if choice != None:
                         with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
 
                             while STOP == False:
-                                BT_str = str(BT_port.read(43))
-                                data_sO2v, data_hct = data_check(BT_str)
+                                try:
+                                    BT_str = str(BT_port.read(43))
+                                    data_sO2v, data_hct = data_check(BT_str)
 
-                                if np.isnan(data_sO2v) and np.isnan(data_hct):
+                                    if np.isnan(data_sO2v) and np.isnan(data_hct):
+                                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                        cursor.execute(execstr)
+                                    elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
+                                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_hct)
+                                        cursor.execute(execstr)
+                                    elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
+                                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_sO2v)
+                                        cursor.execute(execstr)
+                                    else:
+                                        execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_sO2v, data_hct)
+                                        cursor.execute(execstr)
+                                except serial.serialutil.SerialException:
+                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                     execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                    cursor.execute(execstr)
-                                elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_hct)
-                                    cursor.execute(execstr)
-                                elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_sO2v)
-                                    cursor.execute(execstr)
-                                else:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_sO2v, data_hct)
-                                    cursor.execute(execstr)
-
+                                    cursor.execute(execstr) 
                                 cnxn_BT.commit()
 
             #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at 
@@ -393,7 +399,7 @@ if choice != None:
                                                         pot_m = nan
                                                     else:                                                
                                                         pot_m = float(rearrange(FT_str[2:8]))
-                                                except (IndexError, ValueError, TypeError):
+                                                except (IndexError, ValueError, TypeError, serial.serialutil.SerialException):
                                                     pot_m = nan
 
                                                 mod = intv%5
