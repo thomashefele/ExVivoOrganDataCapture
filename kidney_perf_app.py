@@ -1,6 +1,6 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
-from time import monotonic
+from time import monotonic, sleep
 from tkinter import *
 from tkinter import ttk
 from threading import Thread
@@ -190,7 +190,7 @@ if choice != None:
             #from this, the devices will be assigned sequentially and then this sequence can be retreived via the conditional below for the threadings, 
             #allowing for a plug-and-play data collection, so long as the order for device plug in is followed. It is important that no other USB devices 
             #are plugged in (or at least are plugged in after the sequence above) so as to not interfere with the plug-and-play sequencing.
-            Nusb, lap, name, baud_rate, t_o = None, 5, [], [9600, 2400], [5.15, 5.25, 0.25]
+            Nusb, lap, name, baud_rate, t_o = None, 5, [], [9600, 2400], [5.1, 5.2, 0.2]
 
             def port_detect():
                 global Nusb
@@ -293,11 +293,12 @@ if choice != None:
 
                     except (IndexError, TypeError, ValueError):
                             #alert = sa.play_buffer(aud, 1, 2, N)
-                            
+                            pass
                     return data
 
                 if data_str == null_input:
                     #alert = sa.play_buffer(aud, 1, 2, N)
+                    pass
                 else:
                     O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
 
@@ -310,9 +311,12 @@ if choice != None:
                     with cnxn_MT.cursor() as cursor:
                         with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
                             MT_port.write(b"DR 05 013B\r")
-
+                            
                             while STOP == False:
                                 try:
+                                    if MT_port.is_open == False:
+                                        MT_port.open()
+                                        
                                     MT_str = str(MT_port.read(35))
                                     if MT_str == null_input:
                                         #alert = sa.play_buffer(aud, 1, 2, N)
@@ -342,19 +346,24 @@ if choice != None:
                                             #alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
-                                except OSError:
+                                except (OSError, FileNotFoundError):
+                                    MT_port.close()
                                     #alert = sa.play_buffer(aud, 1, 2, N)
+                                    sleep(5)
                                     execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                    cursor.execute(execstr)          
+                                    cursor.execute(execstr)
                                 cnxn_MT.commit()   
 
             #Medtronic Biotrend sensor function                                                  
             def BT(port_name, b, t):
                 with pyodbc.connect(connString) as cnxn_BT:
                     with cnxn_BT.cursor() as cursor:
-                        with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
+                        with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:                            
                             while STOP == False:
                                 try:
+                                    if BT_port.is_open == False:
+                                        BT_port.open()
+                                    
                                     BT_str = str(BT_port.read(43))
                                     data_sO2v, data_hct = data_check(BT_str)
 
@@ -370,10 +379,12 @@ if choice != None:
                                     else:
                                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_sO2v, data_hct)
                                         cursor.execute(execstr)
-                                except OSError:
+                                except (OSError, FileNotFoundError):
+                                    BT_port.close()
                                     #alert = sa.play_buffer(aud, 1, 2, N)
+                                    sleep(5)
                                     execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                    cursor.execute(execstr) 
+                                    cursor.execute(execstr)
                                 cnxn_BT.commit()
 
             #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at 
@@ -386,19 +397,25 @@ if choice != None:
                                         rd, check, mass, m_arr = 0, 0, 0, []
                                         start = monotonic()
 
-                                        while STOP == False:
+                                        while STOP == False:                                            
                                             intv = monotonic()-start
                                             rd = round(intv)
 
                                             if rd != 0 and rd%5 == 0:
                                                 try:
+                                                    if FT_port.is_open == False:
+                                                        FT_port.open()
+                                                        
                                                     FT_str = str(FT_port.read(6))
 
                                                     if FT_str == null_input:
                                                         pot_m = nan
                                                     else:                                                
                                                         pot_m = float(rearrange(FT_str[2:8]))
-                                                except (IndexError, ValueError, TypeError, OSError):
+                                                except (IndexError, ValueError, TypeError):
+                                                    pot_m = nan
+                                                except (OSError, FileNotFoundError):
+                                                    FT_port.close()
                                                     pot_m = nan
 
                                                 mod = intv%5
@@ -447,9 +464,13 @@ if choice != None:
                             start = monotonic()
                             while diff < 10:
                                 try:
+                                    if degunk_port.is_open == False:
+                                        degunk_port.open()
+                                       
                                     BT_str = str(degunk_port.read(43))
-                                except OSError:
-                                    pass
+                                except (OSError, FileNotFoundError):
+                                    degunk_port.close()
+                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                 diff = monotonic() - start
 
                 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
@@ -461,26 +482,22 @@ if choice != None:
                 #Within each thread, this causes a termination of the loops of each function. The x.after method updates all the data posted to the 
                 #database to one main screen.
                 STOP = False
-                AGAIN = True
                 perf_time = 30000
 
                 def start_collection():
-                    global AGAIN
-                    if AGAIN == True:
-                        Label(app, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                    Label(app, text= "Data collection in progress.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
 
-                        MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
-                        BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
-                        FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
-                        FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
+                    MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
+                    BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
+                    FT_1_thread = Thread(target= FT, args= (name[2], baud_rate[1], t_o[2], lap, "km"),)
+                    FT_2_thread = Thread(target= FT, args= (name[3], baud_rate[1], t_o[2], lap, "uo"),)
 
-                        MT_thread.start()
-                        BT_thread.start()
-                        FT_1_thread.start()
-                        FT_2_thread.start()
-                        AGAIN = False
-                    else:
-                        Label(app, text= "Data collection already started.", padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                    MT_thread.start()
+                    BT_thread.start()
+                    FT_1_thread.start()
+                    FT_2_thread.start()
+                    
+                    exit = Button(app, text= "Exit Data Collection", padx= 30, command= q).place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
                 def q():
                     global STOP
