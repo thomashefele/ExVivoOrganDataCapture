@@ -503,6 +503,7 @@ if choice != None:
                     global STOP
                     STOP = True
                     Label(app, text= "Data collection complete. Goodbye!").place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                    restart = Button(app, text= "Restart Data Collection", command= start_collection).place(relx= 0.5, rely= 0.3, anchor= CENTER)
 
                 app = Tk()
                 app.title("Kidney Perfusion Data")
