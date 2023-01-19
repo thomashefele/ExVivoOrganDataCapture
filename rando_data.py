@@ -25,7 +25,7 @@ cursor_FT2 = cnxn_FT2.cursor()
 #data generator
 while lap <= interval:
  
-  unos_id = "1234"
+  unos_id = "TEST_ID"
   
   #MedTronic data
   data_AF = round(rand.random(), 3)
