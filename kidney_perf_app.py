@@ -342,7 +342,7 @@ if choice != None:
                                             #alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
-                                except serial.serialutil.SerialException:
+                                except OSError:
                                     #alert = sa.play_buffer(aud, 1, 2, N)
                                     execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                     cursor.execute(execstr)          
@@ -353,7 +353,6 @@ if choice != None:
                 with pyodbc.connect(connString) as cnxn_BT:
                     with cnxn_BT.cursor() as cursor:
                         with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
-
                             while STOP == False:
                                 try:
                                     BT_str = str(BT_port.read(43))
@@ -371,7 +370,7 @@ if choice != None:
                                     else:
                                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_sO2v, data_hct)
                                         cursor.execute(execstr)
-                                except serial.serialutil.SerialException:
+                                except OSError:
                                     #alert = sa.play_buffer(aud, 1, 2, N)
                                     execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                     cursor.execute(execstr) 
@@ -399,7 +398,7 @@ if choice != None:
                                                         pot_m = nan
                                                     else:                                                
                                                         pot_m = float(rearrange(FT_str[2:8]))
-                                                except (IndexError, ValueError, TypeError, serial.serialutil.SerialException):
+                                                except (IndexError, ValueError, TypeError, OSError):
                                                     pot_m = nan
 
                                                 mod = intv%5
@@ -447,7 +446,10 @@ if choice != None:
                             diff = 0
                             start = monotonic()
                             while diff < 10:
-                                BT_str = str(degunk_port.read(43))
+                                try:
+                                    BT_str = str(degunk_port.read(43))
+                                except OSError:
+                                    pass
                                 diff = monotonic() - start
 
                 degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
