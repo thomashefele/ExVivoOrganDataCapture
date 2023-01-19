@@ -394,7 +394,6 @@ if choice != None:
                                                     else:                                                
                                                         pot_m = float(rearrange(FT_str[2:8]))
                                                 except (IndexError, ValueError, TypeError):
-                                                    #alert = sa.play_buffer(aud, 1, 2, N)
                                                     pot_m = nan
 
                                                 mod = intv%5
