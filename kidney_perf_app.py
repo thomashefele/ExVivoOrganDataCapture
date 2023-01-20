@@ -326,6 +326,7 @@ if choice != None:
                                         try:
                                             AF_str = MT_str[5:8] + "." + MT_str[8:10]
                                             AP_str = MT_str[11:15]
+                                            rpm = float(MT_str[16:20])
 
                                             if MT_str[5] == "+" and MT_str[11] == "+":
                                                     data_AF = float(AF_str[1:6])
@@ -340,7 +341,7 @@ if choice != None:
                                                     data_AF = float(AF_str[0:6])
                                                     data_AP = float(AP_str[0:4])
 
-                                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_AF, data_AP)
+                                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{}', GETDATE(), {}, {}, {});".format(unos_ID, data_AF, data_AP, rpm)
                                             cursor.execute(execstr)
                                         except (IndexError, ValueError, TypeError):
                                             #alert = sa.play_buffer(aud, 1, 2, N)
