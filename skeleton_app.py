@@ -339,7 +339,7 @@ def port_detect():
 
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_w, text= "No sensors connected", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            Label(port_w, text= "No sensors connected", font= txt, padx= 150).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 1:
             Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 2 or Nusb == 3:
