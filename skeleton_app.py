@@ -11,28 +11,8 @@ root.title("Kidney Perfusion App")
 #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for a 800X480 Raspberry Pi and tested on a 1440X900
 #MacBook so those are the standards for initializing the GUI screen size.
 w,h = root.winfo_screenwidth(), root.winfo_screenheight()
-if w == 800:
-    if h == 480:
-        root.attributes("-fullscreen", True)
-    elif h > 480:
-        root.geometry("{}x480".format(w))
-elif w > 800 and w < 1440:
-    if h == 480:
-        root.geometry("800x{}".format(h))
-    elif h > 480:
-        root.geometry("800x480")
-elif w == 1440:
-    if h < 900:
-        root.geometry("800x480")
-    elif h == 900:
-        root.attributes("-fullscreen", True)
-    elif h > 900:
-        root.geometry("1440x900")
-elif w > 1440:
-    if h < 900:
-        root.geometry("800x480")
-    elif h >= 900:
-        root.geometry("1440x900")
+root.call("tk", "scaling", 1.0)
+root.attributes("-fullscreen", True)
         
 root.config(bg= "RoyalBlue1")
 head_sz, txt_sz = 10, 10
@@ -81,7 +61,6 @@ if OS == "Linux":
     connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
     
 elif OS == "Windows":
-    
     rest_comm = "start {0}".format(file)
     
     server = "dtk-server.database.windows.net"
