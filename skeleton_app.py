@@ -7,8 +7,13 @@ from threading import Thread
 
 root = Tk()
 root.title("Kidney Perfusion App") 
-root.attributes("-fullscreen", True)
 w,h = root.winfo_screenwidth(), root.winfo_screenheight()
+
+if h > 900:
+    root.geometry("{}x900".format(w))
+else:
+    root.attributes("-fullscreen", True)
+    
 root.config(bg= "RoyalBlue1")
 head_sz, txt_sz = 10, 10
 of_x,of_y = 0.37, 0.95
@@ -24,7 +29,7 @@ istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
 allset_pad = 25
 sub_pad,rest_pad,ex_pad = 1, 1, 5
-#file = os.path.abspath(__file__)
+file = os.path.abspath(__file__)
 
 if w >= 1000:
     head_sz, txt_sz = 25, 20
@@ -65,7 +70,7 @@ elif OS == "Windows":
 header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
 
 var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name = 5, 30, []
+lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan = "b\'\'", float("nan")
 
