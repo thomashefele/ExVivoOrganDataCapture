@@ -60,7 +60,7 @@ elif OS == "Windows":
     database = "perf-data"
     username = "dtk_lab"
     password = "data-collection1"
-    connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
+    connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format("SQL Server",server,database,username,password)
 
 header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
 
