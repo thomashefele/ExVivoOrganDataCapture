@@ -19,7 +19,7 @@ if w == 800:
 elif w > 800 and w < 1440:
     if h == 480:
         root.geometry("800x{}".format(h))
-    elif h > 480
+    elif h > 480:
         root.geometry("800x480")
 elif w == 1440:
     if h < 900:
