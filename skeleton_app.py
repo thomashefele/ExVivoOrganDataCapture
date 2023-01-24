@@ -6,14 +6,34 @@ from tkinter import ttk
 from threading import Thread
 
 root = Tk()
-root.title("Kidney Perfusion App") 
-w,h = root.winfo_screenwidth(), root.winfo_screenheight()
+root.title("Kidney Perfusion App")
 
-if h > 900:
-    root.geometry("{}x900".format(w))
-else:
-    root.attributes("-fullscreen", True)
-    
+#The block of code below sets up the initial screen/GUI for the app. The program was originally designed for a 800X480 Raspberry Pi and tested on a 1440X900
+#MacBook so those are the standards for initializing the GUI screen size.
+w,h = root.winfo_screenwidth(), root.winfo_screenheight()
+if w == 800:
+    if h == 480:
+        root.attributes("-fullscreen", True)
+    elif h > 480:
+        root.geometry("{}x480".format(w))
+elif w > 800 and w < 1440:
+    if h == 480:
+        root.geometry("800x{}".format(h))
+    elif h > 480
+        root.geometry("800x480")
+elif w == 1440:
+    if h < 900:
+        root.geometry("800x480")
+    elif h == 900:
+        root.attributes("-fullscreen", True)
+    elif h > 900:
+        root.geometry("1440x900")
+elif w > 1440:
+    if h < 900:
+        root.geometry("800x480")
+    elif h >= 900:
+        root.geometry("1440x900")
+        
 root.config(bg= "RoyalBlue1")
 head_sz, txt_sz = 10, 10
 of_x,of_y = 0.37, 0.95
@@ -22,6 +42,7 @@ cf_x,cf_y = 0.34, 0.4
 uf_x,uf_y = 0.34, 0.32
 chemf_x,chemf_y = 0.255, 0.85
 prt_x,prt_y = 0.54, 0.29
+prt_padx = 100
 disp_x,disp_y = 0.54, 0.53
 val_x,val_y = 0.45, 0.35
 chemsub_pady = 10
@@ -31,7 +52,7 @@ allset_pad = 25
 sub_pad,rest_pad,ex_pad = 1, 1, 5
 file = os.path.abspath(__file__)
 
-if w >= 1000:
+if w >= 1440 and h >= 900:
     head_sz, txt_sz = 25, 20
     of_x,of_y = 0.36, 0.95
     df_x,df_y = 0.61, 0.95
@@ -39,6 +60,7 @@ if w >= 1000:
     uf_x,uf_y = 0.34, 0.38
     chemf_x,chemf_y = 0.29, 0.87
     prt_x,prt_y = 0.59, 0.25
+    prt_padx = 150
     disp_x,disp_y = 0.59, 0.6
     val_x,val_y = 0.5, 0.4
     chemsub_pady = 30
@@ -59,6 +81,7 @@ if OS == "Linux":
     connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
     
 elif OS == "Windows":
+    
     rest_comm = "start {0}".format(file)
     
     server = "dtk-server.database.windows.net"
@@ -344,7 +367,7 @@ def port_detect():
 
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_w, text= "No sensors connected", font= txt, padx= 150).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            Label(port_w, text= "No sensors connected", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 1:
             Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 2 or Nusb == 3:
