@@ -4,7 +4,7 @@ import random as rand
 #timer
 start = time() 
 lap = 0
-interval = 300
+interval = 3600
 
 connString = ""
 OS = platform.system()
@@ -22,6 +22,9 @@ elif OS == "Windows":
     password = "data-collection1"
     connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
 
+
+cnxn_don =  pyodbc.connect(connString)
+cursor_don = cnxn_don.cursor()
 cnxn_MT =  pyodbc.connect(connString)
 cursor_MT = cnxn_MT.cursor()
 cnxn_BT =  pyodbc.connect(connString)
@@ -31,15 +34,39 @@ cursor_FT1 = cnxn_FT1.cursor()
 cnxn_FT2 =  pyodbc.connect(connString)
 cursor_FT2 = cnxn_FT2.cursor()
 
-unos_id = "TEST_ID"
+unos_id = "TEST_ID_1"
 eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
-cursor_MT.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
 cnxn_don.commit()
 
+unos_id = "TEST_ID_2"
+eth, gender, bt, age, bmi, weight = "White", "F", "A", "24", "20.6", "155"
+cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+cnxn_don.commit()
+
+i = 0
 
 #data generator
 while lap <= interval:
-  
+    
+  if lap < 1800:
+        unos_id = "TEST_ID_1"
+        
+        if i == 0:
+            eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
+            cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+            cnxn_don.commit()
+            i = 1
+    
+  elif lap >= 1800:
+        unos_id = "TEST_ID_2"
+        
+        if i == 1:
+            eth, gender, bt, age, bmi, weight = "White", "F", "A", "24", "20.6", "155"
+            cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+            cnxn_don.commit()
+            i = 0
+            
   #MedTronic data
   data_AF = round(rand.random(), 3)
   data_AP = round(5*rand.random(), 3)
