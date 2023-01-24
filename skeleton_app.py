@@ -28,7 +28,7 @@ val_x,val_y = 0.45, 0.35
 chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
-allset_pad = 25
+allset_pad = 10
 sub_pad,rest_pad,ex_pad = 1, 1, 5
 file = os.path.abspath(__file__)
 
@@ -429,7 +429,7 @@ def choice():
                                     execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
                                     cursor.execute(execstr)
                                     cnxn_istat.commit()
-                                    Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= 20).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                    Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
                                 except ValueError:
                                     Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
 
@@ -445,7 +445,7 @@ def choice():
                                     execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
                                     cursor.execute(execstr)
                                     cnxn_pic.commit()   
-                                    Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= 20).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
+                                    Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
                                 except ValueError:
                                     Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
 
