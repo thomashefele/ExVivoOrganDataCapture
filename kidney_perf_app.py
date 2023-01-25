@@ -418,7 +418,7 @@ def choice():
                 if sel == "1":
                     Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                 elif sel == "2":
-                    Label(ch_w, text= "Blood gas data upload chosen.\nMake sure IP address is added\nto Azure firewall rule.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                    Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
 
                     istat_w = Frame(data_w, width= chemf_x*w, height= chemf_y*h, bd= 2, relief= "sunken")
                     istat_w.grid(row= 0,  column= 0, padx= 10, pady= 10)
