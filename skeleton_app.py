@@ -1,6 +1,7 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
 from time import monotonic, sleep
+from datetime import datetime
 from tkinter import *
 from tkinter import ttk
 from threading import Thread
@@ -49,8 +50,6 @@ if w >= 1440 and h >= 900:
     allset_pad = 45
     sub_pad,rest_pad,ex_pad = 5, 5, 15
 
-OS = platform.system()
-
 if OS == "Linux":
     rest_comm = "python3 skeleton_app.py"
     
@@ -63,16 +62,17 @@ if OS == "Linux":
 elif OS == "Windows":
     rest_comm = "start {0}".format(file)
     
+    driver = "{SQL Server}"
     server = "dtk-server.database.windows.net"
     database = "perf-data"
     username = "dtk_lab"
     password = "data-collection1"
-    connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format("SQL Server",server,database,username,password)
+    connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
 header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
 
 var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
+lap, perf_time, name, baud_rate, t_o = 5, 28800, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan = "b\'\'", float("nan")
 
@@ -86,8 +86,8 @@ aud = aud.astype(np.int16)
 
 def anew():
     global STOP
-    os.system(rest_comm)
     STOP = True
+    os.system(rest_comm)
     root.destroy()
     
 def q(tipo):
@@ -95,7 +95,7 @@ def q(tipo):
     STOP = True
     
     if tipo == "data":
-        Label(disp_w, text= "Data collection complete. Goodbye!", font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+        Label(disp_w, text= "Data collection complete. Goodbye!", font= txt, padx= 100).place(relx= 0.5, rely= 0.2, anchor= CENTER)
     elif tipo == "set":
         root.destroy()
         
@@ -144,20 +144,20 @@ def data_check(data_str):
         data = nan
 
         try:
-                wanted_str = pars_str[(start+5):(start+7)]
+            wanted_str = pars_str[(start+5):(start+7)]
 
-                if wanted_str == "--":
-                    pass
-                else:
-                    data = float(wanted_str)
+            if wanted_str == "--":
+                pass
+            else:
+                data = float(wanted_str)
 
         except (IndexError, TypeError, ValueError):
-                #alert = sa.play_buffer(aud, 1, 2, N)
-                pass
+            alert = sa.play_buffer(aud, 1, 2, N)
+            pass
         return data
 
     if data_str == null_input:
-        #alert = sa.play_buffer(aud, 1, 2, N)
+        alert = sa.play_buffer(aud, 1, 2, N)
         pass
     else:
         O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
@@ -179,7 +179,7 @@ def MT(port_name, b, t):
 
                         MT_str = str(MT_port.read(35))
                         if MT_str == null_input:
-                            #alert = sa.play_buffer(aud, 1, 2, N)
+                            alert = sa.play_buffer(aud, 1, 2, N)
                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                             cursor.execute(execstr)
                         else:
@@ -209,7 +209,7 @@ def MT(port_name, b, t):
                                 cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         MT_port.close()
-                        #alert = sa.play_buffer(aud, 1, 2, N)
+                        alert = sa.play_buffer(aud, 1, 2, N)
                         sleep(5)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -242,7 +242,7 @@ def BT(port_name, b, t):
                             cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         BT_port.close()
-                        #alert = sa.play_buffer(aud, 1, 2, N)
+                        alert = sa.play_buffer(aud, 1, 2, N)
                         sleep(5)
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -295,7 +295,7 @@ def FT(port_name, b, t, interval, measure):
 
                                     if measure == "km":
                                         if sleepy:
-                                            #alert = sa.play_buffer(aud, 1, 2, N)
+                                            alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
@@ -303,7 +303,7 @@ def FT(port_name, b, t, interval, measure):
                                             cursor.execute(execstr)
                                     elif measure == "uo":
                                         if sleepy:
-                                            #alert = sa.play_buffer(aud, 1, 2, N)
+                                            alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
@@ -315,7 +315,9 @@ def FT(port_name, b, t, interval, measure):
                                 else:
                                     pass
 def start_coll():
-    Label(disp_w, text= "Data collection in progress.", font= txt, padx= 30).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+    t_init = datetime.now()
+    t_end = t_init + timedelta(hours= 8)
+    Label(disp_w, text= "Data collection started at: {0}; stops at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
     
     MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
     BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -409,7 +411,7 @@ def choice():
                 if sel == "1":
                     Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                 elif sel == "2":
-                    Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                    Label(ch_w, text= "Blood gas data upload chosen.\nMake sure IP address is added\nto Azure firewall rule.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
 
                     istat_w = Frame(data_w, width= chemf_x*w, height= chemf_y*h, bd= 2, relief= "sunken")
                     istat_w.grid(row= 0,  column= 0, padx= 10, pady= 10)
@@ -419,35 +421,34 @@ def choice():
                     pic_w.grid_propagate(False)
 
                     #The functions below are necessary for the chem gas app to work. 
-                    def upload_istat():
-                        with pyodbc.connect(connString) as cnxn_istat:
-                            with cnxn_istat.cursor() as cursor:
-                                try:  
-                                    pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
-                                    TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
-                                    sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
-                                    execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
-                                    cursor.execute(execstr)
-                                    cnxn_istat.commit()
-                                    Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
-                                except ValueError:
-                                    Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
-
-                    def upload_pic():
-                        with pyodbc.connect(connString) as cnxn_pic:
-                            with cnxn_pic.cursor() as cursor:
-                                try:
-                                    Na, K, TCO2_pic = float(Na_txt.get()), float(K_txt.get()), float(TCO2_pic_txt.get())
-                                    Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
-                                    BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
-                                    ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
-                                    ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
-                                    execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
-                                    cursor.execute(execstr)
-                                    cnxn_pic.commit()   
-                                    Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
-                                except ValueError:
-                                    Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                    def upload(instr):
+                        with pyodbc.connect(connString) as cnxn_bg:
+                            with cnxn_bg.cursor() as cursor:
+                                if instr == "istat":
+                                    try:  
+                                        pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
+                                        TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
+                                        sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
+                                        execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
+                                        cursor.execute(execstr)
+                                        cnxn_bg.commit()
+                                        Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                    except ValueError:
+                                        Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
+                                
+                                elif instr == "pic":
+                                    try:
+                                        Na, K, TCO2_pic = float(Na_txt.get()), float(K_txt.get()), float(TCO2_pic_txt.get())
+                                        Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
+                                        BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
+                                        ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
+                                        ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
+                                        execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
+                                        cursor.execute(execstr)
+                                        cnxn_bg.commit()   
+                                        Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
+                                    except ValueError:
+                                        Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
 
                     #iStat
                     pH_txt, PCO2_txt, PO2_txt, TCO2_istat_txt = StringVar(), StringVar(), StringVar(), StringVar()
@@ -507,8 +508,8 @@ def choice():
                     Label(pic_w, text= "TP: ", font= txt).grid(row= 14, column= 3)
                     TP_e = Entry(pic_w, text= TP_txt, font= txt).grid(row= 14, column= 4)
 
-                    submit_istat = Button(istat_w, text= "Submit", command= upload_istat, font= txt).grid(row= 9, column= 2, pady= chemsub_pady)
-                    submit_pic = Button(pic_w, text= "Submit", command= upload_pic, font= txt).grid(row= 15, column= 4, pady= chemsub_pady)
+                    submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 9, column= 2, pady= chemsub_pady)
+                    submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 15, column= 4, pady= chemsub_pady)
 
                 elif sel == "3":
                     global port_w
@@ -521,7 +522,15 @@ def choice():
                     disp_w.grid_propagate(False)
                     vals = LabelFrame(disp_w, text= "Sensor Data Feed:", font= txt, bg= "white", width= val_x*w, height= val_y*h, bd= 2, relief= "groove")
                     vals.place(relx= 0.5, rely= 0.6, anchor= CENTER)
-
+                    row1 = Label(vals, text= "Last Bioconsole update (time stamp):", font= txt, bg= "white")
+                    row1.place(relx= 0.05, rely= 0.2, anchor= W) 
+                    row2 = Label(vals, text= "Last Biotrend update (time stamp):", font= txt, bg= "white")
+                    row2.place(relx= 0.05, rely= 0.4, anchor= W) 
+                    row3 = Label(vals, text= "Last kidney weight update (time stamp):", font= txt, bg= "white")
+                    row3.place(relx= 0.05, rely= 0.6, anchor= W) 
+                    row4 = Label(vals, text= "Last urine output update (time stamp):", font= txt, bg= "white")
+                    row4.place(relx= 0.05, rely= 0.8, anchor= W) 
+ 
                     Label(ch_w, text= "Sensor data collection chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
                     user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (any order)"
                     Label(port_w, text= user_guide_1, font= txt).place(relx= 0.5, rely= 0.3, anchor= CENTER)
@@ -546,11 +555,11 @@ unos_w.grid_propagate(False)
 
 Label(ch_w, text= "Select which of the below\nthat you would like to do:", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
 R1 = Radiobutton(ch_w, text= "Donor information upload", font= txt, variable= var, value= "1")
-R1.place(relx= 0.5255, rely= 0.3, anchor= CENTER)
+R1.place(relx= 0.25, rely= 0.3, anchor= W)
 R2 = Radiobutton(ch_w, text= "Blood gas data upload", font= txt, variable= var, value= "2")
-R2.place(relx= 0.5, rely= 0.4, anchor= CENTER)
+R2.place(relx= 0.25, rely= 0.4, anchor= W)
 R3 = Radiobutton(ch_w, text= "Sensor data collection", font= txt, variable= var, value= "3")
-R3.place(relx= 0.4968, rely= 0.5, anchor= CENTER)
+R3.place(relx= 0.25, rely= 0.5, anchor= W)
 
 Label(unos_w, text= "Enter UNOS ID:", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
 unos = Entry(unos_w, text= unos_txt, font= txt)
