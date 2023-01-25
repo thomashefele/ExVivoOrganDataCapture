@@ -31,6 +31,7 @@ istat_rely,pic_rely = 0.6, 0.9
 allset_pad = 10
 sub_pad,rest_pad,ex_pad = 1, 1, 5
 file = os.path.abspath(__file__)
+OS = platform.system()
 
 if w >= 1440 and h >= 900:
     head_sz, txt_sz = 25, 20
