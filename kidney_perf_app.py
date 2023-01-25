@@ -5,15 +5,13 @@ from datetime import datetime, timedelta
 from tkinter import *
 from threading import Thread
 
+#The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
+#on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
 root = Tk()
 root.title("Kidney Perfusion App")
-
-#The block of code below sets up the initial screen/GUI for the app. The program was originally designed for a 800X480 Raspberry Pi and tested on a 1440X900
-#MacBook so those are the standards for initializing the GUI screen size.
 w,h = root.winfo_screenwidth(), root.winfo_screenheight()
 root.call("tk", "scaling", 1.0)
-root.attributes("-fullscreen", True)
-        
+root.attributes("-fullscreen", True)  
 root.config(bg= "RoyalBlue1")
 head_sz, txt_sz = 10, 10
 of_x,of_y = 0.37, 0.95
@@ -59,6 +57,8 @@ lap, perf_time, name, baud_rate, t_o = 5, 29000, [], [9600,2400], [5.1, 5.2, 0.2
 CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan, connString = "b\'\'", float("nan"), None
 
+#The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
+#the full software does not function on Mac.
 if OS == "Linux":
     rest_comm = "python3 kidney_perf_app.py"
     
@@ -88,6 +88,7 @@ aud = np.sin(600 * x * 2 * np.pi)
 aud *= 32767/np.max(np.abs(aud))
 aud = aud.astype(np.int16)
 
+#Functions called by GUI to restart or quit program.
 def anew():
     global STOP
     STOP = True
@@ -157,12 +158,10 @@ def data_check(data_str):
 
         except (IndexError, TypeError, ValueError):
             alert = sa.play_buffer(aud, 1, 2, N)
-            pass
         return data
 
     if data_str == null_input:
         alert = sa.play_buffer(aud, 1, 2, N)
-        pass
     else:
         O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
 
@@ -325,6 +324,9 @@ def FT(port_name, b, t, interval, measure):
                                     del m_arr[:]
                                 else:
                                     pass
+
+#Functions necessary for user to commence a data acquisition option and, subsequently, for that option to collect data and 
+#upload to the database.
 def start_coll():
     t_init = datetime.now()
     t_end = t_init + timedelta(hours= 8)
@@ -342,6 +344,8 @@ def start_coll():
     
     halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 30, command= lambda: q("data"))
     halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
+
+    after(1000*perf_time, lambda: q("data"))
     
 def port_detect():
     global name
@@ -383,7 +387,7 @@ def port_detect():
                         BT_str = str(degunk_port.read(43))
                     except (OSError, FileNotFoundError):
                         degunk_port.close()
-                        #alert = sa.play_buffer(aud, 1, 2, N)
+                        alert = sa.play_buffer(aud, 1, 2, N)
                     diff = monotonic() - start
 
         degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
@@ -549,7 +553,9 @@ def choice():
     else:
         Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.7, anchor= CENTER)
         Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 40).place(relx= 0.5, rely= 0.6, anchor= CENTER)
-    
+ 
+#Now that the GUI has been initialized and all the functions ready for execution, the block of code below establishes the widgets necessary
+#for the user to interact with the program.
 opts_w = LabelFrame(root, text= "Settings:", width= of_x*w, height= of_y*h, bd= 2, relief= "raised", font= header)
 opts_w.grid(row= 0, column= 0, padx= 10, pady= 10)
 opts_w.grid_propagate(False)
