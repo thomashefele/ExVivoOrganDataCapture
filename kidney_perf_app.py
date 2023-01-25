@@ -56,7 +56,7 @@ CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan, connString = "b\'\'", float("nan"), None
 
 if OS == "Linux":
-    rest_comm = "python3 skeleton_app.py"
+    rest_comm = "python3 kidney_perf_app.py"
     
     dsn = "DTKserverdatasource"
     user = "dtk_lab@dtk-server"
@@ -152,12 +152,12 @@ def data_check(data_str):
                 data = float(wanted_str)
 
         except (IndexError, TypeError, ValueError):
-            alert = sa.play_buffer(aud, 1, 2, N)
+            #alert = sa.play_buffer(aud, 1, 2, N)
             pass
         return data
 
     if data_str == null_input:
-        alert = sa.play_buffer(aud, 1, 2, N)
+        #alert = sa.play_buffer(aud, 1, 2, N)
         pass
     else:
         O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
@@ -179,7 +179,7 @@ def MT(port_name, b, t):
 
                         MT_str = str(MT_port.read(35))
                         if MT_str == null_input:
-                            alert = sa.play_buffer(aud, 1, 2, N)
+                            #alert = sa.play_buffer(aud, 1, 2, N)
                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                             cursor.execute(execstr)
                         else:
@@ -209,7 +209,7 @@ def MT(port_name, b, t):
                                 cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         MT_port.close()
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        #alert = sa.play_buffer(aud, 1, 2, N)
                         sleep(5)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -244,7 +244,7 @@ def BT(port_name, b, t):
                             cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         BT_port.close()
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        #alert = sa.play_buffer(aud, 1, 2, N)
                         sleep(5)
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -299,7 +299,7 @@ def FT(port_name, b, t, interval, measure):
 
                                     if measure == "km":
                                         if sleepy:
-                                            alert = sa.play_buffer(aud, 1, 2, N)
+                                            #alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
@@ -309,7 +309,7 @@ def FT(port_name, b, t, interval, measure):
                                         ts_km.place(relx= 0.75, rely= 0.6, anchor= CENTER) 
                                     elif measure == "uo":
                                         if sleepy:
-                                            alert = sa.play_buffer(aud, 1, 2, N)
+                                            #alert = sa.play_buffer(aud, 1, 2, N)
                                             execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
