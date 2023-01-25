@@ -328,7 +328,7 @@ def FT(port_name, b, t, interval, measure):
 def start_coll():
     t_init = datetime.now()
     t_end = t_init + timedelta(hours= 8)
-    Label(disp_w, text= "Data collection started at: {0}; stops at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+    Label(disp_w, text= "Data collection started at: {0}; stop at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
     
     MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
     BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -342,7 +342,6 @@ def start_coll():
     
     halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 30, command= lambda: q("data"))
     halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
-    root.after(1000*perf_time, lambda: q("data"))
     
 def port_detect():
     global name
