@@ -17,11 +17,12 @@ if OS == "Linux":
     database = "perf-data"
     connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
 elif OS == "Windows":
+    driver =  "{SQL Server}"
     server = "dtk-server.database.windows.net"
     database = "perf-data"
     username = "dtk_lab"
     password = "data-collection1"
-    connString = "DRIVER={SQL Server};SERVER={0};DATABASE={1};UID={2};PWD={3}".format(server,database,username,password)
+    connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
 
 cnxn_don =  pyodbc.connect(connString)
