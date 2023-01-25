@@ -26,7 +26,7 @@ prt_x,prt_y = 0.54, 0.29
 prt_padx = 100
 disp_x,disp_y = 0.54, 0.53
 val_x,val_y = 0.45, 0.35
-tsx = 0.85
+tsx = 0.9
 chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
@@ -151,7 +151,7 @@ def data_check(data_str):
             wanted_str = pars_str[(start+5):(start+7)]
 
             if wanted_str == "--":
-                data = 30
+                pass
             else:
                 data = float(wanted_str)
 
