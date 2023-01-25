@@ -19,6 +19,7 @@ head_sz, txt_sz = 10, 10
 of_x,of_y = 0.37, 0.95
 df_x,df_y = 0.57, 0.95
 cf_x,cf_y = 0.34, 0.4
+radx = 0.2
 uf_x,uf_y = 0.34, 0.32
 chemf_x,chemf_y = 0.255, 0.85
 prt_x,prt_y = 0.54, 0.29
@@ -38,6 +39,7 @@ if w >= 1440 and h >= 900:
     of_x,of_y = 0.36, 0.95
     df_x,df_y = 0.61, 0.95
     cf_x,cf_y = 0.34, 0.42
+    radx = 0.25
     uf_x,uf_y = 0.34, 0.38
     chemf_x,chemf_y = 0.29, 0.87
     prt_x,prt_y = 0.59, 0.25
@@ -563,11 +565,11 @@ unos_w.grid_propagate(False)
 
 Label(ch_w, text= "Select which of the below\nthat you would like to do:", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
 R1 = Radiobutton(ch_w, text= "Donor information upload", font= txt, variable= var, value= "1")
-R1.place(relx= 0.25, rely= 0.3, anchor= W)
+R1.place(relx= radx, rely= 0.3, anchor= W)
 R2 = Radiobutton(ch_w, text= "Blood gas data upload", font= txt, variable= var, value= "2")
-R2.place(relx= 0.25, rely= 0.4, anchor= W)
+R2.place(relx= radx, rely= 0.4, anchor= W)
 R3 = Radiobutton(ch_w, text= "Sensor data collection", font= txt, variable= var, value= "3")
-R3.place(relx= 0.25, rely= 0.5, anchor= W)
+R3.place(relx= radx, rely= 0.5, anchor= W)
 
 Label(unos_w, text= "Enter UNOS ID:", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
 unos = Entry(unos_w, text= unos_txt, font= txt)
