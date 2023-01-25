@@ -519,7 +519,8 @@ def choice():
 
                 elif sel == "3":
                     global port_w
-                    global disp_w
+                    global disp_w                        
+                    global vals
                     port_w = Frame(data_w, width= prt_x*w, height= prt_y*h, bd = 2, relief= "sunken")
                     port_w.grid(row= 0, column= 0, padx= 10, pady= 10)
                     port_w.grid_propagate(False)
