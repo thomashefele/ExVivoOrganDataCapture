@@ -50,6 +50,11 @@ if w >= 1440 and h >= 900:
     allset_pad = 45
     sub_pad,rest_pad,ex_pad = 5, 5, 15
 
+var,unos_txt = StringVar(), StringVar()
+lap, perf_time, name, baud_rate, t_o = 5, 28800, [], [9600,2400], [5.1, 5.2, 0.2]
+CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
+null_input, nan, connString = "b\'\'", float("nan"), None
+
 if OS == "Linux":
     rest_comm = "python3 skeleton_app.py"
     
@@ -70,11 +75,6 @@ elif OS == "Windows":
     connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
 header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
-
-var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name, baud_rate, t_o = 5, 28800, [], [9600,2400], [5.1, 5.2, 0.2]
-CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
-null_input, nan = "b\'\'", float("nan")
 
 #This initializes the warning sound to be played if a sensor falls asleep.
 N = 44100
