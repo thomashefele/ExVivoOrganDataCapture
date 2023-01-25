@@ -26,7 +26,7 @@ prt_x,prt_y = 0.54, 0.29
 prt_padx = 100
 disp_x,disp_y = 0.54, 0.53
 val_x,val_y = 0.45, 0.35
-tsx = 0.9
+tsx = 0.85
 chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
@@ -55,7 +55,7 @@ if w >= 1440 and h >= 900:
     sub_pad,rest_pad,ex_pad = 5, 5, 15
 
 var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name, baud_rate, t_o = 5, 28800, [], [9600,2400], [5.1, 5.2, 0.2]
+lap, perf_time, name, baud_rate, t_o = 5, 29000, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan, connString = "b\'\'", float("nan"), None
 
@@ -219,7 +219,7 @@ def MT(port_name, b, t):
                         cursor.execute(execstr)
                     cnxn_MT.commit()
                     ts_MT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                    ts_MT.place(relx= 0.75, rely= 0.2, anchor= CENTER) 
+                    ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER) 
 
 #Medtronic Biotrend sensor function                                                  
 def BT(port_name, b, t):
@@ -254,7 +254,7 @@ def BT(port_name, b, t):
                         cursor.execute(execstr)
                     cnxn_BT.commit()
                     ts_BT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                    ts_BT.place(relx= 0.75, rely= 0.4, anchor= CENTER) 
+                    ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER) 
 
 #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at 
 #what time interval at which we want to collect data (i.e. every x seconds). The function collects the data point closest to the "x"
@@ -310,7 +310,7 @@ def FT(port_name, b, t, interval, measure):
                                             execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
                                             cursor.execute(execstr)
                                         ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                                        ts_km.place(relx= 0.75, rely= 0.6, anchor= CENTER) 
+                                        ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER) 
                                     elif measure == "uo":
                                         if sleepy:
                                             #alert = sa.play_buffer(aud, 1, 2, N)
@@ -320,7 +320,7 @@ def FT(port_name, b, t, interval, measure):
                                             execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
                                             cursor.execute(execstr)
                                         ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                                        ts_uo.place(relx= 0.75, rely= 0.8, anchor= CENTER) 
+                                        ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER) 
                                     cnxn_FT.commit()
                                     del m_arr[:]
                                 else:
