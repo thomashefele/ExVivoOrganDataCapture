@@ -1,9 +1,8 @@
-import serial as ser, numpy as np, simpleaudio as sa
+import serial as ser, numpy as np, simpleaudio as sa,
 import pyodbc, serial.tools.list_ports, os, sys, platform
 from time import monotonic, sleep
 from datetime import datetime
 from tkinter import *
-from tkinter import ttk
 from threading import Thread
 
 root = Tk()
@@ -213,7 +212,9 @@ def MT(port_name, b, t):
                         sleep(5)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
-                    cnxn_MT.commit()   
+                    cnxn_MT.commit()
+                    ts_MT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S"))), font= txt, bg= "white", padx= 5)
+                    ts_MT.place(relx= 0.75, rely= 0.2, anchor= CENTER) 
 
 #Medtronic Biotrend sensor function                                                  
 def BT(port_name, b, t):
@@ -247,6 +248,8 @@ def BT(port_name, b, t):
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
                     cnxn_BT.commit()
+                    ts_BT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S"))), font= txt, bg= "white", padx= 5)
+                    ts_BT.place(relx= 0.75, rely= 0.4, anchor= CENTER) 
 
 #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at 
 #what time interval at which we want to collect data (i.e. every x seconds). The function collects the data point closest to the "x"
@@ -301,6 +304,8 @@ def FT(port_name, b, t, interval, measure):
                                         else:
                                             execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
                                             cursor.execute(execstr)
+                                        ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S"))), font= txt, bg= "white", padx= 5)
+                                        ts_km.place(relx= 0.75, rely= 0.6, anchor= CENTER) 
                                     elif measure == "uo":
                                         if sleepy:
                                             alert = sa.play_buffer(aud, 1, 2, N)
@@ -309,8 +314,9 @@ def FT(port_name, b, t, interval, measure):
                                         else:
                                             execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
                                             cursor.execute(execstr)
+                                        ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S"))), font= txt, bg= "white", padx= 5)
+                                        ts_uo.place(relx= 0.75, rely= 0.8, anchor= CENTER) 
                                     cnxn_FT.commit()
-
                                     del m_arr[:]
                                 else:
                                     pass
