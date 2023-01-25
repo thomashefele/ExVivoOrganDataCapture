@@ -1,7 +1,7 @@
 import serial as ser, numpy as np, simpleaudio as sa
 import pyodbc, serial.tools.list_ports, os, sys, platform
 from time import monotonic, sleep
-from datetime import datetime
+from datetime import datetime, timedelta
 from tkinter import *
 from threading import Thread
 
