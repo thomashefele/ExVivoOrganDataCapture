@@ -26,6 +26,7 @@ prt_x,prt_y = 0.54, 0.29
 prt_padx = 100
 disp_x,disp_y = 0.54, 0.53
 val_x,val_y = 0.45, 0.35
+tsx = 0.85
 chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
@@ -46,6 +47,7 @@ if w >= 1440 and h >= 900:
     prt_padx = 150
     disp_x,disp_y = 0.59, 0.6
     val_x,val_y = 0.5, 0.4
+    tsx = 0.75
     chemsub_pady = 30
     istat_relx,pic_relx = 0.48, 0.525
     istat_rely,pic_rely = 0.55, 0.8
@@ -149,7 +151,7 @@ def data_check(data_str):
             wanted_str = pars_str[(start+5):(start+7)]
 
             if wanted_str == "--":
-                pass
+                data = 30
             else:
                 data = float(wanted_str)
 
