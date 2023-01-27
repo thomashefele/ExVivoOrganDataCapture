@@ -60,6 +60,7 @@ null_input, nan, connString = "b\'\'", float("nan"), None
 #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
 #the full software does not function on Mac.
 if OS == "Linux":
+    #FIX THIS WHEN TIME COMES
     rest_comm = "python3 kidney_perf_app.py"
     
     dsn = "DTKserverdatasource"
@@ -69,6 +70,7 @@ if OS == "Linux":
     connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
     
 elif OS == "Windows":
+    #FIX THIS WHEN TIME COMES
     rest_comm = "start {0}".format(file)
     
     driver = "{SQL Server}"
