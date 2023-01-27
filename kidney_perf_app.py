@@ -1,5 +1,5 @@
-import serial as ser, numpy as np, simpleaudio as sa
-import pyodbc, serial.tools.list_ports, os, sys, platform
+import serial as ser, numpy as np, simpleaudio as sa, pandas as pd
+import pyodbc, serial.tools.list_ports, os, sys, platform, fitz
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
@@ -345,7 +345,7 @@ def start_coll():
     halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 30, command= lambda: q("data"))
     halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
 
-    after(1000*perf_time, lambda: q("data"))
+    root.after(1000*perf_time, lambda: q("data"))
     
 def port_detect():
     global name
@@ -424,6 +424,143 @@ def choice():
 
                 if sel == "1":
                     Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                    
+                    def find(name, path):
+                        for root, dirs, files in os.walk(path):
+                            if name in files:
+                                return os.path.join(root, name)
+                            else:
+                                ###FIX HERE
+
+                    def position_tracker(length, idx):
+                        pos = []
+
+                        for i in range(length):
+                            pos_p = []
+
+                            for j in range(lt):
+                                if txt_arr[j].find(param[i][idx]) != -1:
+                                    pos_p.append(j)
+
+                            pos.append(pos_p)
+
+                        return pos
+
+                    donor_file = find("{}.pdf".format(unos_ID), "/")
+
+                    doc = fitz.open(donor_file)
+                    text = ""
+                    txt_arr = []
+
+                    for page in doc: 
+                        text = page.get_text()
+                        temp = text.split("\n")
+                        temp = temp[4:]
+
+                        for i in temp:
+                            if i == " ":
+                                pass
+                            else:
+                                txt_arr.append(i)
+
+                    param = [['Blood Type:','Donor Summary for ***** *****'], ['Donor ID: ','Printed on:'], ['Height: ','Date of birth: '], 
+                               ['Weight: ','Age: '], ['Age: ','Body Mass Index (BMI): '], ['Body Mass Index (BMI): ','Gender: '],
+                               ['Gender: ','KDPI:'], ['KDPI:','Ethnicity/race: '], ['Ethnicity/race: ', 'Cause of death: '],
+                               ['Cause of death: ','Mechanism of injury: '], ['Mechanism of injury: ','Circumstance of death: '],
+                               ['Circumstance of death: ', 'Admit date:'], ['Cold Ischemic Time:','OR Date:'],
+                               ['Donor meets DCD criteria: ','Cardiac arrest/downtime?: '], ['Cardiac arrest/downtime?: ','CPR administered?: '], 
+                               ['CPR administered?: ','Donor Highlights: '],['History of diabetes: ','History of cancer: '],
+                               ['History of cancer: ','History of hypertension: '], ['History of hypertension: ','History of coronary artery disease (CAD): '],          
+                               ['History of coronary artery disease (CAD): ','Previous gastrointestinal disease: '],
+                               ['Previous gastrointestinal disease: ', 'Chest trauma: '], 
+                               ['Cigarette use (>20 pack years) ever: ','Heavy alcohol use (2+ drinks/daily): '],
+                               ['Heavy alcohol use (2+ drinks/daily): ','I.V. drug usage: '],
+                               ['I.V. drug usage: ','According to the OPTN policy in effect on the date of referral'], 
+                               ['Average/Actual BP','Average heart rate (bpm)'],['Average heart rate (bpm)','High BP'],
+                               ['High BP','Duration at high (minutes)'],['Duration at high (minutes)','Low BP'], 
+                               ['Low BP','Duration at low (minutes)'], ['Duration at low (minutes)','Core Body Temp.'], 
+                               ['WBC (thous/mcL)','RBC (mill/mcL)'],['RBC (mill/mcL)','HgB (g/dL)'],['HgB (g/dL)','Hct (%)'], 
+                               ['Hct (%)','Plt (thous/mcL)'], ['Plt (thous/mcL)','Bands (%)'], ['Na (mEq/L)','K+ (mmol/L)'],
+                               ['K+ (mmol/L)','Cl (mmol/L)'], ['Cl (mmol/L)','CO2 (mmol/L)'],['BUN (mg/dL)','Creatinine (mg/dL))'], 
+                               ['Creatinine (mg/dL))','Glucose (mg/dL)'], ['Glucose (mg/dL)','Total Bilirubin (mg/dL)'],
+                               ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
+                               ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
+                               ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
+                               ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)'],
+                               ['% Glomerulosclerosis: ','Biopsy type: '], ['Biopsy type: ','Glomeruli Count: '], 
+                               ['Glomeruli Count: ','Kidney Pump Values:']]
+
+                    lt, lp = len(txt_arr), len(param)
+                    pos_i, pos_f = position_tracker(lp,0), position_tracker(lp,1)
+
+                    coords,data,trunc,t_dat,strip = [],[],[],[],[]
+
+                    for i in range(lp):  
+                        l_coords = len(pos_i[i])
+
+                        for j in range(l_coords):
+                            a2o = [pos_i[i][j], pos_f[i][j]]
+                            coords.append(a2o)
+
+                    for i in coords:
+                        st, prm_l = None, None
+                        wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
+                        boo = True
+
+                        for j in wonky:
+                            st = txt_arr[i[0]].find(j)
+
+                            if st != -1:
+                                prm_l = len(j)
+                                boo = False
+                                break
+                            else:
+                                pass
+
+                        if boo == False:
+                            p_data = txt_arr[i[0]]
+        
+                            if p_data.find(wonky[0]) != -1:
+                                data.append([p_data,[p_data]])
+                            else:
+                                data.append([p_data,[(p_data)[st+prm_l:]]])
+                        else:
+                            prm = txt_arr[i[0]]
+                            p_data = txt_arr[(i[0]+1):i[1]]
+                            l_pd = len(p_data)
+
+                            if l_pd == 0:
+                                data.append([prm,["NA"]])
+                            else:
+                                data.append([prm,p_data])
+
+                    for i in range(len(data)):
+                        if i == 0:
+                            t_dat += data[i][1]
+                        elif i != 0 and data[i][0] == data[i-1][0]:
+                            t_dat += data[i][1]
+
+                            if i == (len(data)-1):
+                                trunc.append(t_dat)
+                        else:
+                            trunc.append(t_dat)  
+                            t_dat = []
+                            t_dat += data[i][1]
+
+                    for i in trunc:
+                        if len(i) == 1:
+                            strip.append(i[0])
+                        else:
+                            strip.append(i)
+
+                    df = pd.DataFrame(columns= [param[i][0] for i in range(lp)])
+                    df_length = len(df)
+                    df.loc[df_length] = strip
+                    
+                    #SETUP WINDOW BELOW
+                    donor_w = 
+                    
+                    
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
 
@@ -559,7 +696,7 @@ def choice():
 opts_w = LabelFrame(root, text= "Settings:", width= of_x*w, height= of_y*h, bd= 2, relief= "raised", font= header)
 opts_w.grid(row= 0, column= 0, padx= 10, pady= 10)
 opts_w.grid_propagate(False)
-data_w = LabelFrame(root, text= "Data Input:", width= df_x*w, height= df_y*h, bd= 2, relief= "raised", font= header)
+data_w = LabelFrame(root, text= "Data Output:", width= df_x*w, height= df_y*h, bd= 2, relief= "raised", font= header)
 data_w.grid(row= 0, column= 1, padx= 10, pady= 10)
 data_w.grid_propagate(False)
 
