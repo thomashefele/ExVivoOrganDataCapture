@@ -435,24 +435,27 @@ def choice():
                                     if name in files:
                                         return os.path.join(root, name)
                                     else:
-                                        ###FIX HERE
+                                        pass
 
-                            def position_tracker(length, idx):
+                            def position_tracker(arr, length, idx= None):
                                 pos = []
 
                                 for i in range(length):
                                     pos_p = []
 
-                                    for j in range(lt):
-                                        if txt_arr[j].find(param[i][idx]) != -1:
-                                            pos_p.append(j)
+                                    if idx != None:
+                                        for j in range(lt):
+                                            if txt_arr[j].find(arr[i][idx]) != -1:
+                                                pos_p.append(j) 
 
-                                    pos.append(pos_p)
-
+                                        pos.append(pos_p)
+                                    else:
+                                        for j in range(lt):
+                                            if txt_arr[j].find(arr[i]) != -1:
+                                                pos.append(j)
                                 return pos
 
                             donor_file = find("{}.pdf".format(unos_ID), "/")
-
                             doc = fitz.open(donor_file)
                             text = ""
                             txt_arr = []
@@ -491,14 +494,14 @@ def choice():
                                        ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
                                        ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
                                        ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
-                                       ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)'],
-                                       ['% Glomerulosclerosis: ','Biopsy type: '], ['Biopsy type: ','Glomeruli Count: '], 
-                                       ['Glomeruli Count: ','Kidney Pump Values:']]
+                                       ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)']]
 
+                            lr_par = ["Left kidney biopsy:","Right kidney biopsy:"]
+                            ren_par = ["            % Glomerulosclerosis: ","            Biopsy type: ","            Glomeruli Count: "]
+
+                            coords,ren_coord,data,trunc = [],[],[],[]
                             lt, lp = len(txt_arr), len(param)
-                            pos_i, pos_f = position_tracker(lp,0), position_tracker(lp,1)
-
-                            coords,data,trunc,t_dat,strip = [],[],[],[],[]
+                            pos_i, pos_f, pos_lr = position_tracker(param, lp, 0), position_tracker(param, lp, 1), position_tracker(lr_par, 2)
 
                             for i in range(lp):  
                                 l_coords = len(pos_i[i])
@@ -510,19 +513,19 @@ def choice():
                             for i in coords:
                                 st, prm_l = None, None
                                 wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
-                                boo = True
+                                boo_1, boo_2 = True, True
 
                                 for j in wonky:
                                     st = txt_arr[i[0]].find(j)
 
                                     if st != -1:
                                         prm_l = len(j)
-                                        boo = False
+                                        boo_1 = False
                                         break
                                     else:
                                         pass
 
-                                if boo == False:
+                                if boo_1 == False:
                                     p_data = txt_arr[i[0]]
 
                                     if p_data.find(wonky[0]) != -1:
@@ -535,42 +538,65 @@ def choice():
                                     l_pd = len(p_data)
 
                                     if l_pd == 0:
-                                        data.append([prm,["NA"]])
-                                    else:
-                                        data.append([prm,p_data])
+                                        p_data = [""]
 
-                            for i in range(len(data)):
-                                if i == 0:
-                                    t_dat += data[i][1]
-                                elif i != 0 and data[i][0] == data[i-1][0]:
-                                    t_dat += data[i][1]
+                                    for k in data:
+                                        if prm == k[0]:
+                                            k[1] += p_data
+                                            boo_2 = False
+                                            break
 
-                                    if i == (len(data)-1):
-                                        trunc.append(t_dat)
+                                    if boo_2 == True:
+                                        data.append([prm, p_data])
+
+                            for i in pos_lr:
+                                if txt_arr[i+1].find("YES") == -1: 
+                                    data.append([txt_arr[i], ["NO"]])
+
+                                    for j in ren_par:
+                                        data.append([j, ["NA"]])
                                 else:
-                                    trunc.append(t_dat)  
-                                    t_dat = []
-                                    t_dat += data[i][1]
+                                    data.append([txt_arr[i], ["YES"]])
 
-                            for i in trunc:
-                                if len(i) == 1:
-                                    strip.append(i[0])
+                                    for j in ren_par:
+                                        N = txt_arr[i:].index(j)
+                                        V = N+1
+
+                                        if txt_arr[i+V].isnumeric():
+                                            data.append([j,txt_arr[i+V]])
+                                        elif txt_arr[i+V].find(ren_par[1]) != -1:
+                                            data.append([j,["NA"]])
+                                        elif txt_arr[i+V].find(ren_par[2]) != -1:
+                                            data.append([j,["NA"]])
+                                        elif txt_arr[i+V].find("Kidney Pump Values:") != -1:
+                                            data.append([j,["NA"]])
+
+                            for i in data:
+                                if isinstance(i[1], list):
+                                    while i[1].count("") != 0:
+                                        i[1].remove("")
+
+                                    if len(i[1]) == 0:
+                                        i[1].append("NA")
+
+                                if len(i[1]) == 1: 
+                                    trunc.append((i[1])[0])
                                 else:
-                                    strip.append(i)
+                                    trunc.append(i[1])
 
-                            df = pd.DataFrame(columns= [param[i][0] for i in range(lp)])
+                            df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
                             df_length = len(df)
-                            df.loc[df_length] = strip
-
-                            for index, row in df.iterrows():
-                                 cursor.execute(#TO BE FINISHED LATER)
+                            df.loc[df_length] = trunc
                             
+                            #EDIT BELOW
+                            execstr_1 = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp])" 
+                            execstr_2 = "VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
+                            cursor.execute(execstr_1+execstr_2)
                             cnxn_DI.commit()
 
                             #SETUP WINDOW BELOW
                             donor_w =  Table(data_w, dataframe= df, showtoolbar= True, showstatusbar= True)
                             donor_w.show()
-
 
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
