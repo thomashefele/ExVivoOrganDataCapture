@@ -330,7 +330,7 @@ def FT(port_name, b, t, interval, measure):
 #Functions necessary for user to commence a data acquisition option and, subsequently, for that option to collect data and 
 #upload to the database.
 def start_coll():
-    t_init = datetime.now()
+    t_init = datetime.now() + timedelta(seconds= 5)
     t_end = t_init + timedelta(hours= 8)
     Label(disp_w, text= "Data collection started at: {0}; stop at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
     
