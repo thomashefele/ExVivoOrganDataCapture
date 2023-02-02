@@ -586,7 +586,12 @@ def choice():
 
                             df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
                             df_length = len(df)
-                            df.loc[df_length] = trunc
+                            
+                            try:
+                                df.loc[df_length] = trunc
+                            except ValueError:
+                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                            
                             table = df.T.reset_index()
                             donor_info = pt.Table(data_w, dataframe= table, showstatusbar= True)
                             donor_info.show()
@@ -740,7 +745,7 @@ def choice():
                     port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
     else:
         Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 40).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= 20).place(relx= 0.5, rely= 0.6, anchor= CENTER)
  
 #Now that the GUI has been initialized and all the functions ready for execution, the block of code below establishes the widgets necessary
 #for the user to interact with the program.
