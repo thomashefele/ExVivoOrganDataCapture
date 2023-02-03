@@ -609,13 +609,13 @@ def choice():
                                                                df.iloc[:,44],df.iloc[:,45],df.iloc[:,46],df.iloc[:,47],df.iloc[:,48],df.iloc[:,49],
                                                                df.iloc[:,50],df.iloc[:,51],df.iloc[:,52],df.iloc[:,53],df.iloc[:,54],df.iloc[:,55],
                                                                df.iloc[:,56],df.iloc[:,57]))
+                                cnxn_DI.commit()
                             except ValueError:
                                 Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
                             
                             table = df.T.reset_index()
                             donor_info = pt.Table(data_w, dataframe= table, showstatusbar= True)
                             donor_info.show()
-                            cnxn_DI.commit()
 
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
