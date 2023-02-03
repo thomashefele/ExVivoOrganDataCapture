@@ -62,7 +62,7 @@ null_input, nan, connString = "b\'\'", float("nan"), None
 #the full software does not function on Mac.
 if OS == "Linux":
     #FIX THIS WHEN TIME COMES
-    rest_comm = "python3 kidney_perf_app.py"
+    rest_comm = "python3 {0}".format(file)
     
     dsn = "DTKserverdatasource"
     user = "dtk_lab@dtk-server"
