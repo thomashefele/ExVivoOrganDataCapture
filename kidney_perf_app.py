@@ -589,32 +589,32 @@ def choice():
                             
                             try:
                                 df.loc[df_length] = trunc
+                                
+                                cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
+                                cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
+                                cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
+                                cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
+                                cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
+                                cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
+                                cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
+                                cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57})"
+                                cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
+                                cursor.execute(cnxn_str.format(df.iloc[:,0],df.iloc[:,1],df.iloc[:,2],df.iloc[:,3],df.iloc[:,4],df.iloc[:,5],df.iloc[:,6],
+                                                               df.iloc[:,7],df.iloc[:,8],df.iloc[:,9],df.iloc[:,10],df.iloc[:,11],df.iloc[:,12],df.iloc[:,13],
+                                                               df.iloc[:,14],df.iloc[:,15],df.iloc[:,16],df.iloc[:,17],df.iloc[:,18],df.iloc[:,19],
+                                                               df.iloc[:,20],df.iloc[:,21],df.iloc[:,22],df.iloc[:,23],df.iloc[:,24],df.iloc[:,25],
+                                                               df.iloc[:,26],df.iloc[:,27],df.iloc[:,28],df.iloc[:,29],df.iloc[:,30],df.iloc[:,31],
+                                                               df.iloc[:,32],df.iloc[:,33],df.iloc[:,34],df.iloc[:,35],df.iloc[:,36],df.iloc[:,37],
+                                                               df.iloc[:,38],df.iloc[:,39],df.iloc[:,40],df.iloc[:,41],df.iloc[:,42],df.iloc[:,43],
+                                                               df.iloc[:,44],df.iloc[:,45],df.iloc[:,46],df.iloc[:,47],df.iloc[:,48],df.iloc[:,49],
+                                                               df.iloc[:,50],df.iloc[:,51],df.iloc[:,52],df.iloc[:,53],df.iloc[:,54],df.iloc[:,55],
+                                                               df.iloc[:,56],df.iloc[:,57]))
                             except ValueError:
                                 Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
                             
                             table = df.T.reset_index()
                             donor_info = pt.Table(data_w, dataframe= table, showstatusbar= True)
                             donor_info.show()
-                            
-                            cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
-                            cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
-                            cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
-                            cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
-                            cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
-                            cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
-                            cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
-                            cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57})"
-                            cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                            cursor.execute(cnxn_str.format(df.iloc[:,0],df.iloc[:,1],df.iloc[:,2],df.iloc[:,3],df.iloc[:,4],df.iloc[:,5],df.iloc[:,6],
-                                                           df.iloc[:,7],df.iloc[:,8],df.iloc[:,9],df.iloc[:,10],df.iloc[:,11],df.iloc[:,12],df.iloc[:,13],
-                                                           df.iloc[:,14],df.iloc[:,15],df.iloc[:,16],df.iloc[:,17],df.iloc[:,18],df.iloc[:,19],
-                                                           df.iloc[:,20],df.iloc[:,21],df.iloc[:,22],df.iloc[:,23],df.iloc[:,24],df.iloc[:,25],
-                                                           df.iloc[:,26],df.iloc[:,27],df.iloc[:,28],df.iloc[:,29],df.iloc[:,30],df.iloc[:,31],
-                                                           df.iloc[:,32],df.iloc[:,33],df.iloc[:,34],df.iloc[:,35],df.iloc[:,36],df.iloc[:,37],
-                                                           df.iloc[:,38],df.iloc[:,39],df.iloc[:,40],df.iloc[:,41],df.iloc[:,42],df.iloc[:,43],
-                                                           df.iloc[:,44],df.iloc[:,45],df.iloc[:,46],df.iloc[:,47],df.iloc[:,48],df.iloc[:,49],
-                                                           df.iloc[:,50],df.iloc[:,51],df.iloc[:,52],df.iloc[:,53],df.iloc[:,54],df.iloc[:,55],
-                                                           df.iloc[:,56],df.iloc[:,57]))
                             cnxn_DI.commit()
 
                 elif sel == "2":
