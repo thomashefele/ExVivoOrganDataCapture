@@ -1,10 +1,17 @@
 import serial as ser, numpy as np, simpleaudio as sa, pandas as pd
-import pyodbc, serial.tools.list_ports, os, sys, platform, fitz
+import pyodbc, serial.tools.list_ports, os, sys, platform
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
 from threading import Thread
 from pandastable import Table
+
+#fitz (the name for the PyMuPDF library) only works on Python 3.7 or higher. For the programs running on the Raspberry Pi devices, the Python version
+#is less than 3.7. This code allows one to retain the fitz module for the Windows .exe file while ignoring said module for the program on Raspberry Pi.
+try:
+    import fitz
+except ImportError:
+    pass
 
 #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
 #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
@@ -374,11 +381,11 @@ def port_detect():
 
     if Nusb != 4:
         if Nusb == 0:
-            Label(port_w, text= "No sensors connected", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            Label(port_w, text= "No sensors connected.", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 1:
-            Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order.", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 2 or Nusb == 3:
-            Label(port_w, text= "Only {} sensors are connected. Plug all in the correct order".format(Nusb), font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            Label(port_w, text= "Only {} sensors are connected. Plug all in the correct order.".format(Nusb), font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         else:
             pass
         name = []
@@ -433,7 +440,11 @@ def choice():
                 Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.7, anchor= CENTER)
             else:
                 CHOOSE_AGN = True
-
+                
+                #This section of code takes the UNOS ID, searches for the specific donor info pdf associated with that ID, 
+                #and generates a dataframe consisting of pertinent donor medical history data. The dataframe is displayed via
+                #GUI so that the user may edit any values that were incorrectly read from the PDF. When ready, the user can
+                #then upload this data to the Azure database.
                 if sel == "1":
                     with pyodbc.connect(connString) as cnxn_DI:
                         with cnxn_DI.cursor() as cursor:
@@ -643,6 +654,7 @@ def choice():
                             donor_info.show()
                             donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
                                 
+                #This option allows one to manually input blood gas data from the iStat and Piccolo devices to the Azure database.
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
 
@@ -743,6 +755,8 @@ def choice():
                     submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 9, column= 2, pady= chemsub_pady)
                     submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 15, column= 4, pady= chemsub_pady)
 
+                #This option collects data from the myriad perfusion sensors, integrates and formats the data, and then
+                #uploads it to the Azure database.
                 elif sel == "3":
                     global port_w
                     global disp_w                        
