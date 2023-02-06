@@ -1,5 +1,5 @@
 import serial as ser, numpy as np, simpleaudio as sa, pandas as pd
-import pyodbc, serial.tools.list_ports, os, sys, platform #, #fitz
+import pyodbc, serial.tools.list_ports, os, sys, platform, fitz
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
@@ -31,7 +31,7 @@ chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
 allset_pad = 10
-u_padx, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
+u_pady, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
 file = os.path.abspath(__file__)
 rest_comm = "python3 {}".format(file)
 OS = platform.system()
