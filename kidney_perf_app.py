@@ -33,6 +33,7 @@ istat_rely,pic_rely = 0.6, 0.9
 allset_pad = 10
 sub_pad,rest_pad,ex_pad = 1, 1, 5
 file = os.path.abspath(__file__)
+rest_comm = "python3 {}".format(file)
 OS = platform.system()
 
 if w >= 1440 and h >= 900:
@@ -63,8 +64,6 @@ null_input, nan, connString = "b\'\'", float("nan"), None
 #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
 #the full software does not function on Mac.
 if OS == "Linux":
-    rest_comm = "python3 {0}".format(file)
-    
     dsn = "DTKserverdatasource"
     user = "dtk_lab@dtk-server"
     password = "data-collection1"
@@ -72,8 +71,6 @@ if OS == "Linux":
     connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
     
 elif OS == "Windows":
-    rest_comm = "start {0}".format(file)
-    
     driver = "{SQL Server}"
     server = "dtk-server.database.windows.net"
     database = "perf-data"
