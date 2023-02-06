@@ -88,6 +88,15 @@ aud = np.sin(600 * x * 2 * np.pi)
 aud *= 32767/np.max(np.abs(aud))
 aud = aud.astype(np.int16)
 
+def alert():
+    try:
+        try:
+            warn = sa.play_buffer(aud, 1, 2, N)
+        except _sa.SimpleaudioError:
+            pass
+    except NameError:
+        pass
+
 #Functions called by GUI to restart or quit program.
 def anew():
     global STOP
@@ -157,11 +166,11 @@ def data_check(data_str):
                 data = float(wanted_str)
 
         except (IndexError, TypeError, ValueError):
-            alert = sa.play_buffer(aud, 1, 2, N)
+            alert()
         return data
 
     if data_str == null_input:
-        alert = sa.play_buffer(aud, 1, 2, N)
+        alert()
     else:
         O2_sat, hct = finder(data_str, "SO2="), finder(data_str, "HCT=")
 
@@ -182,7 +191,7 @@ def MT(port_name, b, t):
 
                         MT_str = str(MT_port.read(35))
                         if MT_str == null_input:
-                            alert = sa.play_buffer(aud, 1, 2, N)
+                            alert()
                             execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                             cursor.execute(execstr)
                         else:
@@ -207,12 +216,12 @@ def MT(port_name, b, t):
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{}', GETDATE(), {}, {}, {});".format(unos_ID, data_AF, data_AP, rpm)
                                 cursor.execute(execstr)
                             except (IndexError, ValueError, TypeError):
-                                alert = sa.play_buffer(aud, 1, 2, N)
+                                alert()
                                 execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                 cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         MT_port.close()
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        alert()
                         sleep(5)
                         execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -247,7 +256,7 @@ def BT(port_name, b, t):
                             cursor.execute(execstr)
                     except (OSError, FileNotFoundError):
                         BT_port.close()
-                        alert = sa.play_buffer(aud, 1, 2, N)
+                        alert()
                         sleep(5)
                         execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                         cursor.execute(execstr)
@@ -302,7 +311,7 @@ def FT(port_name, b, t, interval, measure):
 
                                     if measure == "km":
                                         if sleepy:
-                                            alert = sa.play_buffer(aud, 1, 2, N)
+                                            alert()
                                             execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
@@ -312,7 +321,7 @@ def FT(port_name, b, t, interval, measure):
                                         ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER) 
                                     elif measure == "uo":
                                         if sleepy:
-                                            alert = sa.play_buffer(aud, 1, 2, N)
+                                            alert()
                                             execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                             cursor.execute(execstr)
                                         else:
@@ -583,8 +592,8 @@ def choice():
                                     data.append([txt_arr[i], ["YES"]])
 
                                     for j in ren_par:
-                                        N = txt_arr[i:].index(j)
-                                        V = N+1
+                                        J = txt_arr[i:].index(j)
+                                        V = J+1
 
                                         if txt_arr[i+V].isnumeric():
                                             data.append([j,[txt_arr[i+V]]])
