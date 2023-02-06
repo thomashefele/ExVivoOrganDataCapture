@@ -650,7 +650,6 @@ def choice():
                     pic_w.grid(row= 0,  column= 1, padx= 10, pady= 10)
                     pic_w.grid_propagate(False)
 
-                    #The functions below are necessary for the chem gas app to work. 
                     def upload(instr):
                         with pyodbc.connect(connString) as cnxn_bg:
                             with cnxn_bg.cursor() as cursor:
@@ -702,7 +701,7 @@ def choice():
                     Label(istat_w, text= "Hb: ", font= txt).grid(row= 8, column= 1)
                     Hb_e = Entry(istat_w, text= Hb_txt, font= txt).grid(row= 8, column= 2)
 
-                    #Piccolo tab
+                    #Piccolo
                     Na_txt, K_txt, TCO2_pic_txt, Cl_txt = StringVar(), StringVar(), StringVar(), StringVar()
                     Glu_txt, Ca_txt, BUN_txt, Cre_txt = StringVar(), StringVar(), StringVar(), StringVar()
                     eGFR_txt, ALP_txt, AST_txt, TBIL_txt = StringVar(), StringVar(), StringVar(), StringVar()
@@ -763,7 +762,7 @@ def choice():
                     row4.place(relx= 0.05, rely= 0.8, anchor= W) 
  
                     Label(ch_w, text= "Sensor data collection chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-                    user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (any order)"
+                    user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (kidney scale, then urine scale)"
                     Label(port_w, text= user_guide_1, font= txt).place(relx= 0.5, rely= 0.3, anchor= CENTER)
                     port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
     else:
