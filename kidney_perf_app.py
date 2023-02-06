@@ -1,5 +1,5 @@
 import serial as ser, numpy as np, simpleaudio as sa, pandas as pd
-import pyodbc, serial.tools.list_ports, os, sys, platform, fitz
+import pyodbc, serial.tools.list_ports, os, sys, platform #, #fitz
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
@@ -31,7 +31,7 @@ chemsub_pady = 10
 istat_relx,pic_relx = 0.5, 0.5
 istat_rely,pic_rely = 0.6, 0.9 
 allset_pad = 10
-sub_pad,rest_pad,ex_pad = 1, 1, 5
+u_padx, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
 file = os.path.abspath(__file__)
 rest_comm = "python3 {}".format(file)
 OS = platform.system()
@@ -54,7 +54,7 @@ if w >= 1440 and h >= 900:
     istat_relx,pic_relx = 0.48, 0.525
     istat_rely,pic_rely = 0.55, 0.8
     allset_pad = 45
-    sub_pad,rest_pad,ex_pad = 5, 5, 15
+    u_pady, sub_pad,rest_pad,ex_pad = 25, 5, 5, 15
 
 var,unos_txt = StringVar(), StringVar()
 lap, perf_time, name, baud_rate, t_o = 5, 28805, [], [9600,2400], [5.1, 5.2, 0.2]
@@ -767,7 +767,7 @@ def choice():
                     port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
     else:
         Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= 25).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= u_pady).place(relx= 0.5, rely= 0.6, anchor= CENTER)
  
 #Now that the GUI has been initialized and all the functions ready for execution, the block of code below establishes the widgets necessary
 #for the user to interact with the program.
