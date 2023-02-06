@@ -20,6 +20,7 @@ df_x,df_y = 0.57, 0.95
 cf_x,cf_y = 0.34, 0.4
 radx = 0.2
 uf_x,uf_y = 0.34, 0.32
+don_x,don_y = 0.59, 0.8
 chemf_x,chemf_y = 0.255, 0.85
 prt_x,prt_y = 0.54, 0.29
 prt_padx = 100
@@ -41,6 +42,7 @@ if w >= 1440 and h >= 900:
     cf_x,cf_y = 0.34, 0.42
     radx = 0.25
     uf_x,uf_y = 0.34, 0.38
+    don_x,don_y = 0.59, 0.8
     chemf_x,chemf_y = 0.29, 0.87
     prt_x,prt_y = 0.59, 0.25
     prt_padx = 150
@@ -54,14 +56,13 @@ if w >= 1440 and h >= 900:
     sub_pad,rest_pad,ex_pad = 5, 5, 15
 
 var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name, baud_rate, t_o = 5, 29000, [], [9600,2400], [5.1, 5.2, 0.2]
+lap, perf_time, name, baud_rate, t_o = 5, 28805, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
 null_input, nan, connString = "b\'\'", float("nan"), None
 
 #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
 #the full software does not function on Mac.
 if OS == "Linux":
-    #FIX THIS WHEN TIME COMES
     rest_comm = "python3 {0}".format(file)
     
     dsn = "DTKserverdatasource"
@@ -453,7 +454,34 @@ def choice():
                                             if txt_arr[j].find(arr[i]) != -1:
                                                 pos.append(j)
                                 return pos
-
+                            
+                            def donor_upload(data):
+                                try:
+                                    df = data.transpose()
+                                    cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
+                                    cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
+                                    cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
+                                    cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
+                                    cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
+                                    cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
+                                    cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
+                                    cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56});"
+                                    cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
+                                    cursor.execute(cnxn_str.format(df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
+                                                                   df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
+                                                                   df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
+                                                                   df.iloc[1,20],df.iloc[1,21],df.iloc[1,22],df.iloc[1,23],df.iloc[1,24],df.iloc[1,25],
+                                                                   df.iloc[1,26],df.iloc[1,27],df.iloc[1,28],df.iloc[1,29],df.iloc[1,30],df.iloc[1,31],
+                                                                   df.iloc[1,32],df.iloc[1,33],df.iloc[1,34],df.iloc[1,35],df.iloc[1,36],df.iloc[1,37],
+                                                                   df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
+                                                                   df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
+                                                                   df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
+                                                                   df.iloc[1,56]))
+                                    cnxn_DI.commit()
+                                    
+                                except (KeyError, IndexError, pyodbc.ProgrammingError, pd.errors.InvalidIndexError):
+                                    pass
+                                
                             donor_file = find("{}.pdf".format(unos_ID), "/")
                             doc = fitz.open(donor_file)
                             text = ""
@@ -589,34 +617,23 @@ def choice():
                             
                             try:
                                 df.loc[df_length] = trunc
+                                df.index = ["Values"]
                                 
-                                cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
-                                cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
-                                cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
-                                cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
-                                cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
-                                cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
-                                cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
-                                cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56},{57})"
-                                cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                                cursor.execute(cnxn_str.format(df.iloc[:,0],df.iloc[:,1],df.iloc[:,2],df.iloc[:,3],df.iloc[:,4],df.iloc[:,5],df.iloc[:,6],
-                                                               df.iloc[:,7],df.iloc[:,8],df.iloc[:,9],df.iloc[:,10],df.iloc[:,11],df.iloc[:,12],df.iloc[:,13],
-                                                               df.iloc[:,14],df.iloc[:,15],df.iloc[:,16],df.iloc[:,17],df.iloc[:,18],df.iloc[:,19],
-                                                               df.iloc[:,20],df.iloc[:,21],df.iloc[:,22],df.iloc[:,23],df.iloc[:,24],df.iloc[:,25],
-                                                               df.iloc[:,26],df.iloc[:,27],df.iloc[:,28],df.iloc[:,29],df.iloc[:,30],df.iloc[:,31],
-                                                               df.iloc[:,32],df.iloc[:,33],df.iloc[:,34],df.iloc[:,35],df.iloc[:,36],df.iloc[:,37],
-                                                               df.iloc[:,38],df.iloc[:,39],df.iloc[:,40],df.iloc[:,41],df.iloc[:,42],df.iloc[:,43],
-                                                               df.iloc[:,44],df.iloc[:,45],df.iloc[:,46],df.iloc[:,47],df.iloc[:,48],df.iloc[:,49],
-                                                               df.iloc[:,50],df.iloc[:,51],df.iloc[:,52],df.iloc[:,53],df.iloc[:,54],df.iloc[:,55],
-                                                               df.iloc[:,56],df.iloc[:,57]))
-                                cnxn_DI.commit()
                             except ValueError:
-                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
-                            
-                            table = df.T.reset_index()
-                            donor_info = pt.Table(data_w, dataframe= table, showstatusbar= True)
-                            donor_info.show()
+                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
 
+                            table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
+                            Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
+                            donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
+                            donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
+                            donor_w.grid_propagate(False)
+                            donor_info = Table(donor_w, dataframe= table, showstatusbar= True)
+                            donor_info.textcolor = "RoyalBlue1"
+                            donor_info.cellbackgr = "white"
+                            donor_info.boxoutlinecolor = "black"
+                            donor_info.show()
+                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
+                                
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
 
@@ -745,7 +762,7 @@ def choice():
                     port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
     else:
         Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= 20).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+        Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= 25).place(relx= 0.5, rely= 0.6, anchor= CENTER)
  
 #Now that the GUI has been initialized and all the functions ready for execution, the block of code below establishes the widgets necessary
 #for the user to interact with the program.
