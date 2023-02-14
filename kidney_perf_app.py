@@ -810,7 +810,7 @@ R2.place(relx= radx, rely= 0.4, anchor= W)
 R3 = Radiobutton(ch_w, text= "Sensor data collection", font= txt, variable= var, value= "3")
 R3.place(relx= radx, rely= 0.5, anchor= W)
 
-Label(unos_w, text= "Enter UNOS ID:", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
+Label(unos_w, text= "Enter UNOS ID (case sensitive):", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
 unos = Entry(unos_w, text= unos_txt, font= txt)
 unos.place(relx= 0.5, rely= 0.35, anchor= CENTER)
 submit = Button(opts_w, text= "Submit", font= txt, command= choice).grid(row= 2, column= 0, pady= 5, ipadx= sub_pad)
