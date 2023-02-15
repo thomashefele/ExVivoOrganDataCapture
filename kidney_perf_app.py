@@ -382,7 +382,7 @@ def port_detect():
     
     Nusb = len(name)
 
-    if Nusb != 4:
+    if Nusb != 4 and CHECK_AGAIN == False:
         if Nusb == 0:
             Label(port_w, text= "No sensors connected.", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         elif Nusb == 1:
@@ -418,7 +418,7 @@ def port_detect():
 
         collecting = Button(disp_w, text= "Start Data Collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
     
-    elif Nusb == 4 and CHECK_AGAIN == True:
+    elif CHECK_AGAIN == True:
         Label(port_w, text= "Data collection ready to commence!", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         
 def choice():
