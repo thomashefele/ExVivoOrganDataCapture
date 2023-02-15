@@ -8,10 +8,12 @@ from pandastable import Table
 
 #fitz (the name for the PyMuPDF library) only works on Python 3.7 or higher. For the programs running on the Raspberry Pi devices, the Python version
 #is less than 3.7. This code allows one to retain the fitz module for the Windows .exe file while ignoring said module for the program on Raspberry Pi.
+no_fitz = False
+
 try:
     import fitz
 except ImportError:
-    pass
+    no_fitz = True
 
 #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
 #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
@@ -513,159 +515,162 @@ def choice():
                                     
                                 except (KeyError, IndexError, pyodbc.ProgrammingError, pd.errors.InvalidIndexError):
                                     pass
-                                
-                            donor_file = find("{}.pdf".format(unos_ID), "/")
-                            doc = fitz.open(donor_file)
-                            text = ""
-                            txt_arr = []
-
-                            for page in doc: 
-                                text = page.get_text()
-                                temp = text.split("\n")
-                                temp = temp[4:]
-
-                                for i in temp:
-                                    if i == " ":
-                                        pass
-                                    else:
-                                        txt_arr.append(i)
-
-                            param = [['Blood Type:','Donor Summary for ***** *****'], ['Donor ID: ','Printed on:'], ['Height: ','Date of birth: '], 
-                                       ['Weight: ','Age: '], ['Age: ','Body Mass Index (BMI): '], ['Body Mass Index (BMI): ','Gender: '],
-                                       ['Gender: ','KDPI:'], ['KDPI:','Ethnicity/race: '], ['Ethnicity/race: ', 'Cause of death: '],
-                                       ['Cause of death: ','Mechanism of injury: '], ['Mechanism of injury: ','Circumstance of death: '],
-                                       ['Circumstance of death: ', 'Admit date:'], ['Cold Ischemic Time:','OR Date:'],
-                                       ['Donor meets DCD criteria: ','Cardiac arrest/downtime?: '], ['Cardiac arrest/downtime?: ','CPR administered?: '], 
-                                       ['CPR administered?: ','Donor Highlights: '],['History of diabetes: ','History of cancer: '],
-                                       ['History of cancer: ','History of hypertension: '], ['History of hypertension: ','History of coronary artery disease (CAD): '],          
-                                       ['History of coronary artery disease (CAD): ','Previous gastrointestinal disease: '],
-                                       ['Previous gastrointestinal disease: ', 'Chest trauma: '], 
-                                       ['Cigarette use (>20 pack years) ever: ','Heavy alcohol use (2+ drinks/daily): '],
-                                       ['Heavy alcohol use (2+ drinks/daily): ','I.V. drug usage: '],
-                                       ['I.V. drug usage: ','According to the OPTN policy in effect on the date of referral'], 
-                                       ['Average/Actual BP','Average heart rate (bpm)'],['Average heart rate (bpm)','High BP'],
-                                       ['High BP','Duration at high (minutes)'],['Duration at high (minutes)','Low BP'], 
-                                       ['Low BP','Duration at low (minutes)'], ['Duration at low (minutes)','Core Body Temp.'], 
-                                       ['WBC (thous/mcL)','RBC (mill/mcL)'],['RBC (mill/mcL)','HgB (g/dL)'],['HgB (g/dL)','Hct (%)'], 
-                                       ['Hct (%)','Plt (thous/mcL)'], ['Plt (thous/mcL)','Bands (%)'], ['Na (mEq/L)','K+ (mmol/L)'],
-                                       ['K+ (mmol/L)','Cl (mmol/L)'], ['Cl (mmol/L)','CO2 (mmol/L)'],['BUN (mg/dL)','Creatinine (mg/dL))'], 
-                                       ['Creatinine (mg/dL))','Glucose (mg/dL)'], ['Glucose (mg/dL)','Total Bilirubin (mg/dL)'],
-                                       ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
-                                       ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
-                                       ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
-                                       ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)']]
-
-                            lr_par = ["Left kidney biopsy:","Right kidney biopsy:"]
-                            ren_par = ["            % Glomerulosclerosis: ","            Biopsy type: ","            Glomeruli Count: "]
-
-                            coords,ren_coord,data,trunc = [],[],[],[]
-                            lt, lp = len(txt_arr), len(param)
-                            pos_i, pos_f, pos_lr = position_tracker(param, lp, 0), position_tracker(param, lp, 1), position_tracker(lr_par, 2)
-
-                            for i in range(lp):  
-                                l_coords = len(pos_i[i])
-
-                                for j in range(l_coords):
-                                    a2o = [pos_i[i][j], pos_f[i][j]]
-                                    coords.append(a2o)
-
-                            for i in coords:
-                                st, prm_l = None, None
-                                wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
-                                boo_1, boo_2 = True, True
-
-                                for j in wonky:
-                                    st = txt_arr[i[0]].find(j)
-
-                                    if st != -1:
-                                        prm_l = len(j)
-                                        boo_1 = False
-                                        break
-                                    else:
-                                        pass
-
-                                if boo_1 == False:
-                                    p_data = txt_arr[i[0]]
-
-                                    if p_data.find(wonky[0]) != -1:
-                                        data.append([p_data,[p_data]])
-                                    else:
-                                        data.append([p_data,[(p_data)[st+prm_l:]]])
-                                else:
-                                    prm = txt_arr[i[0]]
-                                    p_data = txt_arr[(i[0]+1):i[1]]
-                                    l_pd = len(p_data)
-
-                                    if l_pd == 0:
-                                        p_data = [""]
-
-                                    for k in data:
-                                        if prm == k[0]:
-                                            k[1] += p_data
-                                            boo_2 = False
-                                            break
-
-                                    if boo_2 == True:
-                                        data.append([prm, p_data])
-
-                            for i in pos_lr:
-                                if txt_arr[i+1].find("YES") == -1: 
-                                    data.append([txt_arr[i], ["NO"]])
-
-                                    for j in ren_par:
-                                        data.append([j, ["NA"]])
-                                else:
-                                    data.append([txt_arr[i], ["YES"]])
-
-                                    for j in ren_par:
-                                        J = txt_arr[i:].index(j)
-                                        V = J+1
-
-                                        if txt_arr[i+V].isnumeric():
-                                            data.append([j,[txt_arr[i+V]]])
-                                        elif txt_arr[i+V].find(ren_par[1]) != -1:
-                                            data.append([j,["NA"]])
-                                        elif txt_arr[i+V].find(ren_par[2]) != -1:
-                                            data.append([j,["NA"]])
-                                        elif txt_arr[i+V].find("Kidney Pump Values:") != -1:
-                                            data.append([j,["NA"]])
-
-                            for i in data:
-                                if isinstance(i[1], list):
-                                    while i[1].count("") != 0:
-                                        i[1].remove("")
-
-                                    if len(i[1]) == 0:
-                                        i[1].append("NA")
-
-                                if len(i[1]) == 1: 
-                                    trunc.append((i[1])[0])
-                                else:
-                                    trunc.append(", ".join(i[1]))
-
-
-                            df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
-                            df_length = len(df)
                             
-                            try:
-                                df.loc[df_length] = trunc
-                                df.index = ["Values"]
-                                
-                            except ValueError:
-                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                            if no_fitz == False:
+                                donor_file = find("{}.pdf".format(unos_ID), "/")
+                                doc = fitz.open(donor_file)
+                                text = ""
+                                txt_arr = []
 
-                            table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
-                            Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
-                            donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
-                            donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
-                            donor_w.grid_propagate(False)
-                            donor_info = Table(donor_w, dataframe= table, showstatusbar= True)
-                            donor_info.textcolor = "RoyalBlue1"
-                            donor_info.cellbackgr = "white"
-                            donor_info.boxoutlinecolor = "black"
-                            donor_info.show()
-                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
-                                
+                                for page in doc: 
+                                    text = page.get_text()
+                                    temp = text.split("\n")
+                                    temp = temp[4:]
+
+                                    for i in temp:
+                                        if i == " ":
+                                            pass
+                                        else:
+                                            txt_arr.append(i)
+
+                                param = [['Blood Type:','Donor Summary for ***** *****'], ['Donor ID: ','Printed on:'], ['Height: ','Date of birth: '], 
+                                           ['Weight: ','Age: '], ['Age: ','Body Mass Index (BMI): '], ['Body Mass Index (BMI): ','Gender: '],
+                                           ['Gender: ','KDPI:'], ['KDPI:','Ethnicity/race: '], ['Ethnicity/race: ', 'Cause of death: '],
+                                           ['Cause of death: ','Mechanism of injury: '], ['Mechanism of injury: ','Circumstance of death: '],
+                                           ['Circumstance of death: ', 'Admit date:'], ['Cold Ischemic Time:','OR Date:'],
+                                           ['Donor meets DCD criteria: ','Cardiac arrest/downtime?: '], ['Cardiac arrest/downtime?: ','CPR administered?: '], 
+                                           ['CPR administered?: ','Donor Highlights: '],['History of diabetes: ','History of cancer: '],
+                                           ['History of cancer: ','History of hypertension: '], ['History of hypertension: ','History of coronary artery disease (CAD): '],          
+                                           ['History of coronary artery disease (CAD): ','Previous gastrointestinal disease: '],
+                                           ['Previous gastrointestinal disease: ', 'Chest trauma: '], 
+                                           ['Cigarette use (>20 pack years) ever: ','Heavy alcohol use (2+ drinks/daily): '],
+                                           ['Heavy alcohol use (2+ drinks/daily): ','I.V. drug usage: '],
+                                           ['I.V. drug usage: ','According to the OPTN policy in effect on the date of referral'], 
+                                           ['Average/Actual BP','Average heart rate (bpm)'],['Average heart rate (bpm)','High BP'],
+                                           ['High BP','Duration at high (minutes)'],['Duration at high (minutes)','Low BP'], 
+                                           ['Low BP','Duration at low (minutes)'], ['Duration at low (minutes)','Core Body Temp.'], 
+                                           ['WBC (thous/mcL)','RBC (mill/mcL)'],['RBC (mill/mcL)','HgB (g/dL)'],['HgB (g/dL)','Hct (%)'], 
+                                           ['Hct (%)','Plt (thous/mcL)'], ['Plt (thous/mcL)','Bands (%)'], ['Na (mEq/L)','K+ (mmol/L)'],
+                                           ['K+ (mmol/L)','Cl (mmol/L)'], ['Cl (mmol/L)','CO2 (mmol/L)'],['BUN (mg/dL)','Creatinine (mg/dL))'], 
+                                           ['Creatinine (mg/dL))','Glucose (mg/dL)'], ['Glucose (mg/dL)','Total Bilirubin (mg/dL)'],
+                                           ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
+                                           ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
+                                           ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
+                                           ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)']]
+
+                                lr_par = ["Left kidney biopsy:","Right kidney biopsy:"]
+                                ren_par = ["            % Glomerulosclerosis: ","            Biopsy type: ","            Glomeruli Count: "]
+
+                                coords,ren_coord,data,trunc = [],[],[],[]
+                                lt, lp = len(txt_arr), len(param)
+                                pos_i, pos_f, pos_lr = position_tracker(param, lp, 0), position_tracker(param, lp, 1), position_tracker(lr_par, 2)
+
+                                for i in range(lp):  
+                                    l_coords = len(pos_i[i])
+
+                                    for j in range(l_coords):
+                                        a2o = [pos_i[i][j], pos_f[i][j]]
+                                        coords.append(a2o)
+
+                                for i in coords:
+                                    st, prm_l = None, None
+                                    wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
+                                    boo_1, boo_2 = True, True
+
+                                    for j in wonky:
+                                        st = txt_arr[i[0]].find(j)
+
+                                        if st != -1:
+                                            prm_l = len(j)
+                                            boo_1 = False
+                                            break
+                                        else:
+                                            pass
+
+                                    if boo_1 == False:
+                                        p_data = txt_arr[i[0]]
+
+                                        if p_data.find(wonky[0]) != -1:
+                                            data.append([p_data,[p_data]])
+                                        else:
+                                            data.append([p_data,[(p_data)[st+prm_l:]]])
+                                    else:
+                                        prm = txt_arr[i[0]]
+                                        p_data = txt_arr[(i[0]+1):i[1]]
+                                        l_pd = len(p_data)
+
+                                        if l_pd == 0:
+                                            p_data = [""]
+
+                                        for k in data:
+                                            if prm == k[0]:
+                                                k[1] += p_data
+                                                boo_2 = False
+                                                break
+
+                                        if boo_2 == True:
+                                            data.append([prm, p_data])
+
+                                for i in pos_lr:
+                                    if txt_arr[i+1].find("YES") == -1: 
+                                        data.append([txt_arr[i], ["NO"]])
+
+                                        for j in ren_par:
+                                            data.append([j, ["NA"]])
+                                    else:
+                                        data.append([txt_arr[i], ["YES"]])
+
+                                        for j in ren_par:
+                                            J = txt_arr[i:].index(j)
+                                            V = J+1
+
+                                            if txt_arr[i+V].isnumeric():
+                                                data.append([j,[txt_arr[i+V]]])
+                                            elif txt_arr[i+V].find(ren_par[1]) != -1:
+                                                data.append([j,["NA"]])
+                                            elif txt_arr[i+V].find(ren_par[2]) != -1:
+                                                data.append([j,["NA"]])
+                                            elif txt_arr[i+V].find("Kidney Pump Values:") != -1:
+                                                data.append([j,["NA"]])
+
+                                for i in data:
+                                    if isinstance(i[1], list):
+                                        while i[1].count("") != 0:
+                                            i[1].remove("")
+
+                                        if len(i[1]) == 0:
+                                            i[1].append("NA")
+
+                                    if len(i[1]) == 1: 
+                                        trunc.append((i[1])[0])
+                                    else:
+                                        trunc.append(", ".join(i[1]))
+
+
+                                df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
+                                df_length = len(df)
+
+                                try:
+                                    df.loc[df_length] = trunc
+                                    df.index = ["Values"]
+
+                                except ValueError:
+                                    Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+
+                                table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
+                                Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
+                                donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
+                                donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
+                                donor_w.grid_propagate(False)
+                                donor_info = Table(donor_w, dataframe= table, showstatusbar= True)
+                                donor_info.textcolor = "RoyalBlue1"
+                                donor_info.cellbackgr = "white"
+                                donor_info.boxoutlinecolor = "black"
+                                donor_info.show()
+                                donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
+                            else:
+                                pass
+                            
                 #This option allows one to manually input blood gas data from the iStat and Piccolo devices to the Azure database.
                 elif sel == "2":
                     Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
