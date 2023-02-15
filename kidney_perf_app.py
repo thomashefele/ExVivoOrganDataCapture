@@ -366,7 +366,7 @@ def start_coll():
     FT_1_thread.start()
     FT_2_thread.start()
     
-    halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 10, command= lambda: q("pause"))
+    halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 20, command= lambda: q("pause"))
     halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
 
     if ST_AGN == False:
