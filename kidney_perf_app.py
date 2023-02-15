@@ -374,50 +374,51 @@ def port_detect():
     global CHECK_AGAIN
     ports = serial.tools.list_ports.comports()
     
-    for dev,descr,hwid in sorted(ports):
-            if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
-                name.append(dev)
+    if CHECK_AGAIN == False:
+        for dev,descr,hwid in sorted(ports):
+                if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
+                    name.append(dev)
+                else:
+                    pass
+
+        Nusb = len(name)
+
+        if Nusb != 4:
+            if Nusb == 0:
+                Label(port_w, text= "No sensors connected.", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            elif Nusb == 1:
+                Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order.", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
+            elif Nusb == 2 or Nusb == 3:
+                Label(port_w, text= "Only {} sensors are connected. Plug all in the correct order.".format(Nusb), font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
             else:
                 pass
-    
-    Nusb = len(name)
+            name = []
 
-    if Nusb != 4 and CHECK_AGAIN == False:
-        if Nusb == 0:
-            Label(port_w, text= "No sensors connected.", font= txt, padx= prt_padx).place(relx= 0.5, rely= 0.85, anchor= CENTER)
-        elif Nusb == 1:
-            Label(port_w, text= "Only 1 sensor is connected. Plug all in the correct order.", font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
-        elif Nusb == 2 or Nusb == 3:
-            Label(port_w, text= "Only {} sensors are connected. Plug all in the correct order.".format(Nusb), font= txt).place(relx= 0.5, rely= 0.85, anchor= CENTER)
-        else:
-            pass
-        name = []
-        
-    elif Nusb == 4 and CHECK_AGAIN == False:
-        Label(port_w, text= "Data collection ready to commence!", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)     
-        CHECK_AGAIN = True
-        
-        def degunker(port_name, b, t):
-            with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
-                diff = 0
-                start = monotonic()
-                while diff < 10:
-                    try:
-                        if degunk_port.is_open == False:
-                            degunk_port.open()
+        elif Nusb == 4:
+            Label(port_w, text= "Data collection ready to commence!", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)     
+            CHECK_AGAIN = True
 
-                        BT_str = str(degunk_port.read(43))
-                    except (OSError, FileNotFoundError):
-                        degunk_port.close()
-                        alert = sa.play_buffer(aud, 1, 2, N)
-                    diff = monotonic() - start
+            def degunker(port_name, b, t):
+                with ser.Serial(port_name, baudrate= b, timeout= t) as degunk_port:
+                    diff = 0
+                    start = monotonic()
+                    while diff < 10:
+                        try:
+                            if degunk_port.is_open == False:
+                                degunk_port.open()
 
-        degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
-        degunk_thread.start()
-        degunk_thread.join()
+                            BT_str = str(degunk_port.read(43))
+                        except (OSError, FileNotFoundError):
+                            degunk_port.close()
+                            alert = sa.play_buffer(aud, 1, 2, N)
+                        diff = monotonic() - start
 
-        collecting = Button(disp_w, text= "Start Data Collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
-    
+            degunk_thread = Thread(target= degunker, args= (name[1], baud_rate[0], t_o[1]),)
+            degunk_thread.start()
+            degunk_thread.join()
+
+            collecting = Button(disp_w, text= "Start Data Collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
+
     elif CHECK_AGAIN == True:
         Label(port_w, text= "Data collection ready to commence!", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)
         
