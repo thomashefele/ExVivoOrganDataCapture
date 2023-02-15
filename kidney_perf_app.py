@@ -63,9 +63,9 @@ if w >= 1440 and h >= 900:
     u_pady, sub_pad,rest_pad,ex_pad = 25, 5, 5, 15
 
 var,unos_txt = StringVar(), StringVar()
-lap, perf_time, name, baud_rate, t_o = 5, 28805, [], [9600,2400], [5.1, 5.2, 0.2]
-CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, False
-null_input, nan, connString = "b\'\'", float("nan"), None
+lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
+CHOOSE_AGN, CHECK_AGAIN, ST_AGN, STOP = False, False, False, False
+null_input, nan, connString, compl = "b\'\'", float("nan"), None, 0
 
 #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
 #the full software does not function on Mac.
@@ -120,6 +120,11 @@ def q(tipo):
     
     if tipo == "data":
         Label(disp_w, text= "Data collection complete. Goodbye!", font= txt, padx= 100).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+    elif tipo == "pause":
+        Label(disp_w, text= "Data collection stopped.", font= txt, padx= 100).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+        global compl
+        compl = monotonic() - perf_st
+        coll_agn = Button(disp_w, text= "Restart Data Collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
     elif tipo == "set":
         root.destroy()
         
@@ -347,9 +352,7 @@ def FT(port_name, b, t, interval, measure):
 #Functions necessary for user to commence a data acquisition option and, subsequently, for that option to collect data and 
 #upload to the database.
 def start_coll():
-    t_init = datetime.now() + timedelta(seconds= 5)
-    t_end = t_init + timedelta(hours= 8)
-    Label(disp_w, text= "Data collection started at: {0}; stop at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
+    STOP = False
     
     MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
     BT_thread = Thread(target= BT, args= (name[1], baud_rate[0], t_o[1]),)
@@ -361,11 +364,20 @@ def start_coll():
     FT_1_thread.start()
     FT_2_thread.start()
     
-    halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 30, command= lambda: q("data"))
+    halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 40, command= lambda: q("pause"))
     halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
 
-    root.after(1000*perf_time, lambda: q("data"))
+    if ST_AGN == False:
+        t_init = datetime.now() + timedelta(seconds= 5)
+        t_end = t_init + timedelta(hours= 8)
+        global perf_st
+        perf_st = monotonic()
+        Label(disp_w, text= "Perfusion started at: {0}; stop at: {1}.".format(t_init.strftime("%H:%M:%S"),t_end.strftime("%H:%M:%S")), font= txt).place(relx= 0.5, rely= 0.2, anchor= CENTER)
     
+    global ST_AGN
+    ST_AGN = True
+    root.after(1000*(perf_time-compl), lambda: q("data"))
+
 def port_detect():
     global name
     global CHECK_AGAIN
