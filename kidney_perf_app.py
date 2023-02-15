@@ -669,7 +669,7 @@ def choice():
                                 donor_info.show()
                                 donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
                             else:
-                                pass
+                                Label(data_w, text= "PDF scanner currently unavailable.\nUpdate Python to 3.7 or higher.", font= txt).place(relx= 0.5, rely= 0.5, anchor= CENTER)
                             
                 #This option allows one to manually input blood gas data from the iStat and Piccolo devices to the Azure database.
                 elif sel == "2":
