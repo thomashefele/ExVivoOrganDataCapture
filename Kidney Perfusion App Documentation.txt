@@ -49,10 +49,10 @@ https://azure.microsoft.com/en-us/products/azure-sql/database/
     
 Troubleshooting:
 - If a sensor is turned off or unplugged during perfusion, simply restart/reconnect the sensor. There is no need to restart or exit the program, as it is
-designed to continue data collection for a sensor even if the data stream is interrupted. (NULL values are uploaded until reconnection is estblished.)
-- If timestamps are appearing irregularly on the app, this is an indication that the USB ports are not connected in the right order.
+designed to continue data collection for a sensor even if the data stream is interrupted. (NULL values are uploaded until reconnection is established.)
+- If timestamps are appearing irregularly on the app, this is an indication that the USB ports are not connected in the right order. Exit the app, do the following, and then restart the app:
   - If using Windows, go to Device Manager and re-assign all the COM ports in the proper ascending order. To do so, right click on the port under "Ports 
   (COM & LPT)" in Device Manager. Click on "Properties", followed by "Port Settings", and then "Advanced".
-  - If using Linux, remove the sensor USBs, restart the device, and then re-connect the sensor USBs in the proper order.
+  - If using Linux, remove the sensor USBs, restart the computer, and then re-connect the sensor USBs in the proper order.
     
 
