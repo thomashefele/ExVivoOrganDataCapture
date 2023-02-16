@@ -107,8 +107,10 @@ def app():
 
     #Functions called by GUI to restart or quit program.
     def anew():
+        global CHOOSE_AGN
+        global CHECK_AGAIN
         global STOP
-        STOP = True
+        CHOOSE_AGN, CHECK_AGAIN, STOP = False, False, True
         root.destroy()
         app()
 
