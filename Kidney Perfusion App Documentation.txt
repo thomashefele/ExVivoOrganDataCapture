@@ -59,5 +59,3 @@ designed to continue data collection for a sensor even if the data stream is int
   - If using Linux, remove all sensor USBs and then re-connect the sensor USBs in the proper order.
   *Note that restarting the app is not required; the app will continue to upload NULL values until all the USBs are arranged in the proper order, at which
   point the correct values will be uploaded.
-    
-
