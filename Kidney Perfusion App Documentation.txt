@@ -12,9 +12,12 @@ https://azure.microsoft.com/en-us/products/azure-sql/database/
   
     https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-portal#create-a-firewall-rule-after-the-server-is-created
 
-- Install the Windows or Linux ODBC Driver needed to connect to Azure:
+- Install the necessary software to connect to the database. 
+  - In Windows, this software is usually pre-installed. If not, download the software from:
 
-  https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+    https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+    
+  - On Linux, ...
 
   *Note that installation of the driver on Mac is unreliable, thus the program should only be run on Windows or Linux.
 
