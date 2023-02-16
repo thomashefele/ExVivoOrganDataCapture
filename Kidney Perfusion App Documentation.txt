@@ -50,9 +50,14 @@ https://azure.microsoft.com/en-us/products/azure-sql/database/
 Troubleshooting:
 - If a sensor is turned off or unplugged during perfusion, simply restart/reconnect the sensor. There is no need to restart or exit the program, as it is
 designed to continue data collection for a sensor even if the data stream is interrupted. (NULL values are uploaded until reconnection is established.)
-- If timestamps are appearing irregularly on the app, this is an indication that the USB ports are not connected in the right order. Exit the app, do the following, and then restart the app:
+  - For Linux: if one or more sensors become unplugged, plug the sensors back in according to the order list. (ex. If the Bioconsole and Biotrend are
+  unplugged, I will plug in the Bioconsole first) On Linux, ports are temporarily assigned; thus, removing more than one port causes the respective port
+  names to be lost. Re-plugging the ports in a different order will result in different names for the ports.
+- If timestamps are appearing irregularly on the app or NULL values are appearing when all sensors are connected, this is an indication that the USB ports are not connected in the right order. Do as follows:
   - If using Windows, go to Device Manager and re-assign all the COM ports in the proper ascending order. To do so, right click on the port under "Ports 
   (COM & LPT)" in Device Manager. Click on "Properties", followed by "Port Settings", and then "Advanced".
-  - If using Linux, remove the sensor USBs, restart the computer, and then re-connect the sensor USBs in the proper order.
+  - If using Linux, remove all sensor USBs and then re-connect the sensor USBs in the proper order.
+  *Note that restarting the app is not required; the app will continue to upload NULL values until all the USBs are arranged in the proper order, at which
+  point the correct values will be uploaded.
     
 
