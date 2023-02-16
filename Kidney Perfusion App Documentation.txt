@@ -21,7 +21,7 @@ https://azure.microsoft.com/en-us/products/azure-sql/database/
 - If scanning donor information (i.e. the "Donor information upload" option):
   - No further installations are required; download the donor history file from UNOS (https://unos.org/). Copy and paste the UNOS ID of the file into the 
   program - the program will locate and upload information from the PDF file.  
-  - On the data table that appears, verify/edit any information on the table. When ready to upload, click "Upload"
+  - On the data table that appears, verify/edit any information on the table. When ready to upload, click "Upload".
   
 - If uploading blood gas data (i.e. "Blood gas data upload"):
   - No further installations are required; enter the UNOS ID and submit the blood gas data. If any data is immeasurable (<> or *** on iStat; ~~~ or other 
