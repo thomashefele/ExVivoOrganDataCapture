@@ -109,6 +109,7 @@ def app():
     def anew():
         global STOP
         STOP = True
+        root.destroy()
         app()
 
     def q(tipo):
