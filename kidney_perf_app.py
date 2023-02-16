@@ -14,6 +14,28 @@ try:
     import fitz
 except ImportError:
     no_fitz = True
+    
+lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
+CHOOSE_AGN, CHECK_AGAIN = False, False
+null_input, nan, connString = "b\'\'", float("nan"), None
+OS = platform.system()
+
+#The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
+#the full software does not function on Mac.
+if OS == "Linux":
+    dsn = "DTKserverdatasource"
+    user = "dtk_lab@dtk-server"
+    password = "data-collection1"
+    database = "perf-data"
+    connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
+
+elif OS == "Windows":
+    driver = "{SQL Server}"
+    server = "dtk-server.database.windows.net"
+    database = "perf-data"
+    username = "dtk_lab"
+    password = "data-collection1"
+    connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
 def app():
     #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
@@ -42,8 +64,6 @@ def app():
     istat_rely,pic_rely = 0.6, 0.9 
     allset_pad = 10
     u_pady, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
-    file = os.path.abspath(__file__)
-    OS = platform.system()
 
     if w >= 1440 and h >= 900:
         head_sz, txt_sz = 25, 20
@@ -66,31 +86,6 @@ def app():
         u_pady, sub_pad,rest_pad,ex_pad = 25, 5, 5, 15
 
     var,unos_txt = StringVar(), StringVar()
-    lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
-    CHOOSE_AGN, CHECK_AGAIN = False, False
-    null_input, nan, connString = "b\'\'", float("nan"), None
-
-    #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
-    #the full software does not function on Mac.
-    if OS == "Linux":
-        rest_comm = "{}".format(file)
-
-        dsn = "DTKserverdatasource"
-        user = "dtk_lab@dtk-server"
-        password = "data-collection1"
-        database = "perf-data"
-        connString = "DSN={0};UID={1};PWD={2};DATABASE={3};".format(dsn,user,password,database)
-
-    elif OS == "Windows":
-        rest_comm = "start {}".format(file)
-
-        driver = "{SQL Server}"
-        server = "dtk-server.database.windows.net"
-        database = "perf-data"
-        username = "dtk_lab"
-        password = "data-collection1"
-        connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
-
     header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
 
     #This initializes the warning sound to be played if a sensor falls asleep.
