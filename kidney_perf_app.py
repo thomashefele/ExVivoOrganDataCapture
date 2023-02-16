@@ -72,7 +72,7 @@ null_input, nan, connString = "b\'\'", float("nan"), None
 #The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
 #the full software does not function on Mac.
 if OS == "Linux":
-    rest_comm = "python3 {}".format(file)
+    rest_comm = "{}".format(file)
     
     dsn = "DTKserverdatasource"
     user = "dtk_lab@dtk-server"
