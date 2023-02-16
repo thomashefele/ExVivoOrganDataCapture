@@ -344,6 +344,7 @@ def app():
     #Functions necessary for user to commence a data acquisition option and, subsequently, for that option to collect data and 
     #upload to the database.
     def start_coll():
+        global STOP
         STOP = False
         
         MT_thread = Thread(target= MT, args= (name[0], baud_rate[0], t_o[0]),)
