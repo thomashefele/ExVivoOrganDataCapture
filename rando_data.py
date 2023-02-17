@@ -1,6 +1,6 @@
 import pyodbc, platform
 import random as rand
-from time import monotonic(), sleep
+from time import monotonic, sleep
 
 #timer
 start = monotonic() 
@@ -24,7 +24,6 @@ elif OS == "Windows":
     password = "data-collection1"
     connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
-
 cnxn_don =  pyodbc.connect(connString)
 cursor_don = cnxn_don.cursor()
 cnxn_MT =  pyodbc.connect(connString)
@@ -44,20 +43,17 @@ while lap <= interval:
   if lap < (interval/2):
         unos_id = "TEST_ID_1"
         
-        if i == 0:
-            eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
-            cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
-            cnxn_don.commit()
-            i = 1
+        eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
+        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+        cnxn_don.commit()
+            
     
   elif lap >= (interval/2):
         unos_id = "TEST_ID_2"
         
-        if i == 1:
-            eth, gender, bt, age, bmi, weight = "White", "F", "A", "24", "20.6", "155"
-            cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [time_stamp], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', GETDATE(), '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
-            cnxn_don.commit()
-            i = 0
+        eth, gender, bt, age, bmi, weight = "White", "F", "A", "24", "20.6", "155"
+        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+        cnxn_don.commit()
             
   #MedTronic data
   data_AF = round(rand.random(), 3)
