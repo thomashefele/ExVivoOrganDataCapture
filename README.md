@@ -1,4 +1,4 @@
-# dtk_data_collection
+# DTK Data Collection Project
 For ELT of data during kidney perfusions.
 
 Instructions:
