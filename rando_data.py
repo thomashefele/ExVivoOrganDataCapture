@@ -1,9 +1,9 @@
 import pyodbc, platform
 import random as rand
-from time import time, sleep
+from time import monotonic(), sleep
 
 #timer
-start = time() 
+start = monotonic() 
 lap = 0
 interval = 3600
 
@@ -81,4 +81,4 @@ while lap <= interval:
   
   sleep(5)
   
-  lap = time() - start
+  lap = monotonic() - start
