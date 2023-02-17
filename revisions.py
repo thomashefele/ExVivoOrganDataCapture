@@ -1,5 +1,5 @@
 import serial as ser, numpy as np, simpleaudio as sa, pandas as pd
-import pyodbc, serial.tools.list_ports, os, sys, platform
+import pyodbc, serial.tools.list_ports, os, sys, platform, csv
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
@@ -8,6 +8,7 @@ from pandastable import Table
 
 #fitz (the name for the PyMuPDF library) only works on Python 3.7 or higher. For the programs running on the Raspberry Pi devices, the Python version
 #is less than 3.7. This code allows one to retain the fitz module for the Windows .exe file while ignoring said module for the program on Raspberry Pi.
+#If running the Python-independent .ELF software on Linux/Raspbian, then the above will not present an issue. 
 no_fitz = False
 
 try:
@@ -20,8 +21,9 @@ CHOOSE_AGN, CHECK_AGAIN = False, False
 null_input, nan, connString = "b\'\'", float("nan"), None
 OS = platform.system()
 
-#The code below establishes the necessary information to interact with the given OS. Note: although the GUI was designed on a Mac, 
-#the full software does not function on Mac.
+#The code below establishes the necessary information to interact with the given OS. Note: SQL drivers have been tricky to install on Mac (at least those
+#with the M1 chip). As such, the software on Mac will not connect to the Azure database but rather will write all data to a CSV file which can then be
+#uploaded to the database post-perfusion.
 if OS == "Linux":
     dsn = "DTKserverdatasource"
     user = "dtk_lab@dtk-server"
@@ -95,6 +97,12 @@ def app():
     aud = np.sin(600 * x * 2 * np.pi)
     aud *= 32767/np.max(np.abs(aud))
     aud = aud.astype(np.int16)
+    
+    #This function acts as a CSV file writer that serves as a backup for the SQL database in the case that a connectivity error (unsuitable driver,
+    #no firewall access, no internet connection) arises during the perfusion so that no data is lost.
+    def file_write(file_name, array):
+        with open(file_name, "w") as don_f:
+            don_f.writerow(array)
 
     def alert():
         try:
@@ -451,216 +459,233 @@ def app():
                     #GUI so that the user may edit any values that were incorrectly read from the PDF. When ready, the user can
                     #then upload this data to the Azure database.
                     if sel == "1":
-                        with pyodbc.connect(connString) as cnxn_DI:
-                            with cnxn_DI.cursor() as cursor:
-                                Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                        Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                        don_csv = "{}_info.csv".format(unos_ID)
 
-                                def find(name, path):
-                                    for root, dirs, files in os.walk(path):
-                                        if name in files:
-                                            return os.path.join(root, name)
-                                        else:
-                                            pass
+                        def find(name, path):
+                            for root, dirs, files in os.walk(path):
+                                if name in files:
+                                    return os.path.join(root, name)
+                                else:
+                                    pass
 
-                                def position_tracker(arr, length, idx= None):
-                                    pos = []
+                        def position_tracker(arr, length, idx= None):
+                            pos = []
 
-                                    for i in range(length):
-                                        pos_p = []
+                            for i in range(length):
+                                pos_p = []
 
-                                        if idx != None:
-                                            for j in range(lt):
-                                                if txt_arr[j].find(arr[i][idx]) != -1:
-                                                    pos_p.append(j) 
+                                if idx != None:
+                                    for j in range(lt):
+                                        if txt_arr[j].find(arr[i][idx]) != -1:
+                                            pos_p.append(j) 
 
-                                            pos.append(pos_p)
-                                        else:
-                                            for j in range(lt):
-                                                if txt_arr[j].find(arr[i]) != -1:
-                                                    pos.append(j)
-                                    return pos
+                                    pos.append(pos_p)
+                                else:
+                                    for j in range(lt):
+                                        if txt_arr[j].find(arr[i]) != -1:
+                                            pos.append(j)
+                            return pos
 
-                                def donor_upload(data):
-                                    try:
-                                        df = data.transpose()
-                                        cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
-                                        cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
-                                        cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
-                                        cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
-                                        cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
-                                        cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
-                                        cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
-                                        cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56});"
-                                        cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                                        cursor.execute(cnxn_str.format(df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
-                                                                       df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
-                                                                       df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
-                                                                       df.iloc[1,20],df.iloc[1,21],df.iloc[1,22],df.iloc[1,23],df.iloc[1,24],df.iloc[1,25],
-                                                                       df.iloc[1,26],df.iloc[1,27],df.iloc[1,28],df.iloc[1,29],df.iloc[1,30],df.iloc[1,31],
-                                                                       df.iloc[1,32],df.iloc[1,33],df.iloc[1,34],df.iloc[1,35],df.iloc[1,36],df.iloc[1,37],
-                                                                       df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
-                                                                       df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
-                                                                       df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
-                                                                       df.iloc[1,56]))
-                                        cnxn_DI.commit()
+                        def donor_upload(data):
+                            try:
+                                df = data.transpose()
+                                
+                                don_row = [df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
+                                           df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
+                                           df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
+                                           df.iloc[1,20],df.iloc[1,21],df.iloc[1,22],df.iloc[1,23],df.iloc[1,24],df.iloc[1,25],
+                                           df.iloc[1,26],df.iloc[1,27],df.iloc[1,28],df.iloc[1,29],df.iloc[1,30],df.iloc[1,31],
+                                           df.iloc[1,32],df.iloc[1,33],df.iloc[1,34],df.iloc[1,35],df.iloc[1,36],df.iloc[1,37],
+                                           df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
+                                           df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
+                                           df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
+                                           df.iloc[1,56]] 
+                                try:
+                                    with pyodbc.connect(connString) as cnxn_DI:
+                                        with cnxn_DI.cursor() as cursor:                                
+                                            cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
+                                            cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
+                                            cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
+                                            cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
+                                            cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
+                                            cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
+                                            cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
+                                            cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56});"
+                                            cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
+                                            cursor.execute(cnxn_str.format(df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
+                                                                           df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
+                                                                           df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
+                                                                           df.iloc[1,20],df.iloc[1,21],df.iloc[1,22],df.iloc[1,23],df.iloc[1,24],df.iloc[1,25],
+                                                                           df.iloc[1,26],df.iloc[1,27],df.iloc[1,28],df.iloc[1,29],df.iloc[1,30],df.iloc[1,31],
+                                                                           df.iloc[1,32],df.iloc[1,33],df.iloc[1,34],df.iloc[1,35],df.iloc[1,36],df.iloc[1,37],
+                                                                           df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
+                                                                           df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
+                                                                           df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
+                                                                           df.iloc[1,56]))
+                                            cnxn_DI.commit()
+                                            file_write(don_csv, don_row)
+                                            
+                                except (pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                    file_write(don_csv, don_row)
+                                    
+                            except (KeyError, IndexError, pd.errors.InvalidIndexError):
+                                pass
 
-                                    except (KeyError, IndexError, pyodbc.ProgrammingError, pd.errors.InvalidIndexError):
+                        if no_fitz == False:
+                            donor_file = find("{}.pdf".format(unos_ID), "/")
+                            doc = fitz.open(donor_file)
+                            text = ""
+                            txt_arr = []
+
+                            for page in doc: 
+                                text = page.get_text()
+                                temp = text.split("\n")
+                                temp = temp[4:]
+
+                                for i in temp:
+                                    if i == " ":
+                                        pass
+                                    else:
+                                        txt_arr.append(i)
+
+                            param = [['Blood Type:','Donor Summary for ***** *****'], ['Donor ID: ','Printed on:'], ['Height: ','Date of birth: '], 
+                                       ['Weight: ','Age: '], ['Age: ','Body Mass Index (BMI): '], ['Body Mass Index (BMI): ','Gender: '],
+                                       ['Gender: ','KDPI:'], ['KDPI:','Ethnicity/race: '], ['Ethnicity/race: ', 'Cause of death: '],
+                                       ['Cause of death: ','Mechanism of injury: '], ['Mechanism of injury: ','Circumstance of death: '],
+                                       ['Circumstance of death: ', 'Admit date:'], ['Cold Ischemic Time:','OR Date:'],
+                                       ['Donor meets DCD criteria: ','Cardiac arrest/downtime?: '], ['Cardiac arrest/downtime?: ','CPR administered?: '], 
+                                       ['CPR administered?: ','Donor Highlights: '],['History of diabetes: ','History of cancer: '],
+                                       ['History of cancer: ','History of hypertension: '], ['History of hypertension: ','History of coronary artery disease (CAD): '],          
+                                       ['History of coronary artery disease (CAD): ','Previous gastrointestinal disease: '],
+                                       ['Previous gastrointestinal disease: ', 'Chest trauma: '], 
+                                       ['Cigarette use (>20 pack years) ever: ','Heavy alcohol use (2+ drinks/daily): '],
+                                       ['Heavy alcohol use (2+ drinks/daily): ','I.V. drug usage: '],
+                                       ['I.V. drug usage: ','According to the OPTN policy in effect on the date of referral'], 
+                                       ['Average/Actual BP','Average heart rate (bpm)'],['Average heart rate (bpm)','High BP'],
+                                       ['High BP','Duration at high (minutes)'],['Duration at high (minutes)','Low BP'], 
+                                       ['Low BP','Duration at low (minutes)'], ['Duration at low (minutes)','Core Body Temp.'], 
+                                       ['WBC (thous/mcL)','RBC (mill/mcL)'],['RBC (mill/mcL)','HgB (g/dL)'],['HgB (g/dL)','Hct (%)'], 
+                                       ['Hct (%)','Plt (thous/mcL)'], ['Plt (thous/mcL)','Bands (%)'], ['Na (mEq/L)','K+ (mmol/L)'],
+                                       ['K+ (mmol/L)','Cl (mmol/L)'], ['Cl (mmol/L)','CO2 (mmol/L)'],['BUN (mg/dL)','Creatinine (mg/dL))'], 
+                                       ['Creatinine (mg/dL))','Glucose (mg/dL)'], ['Glucose (mg/dL)','Total Bilirubin (mg/dL)'],
+                                       ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
+                                       ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
+                                       ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
+                                       ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)']]
+
+                            lr_par = ["Left kidney biopsy:","Right kidney biopsy:"]
+                            ren_par = ["            % Glomerulosclerosis: ","            Biopsy type: ","            Glomeruli Count: "]
+
+                            coords,ren_coord,data,trunc = [],[],[],[]
+                            lt, lp = len(txt_arr), len(param)
+                            pos_i, pos_f, pos_lr = position_tracker(param, lp, 0), position_tracker(param, lp, 1), position_tracker(lr_par, 2)
+
+                            for i in range(lp):  
+                                l_coords = len(pos_i[i])
+
+                                for j in range(l_coords):
+                                    a2o = [pos_i[i][j], pos_f[i][j]]
+                                    coords.append(a2o)
+
+                            for i in coords:
+                                st, prm_l = None, None
+                                wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
+                                boo_1, boo_2 = True, True
+
+                                for j in wonky:
+                                    st = txt_arr[i[0]].find(j)
+
+                                    if st != -1:
+                                        prm_l = len(j)
+                                        boo_1 = False
+                                        break
+                                    else:
                                         pass
 
-                                if no_fitz == False:
-                                    donor_file = find("{}.pdf".format(unos_ID), "/")
-                                    doc = fitz.open(donor_file)
-                                    text = ""
-                                    txt_arr = []
+                                if boo_1 == False:
+                                    p_data = txt_arr[i[0]]
 
-                                    for page in doc: 
-                                        text = page.get_text()
-                                        temp = text.split("\n")
-                                        temp = temp[4:]
-
-                                        for i in temp:
-                                            if i == " ":
-                                                pass
-                                            else:
-                                                txt_arr.append(i)
-
-                                    param = [['Blood Type:','Donor Summary for ***** *****'], ['Donor ID: ','Printed on:'], ['Height: ','Date of birth: '], 
-                                               ['Weight: ','Age: '], ['Age: ','Body Mass Index (BMI): '], ['Body Mass Index (BMI): ','Gender: '],
-                                               ['Gender: ','KDPI:'], ['KDPI:','Ethnicity/race: '], ['Ethnicity/race: ', 'Cause of death: '],
-                                               ['Cause of death: ','Mechanism of injury: '], ['Mechanism of injury: ','Circumstance of death: '],
-                                               ['Circumstance of death: ', 'Admit date:'], ['Cold Ischemic Time:','OR Date:'],
-                                               ['Donor meets DCD criteria: ','Cardiac arrest/downtime?: '], ['Cardiac arrest/downtime?: ','CPR administered?: '], 
-                                               ['CPR administered?: ','Donor Highlights: '],['History of diabetes: ','History of cancer: '],
-                                               ['History of cancer: ','History of hypertension: '], ['History of hypertension: ','History of coronary artery disease (CAD): '],          
-                                               ['History of coronary artery disease (CAD): ','Previous gastrointestinal disease: '],
-                                               ['Previous gastrointestinal disease: ', 'Chest trauma: '], 
-                                               ['Cigarette use (>20 pack years) ever: ','Heavy alcohol use (2+ drinks/daily): '],
-                                               ['Heavy alcohol use (2+ drinks/daily): ','I.V. drug usage: '],
-                                               ['I.V. drug usage: ','According to the OPTN policy in effect on the date of referral'], 
-                                               ['Average/Actual BP','Average heart rate (bpm)'],['Average heart rate (bpm)','High BP'],
-                                               ['High BP','Duration at high (minutes)'],['Duration at high (minutes)','Low BP'], 
-                                               ['Low BP','Duration at low (minutes)'], ['Duration at low (minutes)','Core Body Temp.'], 
-                                               ['WBC (thous/mcL)','RBC (mill/mcL)'],['RBC (mill/mcL)','HgB (g/dL)'],['HgB (g/dL)','Hct (%)'], 
-                                               ['Hct (%)','Plt (thous/mcL)'], ['Plt (thous/mcL)','Bands (%)'], ['Na (mEq/L)','K+ (mmol/L)'],
-                                               ['K+ (mmol/L)','Cl (mmol/L)'], ['Cl (mmol/L)','CO2 (mmol/L)'],['BUN (mg/dL)','Creatinine (mg/dL))'], 
-                                               ['Creatinine (mg/dL))','Glucose (mg/dL)'], ['Glucose (mg/dL)','Total Bilirubin (mg/dL)'],
-                                               ['Total Bilirubin (mg/dL)','Direct Bilirubin (mg/dL)'], ['Direct Bilirubin (mg/dL)','Indirect Bilirubin (mg/dL)'],
-                                               ['Indirect Bilirubin (mg/dL)','SGOT (AST) (u/L)'], ['SGOT (AST) (u/L)','SGPT (ALT) (u/L)',],
-                                               ['SGPT (ALT) (u/L)','Alkaline phosphatase (u/L)'], ['Alkaline phosphatase (u/L)','GGT (u/L)'],
-                                               ['Prothrombin (PT) (seconds)','INR'],['PTT (seconds)','Serum Amylase (u/L)']]
-
-                                    lr_par = ["Left kidney biopsy:","Right kidney biopsy:"]
-                                    ren_par = ["            % Glomerulosclerosis: ","            Biopsy type: ","            Glomeruli Count: "]
-
-                                    coords,ren_coord,data,trunc = [],[],[],[]
-                                    lt, lp = len(txt_arr), len(param)
-                                    pos_i, pos_f, pos_lr = position_tracker(param, lp, 0), position_tracker(param, lp, 1), position_tracker(lr_par, 2)
-
-                                    for i in range(lp):  
-                                        l_coords = len(pos_i[i])
-
-                                        for j in range(l_coords):
-                                            a2o = [pos_i[i][j], pos_f[i][j]]
-                                            coords.append(a2o)
-
-                                    for i in coords:
-                                        st, prm_l = None, None
-                                        wonky = ["Donor ID:", "Ethnicity/race: ", "Circumstance of death: ", "Donor meets DCD criteria: ", "Cardiac arrest/downtime?: "]
-                                        boo_1, boo_2 = True, True
-
-                                        for j in wonky:
-                                            st = txt_arr[i[0]].find(j)
-
-                                            if st != -1:
-                                                prm_l = len(j)
-                                                boo_1 = False
-                                                break
-                                            else:
-                                                pass
-
-                                        if boo_1 == False:
-                                            p_data = txt_arr[i[0]]
-
-                                            if p_data.find(wonky[0]) != -1:
-                                                data.append([p_data,[p_data]])
-                                            else:
-                                                data.append([p_data,[(p_data)[st+prm_l:]]])
-                                        else:
-                                            prm = txt_arr[i[0]]
-                                            p_data = txt_arr[(i[0]+1):i[1]]
-                                            l_pd = len(p_data)
-
-                                            if l_pd == 0:
-                                                p_data = [""]
-
-                                            for k in data:
-                                                if prm == k[0]:
-                                                    k[1] += p_data
-                                                    boo_2 = False
-                                                    break
-
-                                            if boo_2 == True:
-                                                data.append([prm, p_data])
-
-                                    for i in pos_lr:
-                                        if txt_arr[i+1].find("YES") == -1: 
-                                            data.append([txt_arr[i], ["NO"]])
-
-                                            for j in ren_par:
-                                                data.append([j, ["NA"]])
-                                        else:
-                                            data.append([txt_arr[i], ["YES"]])
-
-                                            for j in ren_par:
-                                                J = txt_arr[i:].index(j)
-                                                V = J+1
-
-                                                if txt_arr[i+V].isnumeric():
-                                                    data.append([j,[txt_arr[i+V]]])
-                                                elif txt_arr[i+V].find(ren_par[1]) != -1:
-                                                    data.append([j,["NA"]])
-                                                elif txt_arr[i+V].find(ren_par[2]) != -1:
-                                                    data.append([j,["NA"]])
-                                                elif txt_arr[i+V].find("Kidney Pump Values:") != -1:
-                                                    data.append([j,["NA"]])
-
-                                    for i in data:
-                                        if isinstance(i[1], list):
-                                            while i[1].count("") != 0:
-                                                i[1].remove("")
-
-                                            if len(i[1]) == 0:
-                                                i[1].append("NA")
-
-                                        if len(i[1]) == 1: 
-                                            trunc.append((i[1])[0])
-                                        else:
-                                            trunc.append(", ".join(i[1]))
-
-
-                                    df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
-                                    df_length = len(df)
-
-                                    try:
-                                        df.loc[df_length] = trunc
-                                        df.index = ["Values"]
-
-                                    except ValueError:
-                                        Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
-
-                                    table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
-                                    Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
-                                    donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
-                                    donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
-                                    donor_w.grid_propagate(False)
-                                    donor_info = Table(donor_w, dataframe= table, showstatusbar= True)
-                                    donor_info.textcolor = "RoyalBlue1"
-                                    donor_info.cellbackgr = "white"
-                                    donor_info.boxoutlinecolor = "black"
-                                    donor_info.show()
-                                    donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
+                                    if p_data.find(wonky[0]) != -1:
+                                        data.append([p_data,[p_data]])
+                                    else:
+                                        data.append([p_data,[(p_data)[st+prm_l:]]])
                                 else:
-                                    Label(data_w, text= "PDF scanner currently unavailable.\nUpdate Python to 3.7 or higher.", font= txt).place(relx= 0.5, rely= 0.5, anchor= CENTER)
+                                    prm = txt_arr[i[0]]
+                                    p_data = txt_arr[(i[0]+1):i[1]]
+                                    l_pd = len(p_data)
+
+                                    if l_pd == 0:
+                                        p_data = [""]
+
+                                    for k in data:
+                                        if prm == k[0]:
+                                            k[1] += p_data
+                                            boo_2 = False
+                                            break
+
+                                    if boo_2 == True:
+                                        data.append([prm, p_data])
+
+                            for i in pos_lr:
+                                if txt_arr[i+1].find("YES") == -1: 
+                                    data.append([txt_arr[i], ["NO"]])
+
+                                    for j in ren_par:
+                                        data.append([j, ["NA"]])
+                                else:
+                                    data.append([txt_arr[i], ["YES"]])
+
+                                    for j in ren_par:
+                                        J = txt_arr[i:].index(j)
+                                        V = J+1
+
+                                        if txt_arr[i+V].isnumeric():
+                                            data.append([j,[txt_arr[i+V]]])
+                                        elif txt_arr[i+V].find(ren_par[1]) != -1:
+                                            data.append([j,["NA"]])
+                                        elif txt_arr[i+V].find(ren_par[2]) != -1:
+                                            data.append([j,["NA"]])
+                                        elif txt_arr[i+V].find("Kidney Pump Values:") != -1:
+                                            data.append([j,["NA"]])
+
+                            for i in data:
+                                if isinstance(i[1], list):
+                                    while i[1].count("") != 0:
+                                        i[1].remove("")
+
+                                    if len(i[1]) == 0:
+                                        i[1].append("NA")
+
+                                if len(i[1]) == 1: 
+                                    trunc.append((i[1])[0])
+                                else:
+                                    trunc.append(", ".join(i[1]))
+
+
+                            df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
+                            df_length = len(df)
+
+                            try:
+                                df.loc[df_length] = trunc
+                                df.index = ["Values"]
+
+                            except ValueError:
+                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+
+                            table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
+                            Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
+                            donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
+                            donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
+                            donor_w.grid_propagate(False)
+                            donor_info = Table(donor_w, dataframe= table, showstatusbar= True)
+                            donor_info.textcolor = "RoyalBlue1"
+                            donor_info.cellbackgr = "white"
+                            donor_info.boxoutlinecolor = "black"
+                            donor_info.show()
+                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
+                        else:
+                            Label(data_w, text= "PDF scanner currently unavailable.\nUpdate Python to 3.7 or higher.", font= txt).place(relx= 0.5, rely= 0.5, anchor= CENTER)
 
                     #This option allows one to manually input blood gas data from the iStat and Piccolo devices to the Azure database.
                     elif sel == "2":
@@ -677,31 +702,27 @@ def app():
                             with pyodbc.connect(connString) as cnxn_bg:
                                 with cnxn_bg.cursor() as cursor:
                                     if instr == "istat":
-                                        try:  
-                                            pH, PCO2, PO2 = float(pH_txt.get()), float(PCO2_txt.get()), float(PO2_txt.get())
-                                            TCO2_istat, HCO3, BE = float(TCO2_istat_txt.get()), float(HCO3_txt.get()), float(BE_txt.get())
-                                            sO2, Hb = float(sO2_txt.get()), float(Hb_txt.get())
-                                            execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, pH, PCO2, PO2, TCO2_istat, HCO3, BE, sO2, Hb)
-                                            cursor.execute(execstr)
-                                            cnxn_bg.commit()
-                                            Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
-                                        except ValueError:
-                                            Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
-
+                                        istat_row = [pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get()]
+                                        
+                                        try:
+                                            try:                                             
+                                                execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{0}', GETDATE(), {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8});".format(unos_ID, pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get())
+                                                cursor.execute(execstr)
+                                                cnxn_bg.commit()
+                                                Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                            except ValueError:
+                                                Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
+                                        except (pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                            
+                                            
                                     elif instr == "pic":
                                         try:
-                                            Na, K, TCO2_pic = float(Na_txt.get()), float(K_txt.get()), float(TCO2_pic_txt.get())
-                                            Cl, Glu, Ca = float(Cl_txt.get()), float(Glu_txt.get()), float(Ca_txt.get())
-                                            BUN, Cre, eGFR = float(BUN_txt.get()), float(Cre_txt.get()), float(eGFR_txt.get())
-                                            ALP, AST, TBIL = float(ALP_txt.get()), float(AST_txt.get()), float(TBIL_txt.get())
-                                            ALB, TP = float(ALB_txt.get()), float(TP_txt.get())
-                                            execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{}', GETDATE(), {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});".format(unos_ID, Na, K, TCO2_pic, Cl, Glu, Ca, BUN, Cre, eGFR, ALP, AST, TBIL, ALB, TP) 
+                                            execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{0}', GETDATE(), {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14});".format(unos_ID, Na_txt.get(), K_txt.get(), TCO2_pic_txt.get(), Cl_txt.get(), Glu_txt.get(), Ca_txt.get(), BUN_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALP_txt.get(), AST_txt.get(), TBIL_txt.get(), ALB_txt.get(), TP_txt.get()) 
                                             cursor.execute(execstr)
                                             cnxn_bg.commit()   
                                             Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
                                         except ValueError:
                                             Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
-
                         #iStat
                         pH_txt, PCO2_txt, PO2_txt, TCO2_istat_txt = StringVar(), StringVar(), StringVar(), StringVar()
                         HCO3_txt, BE_txt, sO2_txt, Hb_txt = StringVar(), StringVar(), StringVar(), StringVar()
