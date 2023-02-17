@@ -39,15 +39,13 @@ i = 0
 
 #data generator
 while lap <= interval:
-    
   if lap < (interval/2):
         unos_id = "TEST_ID_1"
-        
+
         eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
         cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{}', '{}', '{}', '{}', '{}', '{}', '{}');".format(unos_id, bt, weight, age, bmi, gender, eth))
         cnxn_don.commit()
             
-    
   elif lap >= (interval/2):
         unos_id = "TEST_ID_2"
         
