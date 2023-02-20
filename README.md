@@ -2,7 +2,7 @@
 Contributors: Alborz Feizi, Thomas Hefele, Kat Nurminsky
 
 A software for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this can be utilized in the creation of
-digital twins for health care.
+digital twins in health care.
 
 Instructions and GUI:
 
