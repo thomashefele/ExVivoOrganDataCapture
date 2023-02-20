@@ -18,11 +18,11 @@ except ImportError:
     
 lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN = False, False
-null_input, nan, connString = "b\'\'", float("nan"), None
+null_input, nan, connString = "b\'\'", float("nan"), ""
 OS = platform.system()
 
 #The code below establishes the necessary information to interact with the given OS. Note: SQL drivers have been tricky to install on Mac (at least those
-#with the M1 chip). As such, the software on Mac will not connect to the Azure database but rather will write all data to a CSV file which can then be
+#with the M1 chip). As such, the software on Mac will not connect to the Azure database but rather will write all data to CSV files which can then be
 #uploaded to the database post-perfusion.
 if OS == "Linux":
     dsn = "DTKserverdatasource"
@@ -99,11 +99,29 @@ def app():
     aud = aud.astype(np.int16)
     
     #This function acts as a CSV file writer that serves as a backup for the SQL database in the case that a connectivity error (unsuitable driver,
-    #no firewall access, no internet connection) arises during the perfusion so that no data is lost.
-    def file_write(file_name, array):
-        with open(file_name, "w") as don_f:
-            don_f.writerow(array)
+    #no firewall access, no internet connection, etc.) arises during the perfusion so that no data is lost.
+    def file_write(file_name, h_array, r_array):
+        h = False
+        try:
+            with open(file_name, "r") as file:
+                r = csv.reader(file)
+                h_row = next(r)
 
+                if h_row == h_array:
+                    h = True
+                    
+        except FileNotFoundError:
+            pass
+        
+        with open(file_name, "a") as file:
+            a = csv.writer(file)
+            
+            if h == False:
+                a.writerow(h_array)
+
+            a.writerow(r_array)
+
+    #Function that sounds  warning if one of the sensors falls asleep
     def alert():
         try:
             try:
@@ -460,7 +478,6 @@ def app():
                     #then upload this data to the Azure database.
                     if sel == "1":
                         Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-                        don_csv = "{}_info.csv".format(unos_ID)
 
                         def find(name, path):
                             for root, dirs, files in os.walk(path):
@@ -491,6 +508,12 @@ def app():
                             try:
                                 df = data.transpose()
                                 
+                                head_row = ["blood_type","ID","height","weight","age","bmi","gender","kdpi","eth_race","cause",
+                                            "mech","circ","cold_time","dcd","card_ar","CPR","diabetes","cancer","hypert","CAD","GI_dis","smoker","etoh",            
+                                            "iv_drug","BP_avg","HR_avg","BP_high","dur_high","BP_low","dur_low","wbc","rbc","hgb","hct","plt","Na","K","Cl",            
+                                            "BUN","crea","glu","tbili","dbili","idbili","sgot","sgpt","aphos","prothr","ptt","l_biop","l_glom_per","l_type",            
+                                            "l_glom","r_biop","r_glom_per","r_type","r_glom"]
+                                
                                 don_row = [df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
                                            df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
                                            df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
@@ -504,33 +527,23 @@ def app():
                                 try:
                                     with pyodbc.connect(connString) as cnxn_DI:
                                         with cnxn_DI.cursor() as cursor:                                
-                                            cnxn_str_1 = "INSERT INTO dbo.organ_t([blood_type],[ID],[height],[weight],[age],[bmi],[gender],[kdpi],[eth_race],[cause],"
-                                            cnxn_str_2 = "[mech],[circ],[cold_time],[dcd],[card_ar],[CPR],[diabetes],[cancer],[hypert],[CAD],[GI_dis],[smoker],[etoh],"
-                                            cnxn_str_3 = "[iv_drug],[BP_avg],[HR_avg],[BP_high],[dur_high],[BP_low],[dur_low],[wbc],[rbc],[hgb],[hct],[plt],[Na],[K],[Cl],"
-                                            cnxn_str_4 = "[BUN],[crea],[glu],[tbili],[dbili],[idbili],[sgot],[sgpt],[aphos],[prothr],[ptt],[l_biop],[l_glom_per],[l_type],"
-                                            cnxn_str_5 = "[l_glom],[r_biop],[r_glom_per],[r_type],[r_glom]) "
-                                            cnxn_str_6 = "VALUES({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
-                                            cnxn_str_7 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},{38},{39},{40},{41},{42},{43},{44},"
-                                            cnxn_str_8 = "{45},{46},{47},{48},{49},{50},{51},{52},{53},{54},{55},{56});"
+                                            cnxn_str_1 = "INSERT INTO dbo.organ_t({0},{1},{2},{3},{4},{5},{6},{7},{8},{9},"
+                                            cnxn_str_2 = "{10},{11},{12},{13},{14},{15},{16},{17},{18},{19},{20},{21},{22},"
+                                            cnxn_str_3 = "{23},{24},{25},{26},{27},{28},{29},{30},{31},{32},{33},{34},{35},{36},{37},"
+                                            cnxn_str_4 = "{38},{39},{40},{41},{42},{43},{44},{45},{46},{47},{48},{49},{50},{51},{52},"
+                                            cnxn_str_5 = "{53},{54},{55},{56},{57}) "
+                                            cnxn_str_6 = "VALUES('{58}','{59}','{60}','{61}','{62}','{63}','{64}','{65}','{66}','{67}','{68}','{69}','{70}','{71}','{72}','{73}','{74}','{75}','{76}','{77}','{78}','{79}',"
+                                            cnxn_str_7 = "'{81}','{82}','{83}','{84}','{85}','{86}','{87}','{88}','{89}','{90}','{91}','{92}','{93}','{94}','{95}','{96}','{97}','{98}','{99}','{100}','{101}','{102}',"
+                                            cnxn_str_8 = "'{103}','{104}','{105}','{106}','{107}','{108}','{109}','{110}','{111}','{112}','{113}','{114}');"
                                             cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                                            cursor.execute(cnxn_str.format(df.iloc[1,0],df.iloc[1,1],df.iloc[1,2],df.iloc[1,3],df.iloc[1,4],df.iloc[1,5],df.iloc[1,6],
-                                                                           df.iloc[1,7],df.iloc[1,8],df.iloc[1,9],df.iloc[1,10],df.iloc[1,11],df.iloc[1,12],df.iloc[1,13],
-                                                                           df.iloc[1,14],df.iloc[1,15],df.iloc[1,16],df.iloc[1,17],df.iloc[1,18],df.iloc[1,19],
-                                                                           df.iloc[1,20],df.iloc[1,21],df.iloc[1,22],df.iloc[1,23],df.iloc[1,24],df.iloc[1,25],
-                                                                           df.iloc[1,26],df.iloc[1,27],df.iloc[1,28],df.iloc[1,29],df.iloc[1,30],df.iloc[1,31],
-                                                                           df.iloc[1,32],df.iloc[1,33],df.iloc[1,34],df.iloc[1,35],df.iloc[1,36],df.iloc[1,37],
-                                                                           df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
-                                                                           df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
-                                                                           df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
-                                                                           df.iloc[1,56]))
-                                            cnxn_DI.commit()
-                                            file_write(don_csv, don_row)
-                                            
-                                except (pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                    file_write(don_csv, don_row)
-                                    
+                                            cursor.execute(cnxn_str.format(*head_row, *don_row))
+                                            cnxn_DI.commit()       
+                                except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                    pass          
                             except (KeyError, IndexError, pd.errors.InvalidIndexError):
                                 pass
+                            
+                            file_write("donor_info.csv".format(unos_ID), head_row, don_row)
 
                         if no_fitz == False:
                             donor_file = find("{}.pdf".format(unos_ID), "/")
@@ -662,7 +675,6 @@ def app():
                                 else:
                                     trunc.append(", ".join(i[1]))
 
-
                             df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
                             df_length = len(df)
 
@@ -699,30 +711,46 @@ def app():
                         pic_w.grid_propagate(False)
 
                         def upload(instr):
-                            with pyodbc.connect(connString) as cnxn_bg:
-                                with cnxn_bg.cursor() as cursor:
-                                    if instr == "istat":
-                                        istat_row = [pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get()]
-                                        
-                                        try:
+                            fn = ""
+                            head_row = ""
+                            data_row = ""
+                            
+                            if instr == "istat":
+                                fn = "istat.csv"
+                                head_row = ["UNOS_ID", "time_stamp", "ph", "pco2", "po2", "tco2", "hco3", "be", "so2", "hb"]
+                                data_row = [unos_ID, pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get()]
+                                Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                            elif instr == "pic":
+                                fn = "pic.csv"
+                                head_row = ["UNOS_ID", "time_stamp", "Na", "K", "tco2", "Cl", "glu", "Ca", "BUN", "cre", "egfr", "alp", "ast", "tbil", "alb", "tp"]
+                                data_row = [unos_ID, Na_txt.get(), K_txt.get(), TCO2_pic_txt.get(), Cl_txt.get(), Glu_txt.get(), Ca_txt.get(), BUN_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALP_txt.get(), AST_txt.get(), TBIL_txt.get(), ALB_txt.get(), TP_txt.get()]
+                                Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+ 
+                            try:
+                                with pyodbc.connect(connString) as cnxn_bg:
+                                    with cnxn_bg.cursor() as cursor:
+                                        if instr == "istat":
                                             try:                                             
-                                                execstr = "INSERT INTO dbo.istat_t([UNOS_ID], [time_stamp], [ph], [pco2], [po2], [tco2], [hco3], [be], [so2], [hb]) VALUES('{0}', GETDATE(), {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8});".format(unos_ID, pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get())
+                                                execstr = "INSERT INTO dbo.istat_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}]) VALUES('{9}', GETDATE(), '{10}', '{11}', '{12}', '{13}', '{14}', '{15}', '{16}', '{17}');".format(*head_row, *data_row)
                                                 cursor.execute(execstr)
                                                 cnxn_bg.commit()
                                                 Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
                                             except ValueError:
-                                                Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER) 
-                                        except (pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                            
-                                            
-                                    elif instr == "pic":
-                                        try:
-                                            execstr = "INSERT INTO dbo.pic_t([UNOS_ID], [time_stamp], [Na], [K], [tco2], [Cl], [glu], [Ca], [BUN], [cre], [egfr], [alp], [ast], [tbil], [alb], [tp]) VALUES('{0}', GETDATE(), {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12}, {13}, {14});".format(unos_ID, Na_txt.get(), K_txt.get(), TCO2_pic_txt.get(), Cl_txt.get(), Glu_txt.get(), Ca_txt.get(), BUN_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALP_txt.get(), AST_txt.get(), TBIL_txt.get(), ALB_txt.get(), TP_txt.get()) 
-                                            cursor.execute(execstr)
-                                            cnxn_bg.commit()   
-                                            Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
-                                        except ValueError:
-                                            Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                                                Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)         
+                                        elif instr == "pic":
+                                            try:
+                                                execstr = "INSERT INTO dbo.pic_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}]) VALUES('{15}', GETDATE(), '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}');".format() 
+                                                cursor.execute(execstr)
+                                                cnxn_bg.commit()   
+                                                Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
+                                            except ValueError:
+                                                Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+                            
+                            data_row.insert(1, datetime.now())
+                            file_write(fn, head_row, data_row)
+                            
                         #iStat
                         pH_txt, PCO2_txt, PO2_txt, TCO2_istat_txt = StringVar(), StringVar(), StringVar(), StringVar()
                         HCO3_txt, BE_txt, sO2_txt, Hb_txt = StringVar(), StringVar(), StringVar(), StringVar()
