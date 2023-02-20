@@ -215,160 +215,281 @@ def app():
     #Medtronic Bioconsole sensor function. The MT_port.write method allows one to send a command to the Bioconsole in order to set the data 
     #rate output.
     def MT(port_name, b, t):
-        with pyodbc.connect(connString) as cnxn_MT:
-            with cnxn_MT.cursor() as cursor:
-                with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
-                    MT_port.write(b"DR 05 013B\r")
+        with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
+            MT_port.write(b"DR 05 013B\r")
+            head_row = ["UNOS_ID", "time_stamp", "flow", "pressure", "rpm"]
+            up_time = datetime.now()
+            data_row = [unos_ID, up_time, None, None, None]
 
-                    while STOP == False:
+            while STOP == False:
+                try:
+                    if MT_port.is_open == False:
+                        MT_port.open()
+
+                    MT_str = str(MT_port.read(35))
+                    if MT_str == null_input:
+                        alert()
+
                         try:
-                            if MT_port.is_open == False:
-                                MT_port.open()
-
-                            MT_str = str(MT_port.read(35))
-                            if MT_str == null_input:
-                                alert()
-                                execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                cursor.execute(execstr)
-                            else:
-                                try:
-                                    AF_str = MT_str[5:8] + "." + MT_str[8:10]
-                                    AP_str = MT_str[11:15]
-                                    rpm = float(MT_str[16:20])
-
-                                    if MT_str[5] == "+" and MT_str[11] == "+":
-                                            data_AF = float(AF_str[1:6])
-                                            data_AP = float(AP_str[1:4])
-                                    elif MT_str[5] == "+" and MT_str[11] != "+":
-                                            data_AF = float(AF_str[1:6])
-                                            data_AP = float(AP_str[0:4])
-                                    elif MT_str[5] != "+" and MT_str[11] == "+":
-                                            data_AF = float(AF_str[0:6])
-                                            data_AP = float(AP_str[1:4])
-                                    else:
-                                            data_AF = float(AF_str[0:6])
-                                            data_AP = float(AP_str[0:4])
-
-                                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{}', GETDATE(), {}, {}, {});".format(unos_ID, data_AF, data_AP, rpm)
-                                    cursor.execute(execstr)
-                                except (IndexError, ValueError, TypeError):
-                                    alert()
+                            with pyodbc.connect(connString) as cnxn_MT:
+                                with cnxn_MT.cursor() as cursor:
                                     execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                     cursor.execute(execstr)
-                        except (OSError, FileNotFoundError):
-                            MT_port.close()
+                                    cnxn_MT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
+
+                        file_writer("mt_data.csv", head_row, data_row) 
+
+                    else:
+                        try:
+                            AF_str = MT_str[5:8] + "." + MT_str[8:10]
+                            AP_str = MT_str[11:15]
+                            rpm = float(MT_str[16:20])
+
+                            if MT_str[5] == "+" and MT_str[11] == "+":
+                                    data_AF = float(AF_str[1:6])
+                                    data_AP = float(AP_str[1:4])
+                            elif MT_str[5] == "+" and MT_str[11] != "+":
+                                    data_AF = float(AF_str[1:6])
+                                    data_AP = float(AP_str[0:4])
+                            elif MT_str[5] != "+" and MT_str[11] == "+":
+                                    data_AF = float(AF_str[0:6])
+                                    data_AP = float(AP_str[1:4])
+                            else:
+                                    data_AF = float(AF_str[0:6])
+                                    data_AP = float(AP_str[0:4])
+
+                            try:
+                                with pyodbc.connect(connString) as cnxn_MT:
+                                    with cnxn_MT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{0}', GETDATE(), {1}, {2}, {3});".format(unos_ID, data_AF, data_AP, rpm)
+                                        cursor.execute(execstr)
+                                        cnxn_MT.commit()
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("mt_data.csv", head_row, [unos_ID, up_time, data_AF, data_AP, rpm])       
+
+                        except (IndexError, ValueError, TypeError):
                             alert()
-                            sleep(5)
-                            execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                            cursor.execute(execstr)
-                        cnxn_MT.commit()
-                        ts_MT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER) 
+
+                            try:
+                                with pyodbc.connect(connString) as cnxn_MT:
+                                    with cnxn_MT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                        cursor.execute(execstr)
+                                        cnxn_MT.commit()
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("mt_data.csv", head_row, data_row)  
+
+                except (OSError, FileNotFoundError):
+                    MT_port.close()
+                    alert()
+                    sleep(5)
+
+                    try:
+                        with pyodbc.connect(connString) as cnxn_MT:
+                            with cnxn_MT.cursor() as cursor:
+                                execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                cursor.execute(execstr)
+                                cnxn_MT.commit()
+                    except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                        pass
+
+                    file_writer("mt_data.csv", head_row, data_row) 
+
+                ts_MT = Label(vals, text= "{}".format(up_time.strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER) 
 
     #Medtronic Biotrend sensor function                                                  
     def BT(port_name, b, t):
-        with pyodbc.connect(connString) as cnxn_BT:
-            with cnxn_BT.cursor() as cursor:
-                with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:                            
-                    while STOP == False:
+        head_row = ["UNOS_ID", "time_stamp", "sO2", "hct"]
+        up_time = datetime.now()
+        
+        with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:                            
+            while STOP == False:
+                try:
+                    if BT_port.is_open == False:
+                        BT_port.open()
+
+                    BT_str = str(BT_port.read(43))
+                    data_sO2v, data_hct = data_check(BT_str)
+                  
+                    if np.isnan(data_sO2v) and np.isnan(data_hct):
                         try:
-                            if BT_port.is_open == False:
-                                BT_port.open()
-
-                            BT_str = str(BT_port.read(43))
-                            data_sO2v, data_hct = data_check(BT_str)
-
-                            if np.isnan(data_sO2v) and np.isnan(data_hct):
+                            with pyodbc.connect(connString) as cnxn_BT:
+                                with cnxn_BT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                    cursor.execute(execstr)
+                                    cnxn_BT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
+                        
+                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, None]) 
+                    elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
+                        try:
+                            with pyodbc.connect(connString) as cnxn_BT:
+                                with cnxn_BT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, data_hct)
+                                    cursor.execute(execstr)
+                                    cnxn_BT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
+                        
+                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, data_hct]) 
+                    elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
+                        try:
+                            with pyodbc.connect(connString) as cnxn_BT:
+                                with cnxn_BT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, data_sO2v)
+                                    cursor.execute(execstr)
+                                    cnxn_BT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
+                        
+                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, None]) 
+                    else:
+                        try:
+                            with pyodbc.connect(connString) as cnxn_BT:
+                                with cnxn_BT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{0}', GETDATE(), {1}, {2});".format(unos_ID, data_sO2v, data_hct)
+                                    cursor.execute(execstr)
+                                    cnxn_BT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass             
+                    
+                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, data_hct])
+                except (OSError, FileNotFoundError):
+                    BT_port.close()
+                    alert()
+                    sleep(5)
+                    
+                    try:
+                        with pyodbc.connect(connString) as cnxn_BT:
+                            with cnxn_BT.cursor() as cursor:
                                 execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
                                 cursor.execute(execstr)
-                            elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
-                                execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_hct)
-                                cursor.execute(execstr)
-                            elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
-                                execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{}', GETDATE(), {});".format(unos_ID, data_sO2v)
-                                cursor.execute(execstr)
-                            else:
-                                execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{}', GETDATE(), {}, {});".format(unos_ID, data_sO2v, data_hct)
-                                cursor.execute(execstr)
-                        except (OSError, FileNotFoundError):
-                            BT_port.close()
-                            alert()
-                            sleep(5)
-                            execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                            cursor.execute(execstr)
-                        cnxn_BT.commit()
-                        ts_BT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER) 
+                                cnxn_BT.commit()
+                    except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass             
+                    
+                    file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, None])
 
-    #Force transducer sensor function. The force transducer outputs rate at a frequency of 10 Hz. The "interval" parameter allows us to set at 
-    #what time interval at which we want to collect data (i.e. every x seconds). The function collects the data point closest to the "x"
+                ts_BT = Label(vals, text= "{}".format(up_time.strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER) 
+
+    #Force transducer sensor function. The force transducer outputs data at a variable frequency.. The "interval" parameter allows us to set the 
+    #what time interval at which we want to collect data (i.e. every x seconds withing +/- 0.5 secs of x). The function collects the data point closest to the "x"
     #interval mark.
     def FT(port_name, b, t, interval, measure):
-            with pyodbc.connect(connString) as cnxn_FT:
-                    with cnxn_FT.cursor() as cursor:
-                            with ser.Serial(port_name, baudrate= b, timeout= t) as FT_port:
-                                rd, check, mass, m_arr = 0, 0, 0, []
-                                start = monotonic()
+        with ser.Serial(port_name, baudrate= b, timeout= t) as FT_port:
+            rd, check, mass, m_arr = 0, 0, 0, []
+            start = monotonic()
 
-                                while STOP == False:                                            
-                                    intv = monotonic()-start
-                                    rd = round(intv)
+            while STOP == False:                                            
+                intv = monotonic()-start
+                rd = round(intv)
 
-                                    if rd != 0 and rd%5 == 0:
-                                        try:
-                                            if FT_port.is_open == False:
-                                                FT_port.open()
+                if rd != 0 and rd%5 == 0:
+                    try:
+                        if FT_port.is_open == False:
+                            FT_port.open()
 
-                                            FT_str = str(FT_port.read(6))
+                        FT_str = str(FT_port.read(6))
 
-                                            if FT_str == null_input:
-                                                pot_m = nan
-                                            else:                                                
-                                                pot_m = float(rearrange(FT_str[2:8]))
-                                        except (IndexError, ValueError, TypeError):
-                                            pot_m = nan
-                                        except (OSError, FileNotFoundError):
-                                            FT_port.close()
-                                            pot_m = nan
+                        if FT_str == null_input:
+                            pot_m = nan
+                        else:                                                
+                            pot_m = float(rearrange(FT_str[2:8]))
+                    except (IndexError, ValueError, TypeError):
+                        pot_m = nan
+                    except (OSError, FileNotFoundError):
+                        FT_port.close()
+                        pot_m = nan
 
-                                        mod = intv%5
+                    mod = intv%5
 
-                                        if mod >= 4.5 and mod < 5:
-                                            diff = 5-mod
-                                        else:
-                                            diff = mod
+                    if mod >= 4.5 and mod < 5:
+                        diff = 5-mod
+                    else:
+                        diff = mod
 
-                                        m_arr.append([diff, pot_m])
-                                        check = rd
+                    m_arr.append([diff, pot_m])
+                    check = rd
 
-                                    elif rd != 0 and m_arr != [] and check != rd:
-                                        mass = min(m_arr, key= lambda x: x[0])[1]
-                                        sleepy = np.isnan(mass)
+                elif rd != 0 and m_arr != [] and check != rd:
+                    mass = min(m_arr, key= lambda x: x[0])[1]
+                    sleepy = np.isnan(mass)
 
-                                        if measure == "km":
-                                            if sleepy:
-                                                alert()
-                                                execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                                cursor.execute(execstr)
-                                            else:
-                                                execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
-                                                cursor.execute(execstr)
-                                            ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                                            ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER) 
-                                        elif measure == "uo":
-                                            if sleepy:
-                                                alert()
-                                                execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                                cursor.execute(execstr)
-                                            else:
-                                                execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{}', GETDATE(), {});".format(unos_ID, mass)
-                                                cursor.execute(execstr)
-                                            ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                                            ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER) 
+                    if measure == "km":
+                        head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
+                        up_time = datetime.now()
+
+                        if sleepy:
+                            alert()
+
+                            try:
+                                with pyodbc.connect(connString) as cnxn_FT:
+                                    with cnxn_FT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                        cursor.execute(execstr)
                                         cnxn_FT.commit()
-                                        del m_arr[:]
-                                    else:
-                                        pass
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("km_data.csv", head_row, [unos_ID, up_time, None])
+                        else:
+                            try:
+                                with pyodbc.connect(connString) as cnxn_FT:
+                                    with cnxn_FT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, mass)
+                                        cursor.execute(execstr)
+                                        cnxn_FT.commit()
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("km_data.csv", head_row, [unos_ID, up_time, mass])
+
+                        ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                        ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER) 
+                    elif measure == "uo":
+                        head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
+                        up_time = datetime.now()
+
+                        if sleepy:
+                            alert()
+
+                            try:
+                                with pyodbc.connect(connString) as cnxn_FT:
+                                    with cnxn_FT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                        cursor.execute(execstr)
+                                        cnxn_FT.commit()
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("uo_data.csv", head_row, [unos_ID, up_time, None])
+                        else:
+                            try:
+                                with pyodbc.connect(connString) as cnxn_FT:
+                                    with cnxn_FT.cursor() as cursor:
+                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, mass)
+                                        cursor.execute(execstr)
+                                        cnxn_FT.commit()
+                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                                pass
+
+                            file_writer("uo_data.csv", head_row, [unos_ID, up_time, mass])
+
+                        ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                        ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
+
+                    del m_arr[:]
+                else:
+                    pass
 
     #Functions necessary for user to commence a data acquisition option and, subsequently, for that option to collect data and 
     #upload to the database.
