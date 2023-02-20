@@ -218,8 +218,6 @@ def app():
         with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
             MT_port.write(b"DR 05 013B\r")
             head_row = ["UNOS_ID", "time_stamp", "flow", "pressure", "rpm"]
-            up_time = datetime.now()
-            data_row = [unos_ID, up_time, None, None, None]
 
             while STOP == False:
                 try:
@@ -227,6 +225,9 @@ def app():
                         MT_port.open()
 
                     MT_str = str(MT_port.read(35))
+                    up_time = datetime.utcnow()
+                    data_row = [unos_ID, up_time, None, None, None]
+                    
                     if MT_str == null_input:
                         alert()
 
@@ -239,7 +240,7 @@ def app():
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                             pass
 
-                        file_writer("mt_data.csv", head_row, data_row) 
+                        file_write("mt_data.csv", head_row, data_row) 
 
                     else:
                         try:
@@ -269,7 +270,7 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("mt_data.csv", head_row, [unos_ID, up_time, data_AF, data_AP, rpm])       
+                            file_write("mt_data.csv", head_row, [unos_ID, up_time, data_AF, data_AP, rpm])       
 
                         except (IndexError, ValueError, TypeError):
                             alert()
@@ -283,7 +284,7 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("mt_data.csv", head_row, data_row)  
+                            file_write("mt_data.csv", head_row, data_row)  
 
                 except (OSError, FileNotFoundError):
                     MT_port.close()
@@ -298,24 +299,26 @@ def app():
                                 cnxn_MT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                         pass
-
-                    file_writer("mt_data.csv", head_row, data_row) 
-
-                ts_MT = Label(vals, text= "{}".format(up_time.strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER) 
+                    
+                    up_time = datetime.utcnow()
+                    data_row = [unos_ID, up_time, None, None, None]
+                    file_write("mt_data.csv", head_row, data_row) 
+                
+                ts_MT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER)
 
     #Medtronic Biotrend sensor function                                                  
     def BT(port_name, b, t):
         head_row = ["UNOS_ID", "time_stamp", "sO2", "hct"]
-        up_time = datetime.now()
-        
+
         with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:                            
-            while STOP == False:
+            while STOP == False:        
                 try:
                     if BT_port.is_open == False:
                         BT_port.open()
-
+                    
                     BT_str = str(BT_port.read(43))
+                    up_time = datetime.utcnow()
                     data_sO2v, data_hct = data_check(BT_str)
                   
                     if np.isnan(data_sO2v) and np.isnan(data_hct):
@@ -328,7 +331,7 @@ def app():
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                             pass
                         
-                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, None]) 
+                        file_write("bt_data.csv", head_row, [unos_ID, up_time, None, None]) 
                     elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -339,7 +342,7 @@ def app():
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                             pass
                         
-                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, data_hct]) 
+                        file_write("bt_data.csv", head_row, [unos_ID, up_time, None, data_hct]) 
                     elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -350,7 +353,7 @@ def app():
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                             pass
                         
-                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, None]) 
+                        file_write("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, None]) 
                     else:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -361,7 +364,7 @@ def app():
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                             pass             
                     
-                        file_writer("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, data_hct])
+                        file_write("bt_data.csv", head_row, [unos_ID, up_time, data_sO2v, data_hct])
                 except (OSError, FileNotFoundError):
                     BT_port.close()
                     alert()
@@ -374,12 +377,13 @@ def app():
                                 cursor.execute(execstr)
                                 cnxn_BT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass             
-                    
-                    file_writer("bt_data.csv", head_row, [unos_ID, up_time, None, None])
+                            pass
 
-                ts_BT = Label(vals, text= "{}".format(up_time.strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER) 
+                    up_time = datetime.utcnow()
+                    file_write("bt_data.csv", head_row, [unos_ID, up_time, None, None])
+                  
+                ts_BT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER)
 
     #Force transducer sensor function. The force transducer outputs data at a variable frequency.. The "interval" parameter allows us to set the 
     #what time interval at which we want to collect data (i.e. every x seconds withing +/- 0.5 secs of x). The function collects the data point closest to the "x"
@@ -426,7 +430,7 @@ def app():
 
                     if measure == "km":
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
-                        up_time = datetime.now()
+                        up_time = datetime.utcnow()
 
                         if sleepy:
                             alert()
@@ -440,7 +444,7 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("km_data.csv", head_row, [unos_ID, up_time, None])
+                            file_write("km_data.csv", head_row, [unos_ID, up_time, None])
                         else:
                             try:
                                 with pyodbc.connect(connString) as cnxn_FT:
@@ -451,13 +455,13 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("km_data.csv", head_row, [unos_ID, up_time, mass])
-
-                        ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER) 
+                            file_write("km_data.csv", head_row, [unos_ID, up_time, mass])
+                            ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                            ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER)
+                        
                     elif measure == "uo":
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
-                        up_time = datetime.now()
+                        up_time = datetime.utcnow()
 
                         if sleepy:
                             alert()
@@ -471,7 +475,7 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("uo_data.csv", head_row, [unos_ID, up_time, None])
+                            file_write("uo_data.csv", head_row, [unos_ID, up_time, None])
                         else:
                             try:
                                 with pyodbc.connect(connString) as cnxn_FT:
@@ -482,10 +486,9 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
 
-                            file_writer("uo_data.csv", head_row, [unos_ID, up_time, mass])
-
-                        ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
+                            file_write("uo_data.csv", head_row, [unos_ID, up_time, mass])
+                            ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                            ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
 
                     del m_arr[:]
                 else:
@@ -852,7 +855,7 @@ def app():
                                     with cnxn_bg.cursor() as cursor:
                                         if instr == "istat":
                                             try:                                             
-                                                execstr = "INSERT INTO dbo.istat_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}]) VALUES('{9}', GETDATE(), '{10}', '{11}', '{12}', '{13}', '{14}', '{15}', '{16}', '{17}');".format(*head_row, *data_row)
+                                                execstr = "INSERT INTO dbo.istat_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}]) VALUES('{10}', GETDATE(), '{11}', '{12}', '{13}', '{14}', '{15}', '{16}', '{17}', '{18}');".format(*head_row, *data_row)
                                                 cursor.execute(execstr)
                                                 cnxn_bg.commit()
                                                 Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
@@ -860,7 +863,7 @@ def app():
                                                 Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)         
                                         elif instr == "pic":
                                             try:
-                                                execstr = "INSERT INTO dbo.pic_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}]) VALUES('{15}', GETDATE(), '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}');".format(*head_row, *data_row) 
+                                                execstr = "INSERT INTO dbo.pic_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}], [{15}]) VALUES('{16}', GETDATE(), '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}');".format(*head_row, *data_row) 
                                                 cursor.execute(execstr)
                                                 cnxn_bg.commit()   
                                                 Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
@@ -869,7 +872,7 @@ def app():
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                 pass
                             
-                            data_row.insert(1, datetime.now())
+                            data_row.insert(1, datetime.utcnow())
                             file_write(fn, head_row, data_row)
                             
                         #iStat
