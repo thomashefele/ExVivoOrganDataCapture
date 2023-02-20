@@ -860,7 +860,7 @@ def app():
                                                 Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)         
                                         elif instr == "pic":
                                             try:
-                                                execstr = "INSERT INTO dbo.pic_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}]) VALUES('{15}', GETDATE(), '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}');".format() 
+                                                execstr = "INSERT INTO dbo.pic_t([{0}], [time_stamp], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}]) VALUES('{15}', GETDATE(), '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}');".format(*head_row, *data_row) 
                                                 cursor.execute(execstr)
                                                 cnxn_bg.commit()   
                                                 Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
