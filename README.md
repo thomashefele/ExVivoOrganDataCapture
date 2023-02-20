@@ -1,5 +1,7 @@
 # DTK Data Collection Project
-For ELT of data during kidney perfusions.
+Contributors: Alborz Feizi, Thomas Hefele, Kat Nurminsky
+
+A software for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions. 
 
 Instructions:
 - Set up an Azure SQL database for your experiment (if one is not already set up):
