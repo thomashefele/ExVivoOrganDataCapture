@@ -6,6 +6,7 @@ A tool for extracting, transforming, and loading (ETL) real time data on biomark
 - Analyzing hemodynamics and vascular leak in organs
 
 Features:
+
 - Available for Linux, Windows, and Mac!
 - User-friendly GUI!
 - Backup system stores data on CSV files in case connection to database is broken (such as internet loss, lack of firewall access, or lack of SQL driver)
@@ -18,11 +19,14 @@ Features:
   - Hematocrit
   - Organ mass
   - Urine production
+- Alarms to warn if a sensor has powered off/become disconnected
+- Real time data visualization provided by PowerBI
 
-#Navigating the GUI:
+Navigating the GUI:
+
 The GUI of the software appears as follows:
 
-<GUI main screen>
+![GUI Main](https://user-images.githubusercontent.com/116929892/220244767-1b087a14-031e-4603-9dd4-3252978b9c21.png)
 
 To use, simply select an option and enter the UNOS ID (or another identifier) into the app. There are three options from which to choose:
 - Donor Information Upload
@@ -31,86 +35,107 @@ To use, simply select an option and enter the UNOS ID (or another identifier) in
 
 The app is designed to run only one feature at a time. Want to choose a different option or entered the wrong ID? Simply click "Restart"!
 
-#Donor Information Upload:
+Donor Information Upload:
   
 Enter a UNOS ID and the software will find and mine data from the respective file on your computer: 
   
 <Dummy file pic> 
   
+  *Note: for donor privacy, the above is a screenshot of a non-existent file, to which "dummy" data has been added manually
+  
 If the data does not appear correct or data is missing, one can edit by double clicking on a cell or by adding a column via right click:
   
-<Editing donor info pic>
+<Editing donor info pics>
   
-#Blood Gas Data Upload:
+Blood Gas Data Upload:
 
 Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
   
 <Blood gas info pic>
   
-
+Sensor Data Collection:
   
-
-Establishing Database Connection:
-- Set up an Azure SQL database for your experiment (if one is not already set up):
-
-https://azure.microsoft.com/en-us/products/azure-sql/database/
-
-- Ensure that your IPv4 address is added to the Azure Firewall Rules for your database (I attempted to automate this feature in the program to no avail):
-  - To find your IPv4 address: 
+To start sensor data collection, follow the steps below:
+- Ensure each sensor is on and properly calibrated
+- Connect the USB cables for each driver to the computer according to the order on the GUI:
   
-    https://whatismyipaddress.com/
+  <GUI order of drivers pic>
+    
+- Once all sensors are connected, click "Click to check port status" followed by "Start data collection". All done!
+  
+  <GUI data collection pic>
+    
+- If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retreived from csv files that can be found on the computer:
+    
+    - Donor information: donor_info.csv
+    - iStat and Piccolo data: istat.csv, pic.csv
+    - Arterial flow and pressure: mt_data.csv
+    - Venous oxygen saturation and hematocrit: bt_data.csv
+    - Kidney mass: km_data.csv
+    - Urine output: uo_data.csv
+    
+- The time stamps indicate to you the last time data was uploaded from each respective sensor. Each time stamp should update every ~5 seconds.
+- To restart or exit from data collection, make sure to click "Stop Data Collection" first and wait for time stamps to stop updating. Afterwards, "Restart" or "Exit" may be clicked.
+    
+- Troubleshooting Data Collection:
+    
+    Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
+    
+    A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)    
+    
+    Q: We have lost internet connection during perfusion! Is our data being lost?
+    
+    A: The software has a backup feature that writes the data to local csv files during the perfusion. If there is a connection issue during perfusion, 
+    data will continue to be written to the csv files, which can then be uploaded to the database post-perfusion. That being said, the backup feature is       not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear, indicating that data transfer is     no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
+    
+    Q: The time stamp(s) are appearing irregularly!
+    
+    A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
+      - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.
+      - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
+    
+              https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
+    
+    On Windows, another issue that may occur is that a background app may be hijacking the COM ports. 
+   
+              https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
+    
+    After finding the app that is hijacking the COM ports, one can quit or turn off that app.
+    
+    To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
+    
+Data Visualization with PowerBI:
+    
+If using the Azure database, PowerBI can pull data from the database and display it to provide users with a realtime visualization of what is happening during the perfusion. In addition, the AI in PowerBI allows one to ask questions about specific perfusion metrics to gain powerful insights to organ performance!
+
+<PowerBI pic>
+
+Establishing Azure Database Connection (Optional):
+  
+Although the program has been designed to be user-friendly and flexible in use, the most ideal use of the software is when coupled with Azure. To setup an Azure database and connection, follow the instructions below:
+  
+  - Set up an Azure SQL database for your experiment (if one is not already set up):
+
+          https://azure.microsoft.com/en-us/products/azure-sql/database/
+
+  - Ensure that your IPv4 address is added to the Azure Firewall Rules for your database:
+    - To find your IPv4 address: 
+  
+          https://whatismyipaddress.com/
     
   - To add the Firewall Rule: 
   
-    https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-portal#create-a-firewall-rule-after-the-server-is-created
+          https://learn.microsoft.com/en-us/azure/mysql/flexible-server/how-to-manage-firewall-portal#create-a-firewall-rule-after-the-server-is-created
 
 - Install the necessary software to connect to the database. 
   - In Windows, this software is usually pre-installed. If not, download the software from:
 
-    https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+          https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
     
-  - On Linux, ...
-
-  *Note that installation of the driver on Mac is unreliable, thus the program should only be run on Windows or Linux.
-
-- If scanning donor information (i.e. the "Donor information upload" option):
-  - No further installations are required; download the donor history file from UNOS (https://unos.org/). Copy and paste the UNOS ID of the file into the 
-  program - the program will locate and upload information from the PDF file.  
-  - On the data table that appears, verify/edit any information on the table. When ready to upload, click "Upload".
+  - On Linux:
   
-- If uploading blood gas data (i.e. "Blood gas data upload"):
-  - No further installations are required; enter the UNOS ID and submit the blood gas data. If any data is immeasurable (<> or *** on iStat; ~~~ or other 
-  on Piccolo) or low/high (i.e. <N or >N), enter the data as is.
+          https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-ver16&tabs=alpine18-install%2Calpine17-install%2Cdebian8-install%2Credhat7-13-install%2Crhel7-offline
   
-- If collecting data during perfusion:
-  - Prior to perfusion, turn on and calibrate all sensors/instruments.
-  - Windows:
-    - Enter the UNOS ID and plug in all sensors according to the order indicated on the app.
-    - Turn off all background apps that could hijack the COM ports for each serial port. The following guide can tell you any apps that have hijacked
-    a COM port:
-    
-    https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
-
-    - Once all COM ports are assigned, they will remain this way regardless of computer status. Data collection is ready to begin.
-    *Note that COM ports should be assigned in ascending order according to number. If one desires to check this, they can go to "Device Manager" to check
-    the COM port assignments under the tab "Ports (COM & LPT)".
-  - Linux:
-    - Enter the UNOS ID.
-    - If the computer is off, remove all sensor USBs prior to restarting the device; if not, the computer will randomly assign USB ports. Once the computer
-    is restarted, connect all sensors according to the order indicated on the app. The app is now ready for data collection.
-    - If the computer is on and sensor USBs are not plugged in, connect all sensors according to the order indicated on the app. The app is now ready for 
-    data collection.
-    - If the computer is on and sensor USBs are plugged in from prior usage, the app is ready to commence data collection.
-    
-Troubleshooting:
-- If a sensor is turned off or unplugged during perfusion, simply restart/reconnect the sensor. There is no need to restart or exit the program, as it is
-designed to continue data collection for a sensor even if the data stream is interrupted. (NULL values are uploaded until reconnection is established.)
-  - For Linux: if one or more sensors become unplugged, plug the sensors back in according to the order list. (ex. If the Bioconsole and Biotrend are
-  unplugged, I will plug in the Bioconsole first) On Linux, ports are temporarily assigned; thus, removing more than one port causes the respective port
-  names to be lost. Re-plugging the ports in a different order will result in different names for the ports.
-- If timestamps are appearing irregularly on the app or NULL values are appearing when all sensors are connected, this is an indication that the USB ports are not connected in the right order. Do as follows:
-  - If using Windows, go to Device Manager and re-assign all the COM ports in the proper ascending order. To do so, right click on the port under "Ports 
-  (COM & LPT)" in Device Manager. Click on "Properties", followed by "Port Settings", and then "Advanced".
-  - If using Linux, remove all sensor USBs and then re-connect the sensor USBs in the proper order.
-  *Note that restarting the app is not required; the app will continue to upload NULL values until all the USBs are arranged in the proper order, at which
-  point the correct values will be uploaded.
+  - On Mac:
+  
+          https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver16
