@@ -1,13 +1,13 @@
 # DTK Data Collection Project
-Contributors: Alborz Feizi, Kat Nurminsky, Thomas Hefele,
+Contributors: Alborz Feizi, Kat Nurminsky, Thomas Hefele
 
 A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in healthcare, such as:
 - Creating digital twins of organs
 - Analyzing hemodynamics and vascular leak in organs
 
 Features:
-- Available for Linux, Windows, and Mac.
-- User-friendly GUI.
+- Available for Linux, Windows, and Mac!
+- User-friendly GUI!
 - Backup system stores data on CSV files in case connection to database is broken (such as internet loss, lack of firewall access, or lack of SQL driver)
 - PDF scanner will find and extract pertinent donor information. User can check and edit donor information prior to storing in database.
 - User input for blood gas measurements
@@ -19,16 +19,36 @@ Features:
   - Organ mass
   - Urine production
 
-Navigating the GUI:
+#Navigating the GUI:
 The GUI of the software appears as follows:
 
 <GUI main screen>
 
 To use, simply select an option and enter the UNOS ID (or another identifier) into the app. There are three options from which to choose:
+- Donor Information Upload
+- Blood Gas Data Upload
+- Sensor Data Collection
 
-Donor Information Upload:
+The app is designed to run only one feature at a time. Want to choose a different option or entered the wrong ID? Simply click "Restart"!
+
+#Donor Information Upload:
+  
+Enter a UNOS ID and the software will find and mine data from the respective file on your computer: 
+  
+<Dummy file pic> 
+  
+If the data does not appear correct or data is missing, one can edit by double clicking on a cell or by adding a column via right click:
+  
+<Editing donor info pic>
+  
+#Blood Gas Data Upload:
+
+Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
+  
+<Blood gas info pic>
   
 
+  
 
 Establishing Database Connection:
 - Set up an Azure SQL database for your experiment (if one is not already set up):
