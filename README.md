@@ -67,7 +67,7 @@ To start sensor data collection, follow the steps below:
   
   ![Data_stamp_pic](https://user-images.githubusercontent.com/116929892/220245088-0e519bde-188c-45d3-9a0b-b1b669d2ede7.png)
     
-- If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retreived from csv files that can be found on the computer:
+- If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retrieved from csv files that can be found on the computer:
     
     - Donor information: donor_info.csv
     - iStat and Piccolo data: istat.csv, pic.csv
