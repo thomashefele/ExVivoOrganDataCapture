@@ -94,13 +94,12 @@ To start sensor data collection, follow the steps below:
     
     A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
     
-      - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.
-      
-      - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
+     - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.      
+     - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
     
               https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
     
-    On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to do this:
+    On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to check:
    
               https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
     
@@ -112,7 +111,7 @@ Data Visualization with PowerBI:
     
 If using the Azure database, PowerBI can pull data from the database and display it to provide users with a realtime visualization of what is happening during the perfusion. In addition, the AI in PowerBI allows one to ask questions about specific perfusion metrics to gain powerful insights to organ performance!
 
-      <img width="658" alt="PowerBI" src="https://user-images.githubusercontent.com/116929892/220245423-9167dbdf-86d0-4704-ad37-6ca7920c3ac8.png">
+  <img width="658" alt="PowerBI" src="https://user-images.githubusercontent.com/116929892/220245423-9167dbdf-86d0-4704-ad37-6ca7920c3ac8.png">
 
 Establishing Azure Database Connection (Optional):
   
