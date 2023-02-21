@@ -1,12 +1,26 @@
 # DTK Data Collection Project
 Contributors: Alborz Feizi, Thomas Hefele, Kat Nurminsky
 
-A software for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this can be utilized in the creation of
-digital twins in health care.
+A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in healthcare, such as:
+- Creating digital twins of organs
+- Analyzing hemodynamics and vascular leak in organs
 
-Instructions and GUI:
+Features:
+- Available for Linux, Windows, and Mac.
+- User-friendly GUI.
+- Backup system stores data on CSV files in case connection to database is broken (such as internet loss, lack of firewall access, or lack of SQL driver)
+- PDF scanner will find and extract pertinent donor information. User can check and edit donor information prior to storing in database.
+- User input for blood gas measurements
+- Real time data collection of biomarkers pertinent to hemodynamics and vascular leak, such as:
+  - Arterial pressure
+  - Arterial flow
+  - Venous oxygen saturation
+  - Hematocrit
+  - Organ mass
+  - Urine production
 
-- TBD
+Navigating the GUI:
+- 
 
 Establishing Database Connection:
 - Set up an Azure SQL database for your experiment (if one is not already set up):
