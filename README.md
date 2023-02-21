@@ -41,7 +41,7 @@ Enter a UNOS ID and the software will find and mine data from the respective fil
   
 ![DI_1](https://user-images.githubusercontent.com/116929892/220244880-387d45df-9a70-4b56-9a12-6023163dd293.png)
   
-  *Note: for donor privacy, the above is a screenshot of a non-existent file, to which "dummy" data has been added manually.
+  *Note: for donor privacy, the above is a screenshot of a non-existent file to which "dummy" data has been added manually.
   
 If the data does not appear correct or data is missing, one can edit by double clicking on a cell or by adding a column via right click:
   
@@ -113,7 +113,7 @@ If using the Azure database, PowerBI can pull data from the database and display
 
   <img width="658" alt="PowerBI" src="https://user-images.githubusercontent.com/116929892/220245423-9167dbdf-86d0-4704-ad37-6ca7920c3ac8.png">
   
-  *Note: for donor privacy, the above is a screenshot of a data produced by a random number generator program.
+  *Note: for donor privacy, the above is a screenshot of pseudo-data produced by a random number generator program.
 
 Establishing Azure Database Connection (Optional):
   
