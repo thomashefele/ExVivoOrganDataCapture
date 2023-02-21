@@ -39,31 +39,33 @@ Donor Information Upload:
   
 Enter a UNOS ID and the software will find and mine data from the respective file on your computer: 
   
-<Dummy file pic> 
+![DI_1](https://user-images.githubusercontent.com/116929892/220244880-387d45df-9a70-4b56-9a12-6023163dd293.png)
   
   *Note: for donor privacy, the above is a screenshot of a non-existent file, to which "dummy" data has been added manually
   
 If the data does not appear correct or data is missing, one can edit by double clicking on a cell or by adding a column via right click:
   
-<Editing donor info pics>
+![DI_2](https://user-images.githubusercontent.com/116929892/220244909-f5e184fd-b33e-4856-9c98-f82e2bfe120a.png)
+
+![DI_3](https://user-images.githubusercontent.com/116929892/220244921-1d97af0c-0d2f-4d4b-a54c-86cabbe9192e.png)
   
 Blood Gas Data Upload:
 
 Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
   
-<Blood gas info pic>
+![BG](https://user-images.githubusercontent.com/116929892/220245002-b4d3d7a4-b201-4a3b-8514-b3906e1af30b.png)
   
 Sensor Data Collection:
   
 To start sensor data collection, follow the steps below:
 - Ensure each sensor is on and properly calibrated
 - Connect the USB cables for each driver to the computer according to the order on the GUI:
-  
-  <GUI order of drivers pic>
+
+  ![Driver_order](https://user-images.githubusercontent.com/116929892/220245035-19556eca-5424-44ef-bb6c-e3e0f25562e8.png)
     
 - Once all sensors are connected, click "Click to check port status" followed by "Start data collection". All done!
   
-  <GUI data collection pic>
+  ![Data_stamp_pic](https://user-images.githubusercontent.com/116929892/220245088-0e519bde-188c-45d3-9a0b-b1b669d2ede7.png)
     
 - If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retreived from csv files that can be found on the computer:
     
@@ -108,7 +110,7 @@ Data Visualization with PowerBI:
     
 If using the Azure database, PowerBI can pull data from the database and display it to provide users with a realtime visualization of what is happening during the perfusion. In addition, the AI in PowerBI allows one to ask questions about specific perfusion metrics to gain powerful insights to organ performance!
 
-<PowerBI pic>
+<img width="658" alt="PowerBI" src="https://user-images.githubusercontent.com/116929892/220245423-9167dbdf-86d0-4704-ad37-6ca7920c3ac8.png">
 
 Establishing Azure Database Connection (Optional):
   
