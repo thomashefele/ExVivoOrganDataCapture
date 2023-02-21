@@ -87,8 +87,7 @@ To start sensor data collection, follow the steps below:
     
     Q: We have lost internet connection during perfusion! Is our data being lost?
     
-    A: The software has a backup feature that writes the data to local csv files during the perfusion. If there is a connection issue during perfusion, 
-    data will continue to be written to the csv files, which can then be uploaded to the database post-perfusion. That being said, the backup feature is       not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear, indicating that data transfer is     no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
+    A: The software has a backup feature that writes the data to local CSV files during the perfusion. If there is a connection issue during perfusion         (internet or otherwise), data will continue to be written to the CSV files, which can then be uploaded to the database post-perfusion. That being         said, the backup feature is not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear,         indicating that data transfer is no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
     
     Q: The time stamp(s) are appearing irregularly!
     
