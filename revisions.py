@@ -456,8 +456,8 @@ def app():
                                 pass
 
                             file_write("km_data.csv", head_row, [unos_ID, up_time, mass])
-                            ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                            ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER)
+                        ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                        ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER)
                         
                     elif measure == "uo":
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
@@ -487,8 +487,8 @@ def app():
                                 pass
 
                             file_write("uo_data.csv", head_row, [unos_ID, up_time, mass])
-                            ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                            ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
+                        ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+                        ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
 
                     del m_arr[:]
                 else:
