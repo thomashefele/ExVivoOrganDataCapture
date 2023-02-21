@@ -20,7 +20,15 @@ Features:
   - Urine production
 
 Navigating the GUI:
-- 
+The GUI of the software appears as follows:
+
+<GUI main screen>
+
+To use, simply select an option and enter the UNOS ID (or another identifier) into the app. There are three options from which to choose:
+
+Donor Information Upload:
+  
+
 
 Establishing Database Connection:
 - Set up an Azure SQL database for your experiment (if one is not already set up):
