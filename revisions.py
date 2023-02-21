@@ -6,9 +6,6 @@ from tkinter import *
 from threading import Thread
 from pandastable import Table
 
-#fitz (the name for the PyMuPDF library) only works on Python 3.7 or higher. For the programs running on the Raspberry Pi devices, the Python version
-#is less than 3.7. This code allows one to retain the fitz module for the Windows .exe file while ignoring said module for the program on Raspberry Pi.
-#If running the Python-independent .ELF software on Linux/Raspbian, then the above will not present an issue. 
 no_fitz = False
 
 try:
