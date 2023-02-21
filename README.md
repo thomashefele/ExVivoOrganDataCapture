@@ -63,7 +63,7 @@ To start sensor data collection, follow the steps below:
 
   ![Driver_order](https://user-images.githubusercontent.com/116929892/220245035-19556eca-5424-44ef-bb6c-e3e0f25562e8.png)
     
-- Once all sensors are connected, click "Click to check port status" followed by "Start data collection". All done!
+- Once all sensors are connected, click "Click to check port status" followed by "Start Data Collection". All done!
   
   ![Data_stamp_pic](https://user-images.githubusercontent.com/116929892/220245088-0e519bde-188c-45d3-9a0b-b1b669d2ede7.png)
     
