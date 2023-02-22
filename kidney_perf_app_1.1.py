@@ -626,6 +626,9 @@ def app():
                             return pos
 
                         def donor_upload(data):
+                            
+                            don_row = [None]*57
+                            
                             try:
                                 df = data.transpose()
                                 
