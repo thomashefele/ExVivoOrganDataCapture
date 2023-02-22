@@ -653,6 +653,11 @@ def app():
                                            df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
                                            df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
                                            df.iloc[1,56]] 
+                                
+                                for i in range(0,57):
+                                    if don_row[i] == "nan":
+                                        don_row[i] = None
+                                
                                 try:
                                     with pyodbc.connect(connString) as cnxn_DI:
                                         with cnxn_DI.cursor() as cursor:                                
