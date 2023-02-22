@@ -655,7 +655,7 @@ def app():
                                            df.iloc[1,56]] 
                                 
                                 for i in range(0,57):
-                                    if don_row[i] == "nan":
+                                    if np.isnan(don_row[i]):
                                         don_row[i] = None
                                 
                                 try:
