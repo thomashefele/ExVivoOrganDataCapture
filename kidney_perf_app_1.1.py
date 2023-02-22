@@ -655,9 +655,9 @@ def app():
                                            df.iloc[1,56]] 
                                 
                                 for i in range(0,57):
-                                    if np.isnan(don_row[i]):
-                                        don_row[i] = None
-                                
+                                    if isinstance(don_row[i], float):
+                                        if np.isnan(don_row[i]):
+                                            don_row[i] = None
                                 try:
                                     with pyodbc.connect(connString) as cnxn_DI:
                                         with cnxn_DI.cursor() as cursor:                                
