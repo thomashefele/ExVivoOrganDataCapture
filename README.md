@@ -34,7 +34,7 @@ To use, simply select an option and enter the UNOS ID (or another identifier) in
 - Blood Gas Data Upload
 - Sensor Data Collection
 
-The app is designed to run only one feature at a time. Want to choose a different option or entered the wrong ID? Simply click "Restart"!
+Due to the runtime complexity of each individual option, the app is designed to run only one feature at a time. Want to choose a different option or entered the wrong ID? Simply click "Restart"!
 
 Donor Information Upload:
   
