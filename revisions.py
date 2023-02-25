@@ -36,9 +36,10 @@ elif OS == "Windows":
     password = "data-collection1"
     connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
-def app():
+def app(UNOS_AGAIN= None):
     #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
     #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
+    
     root = Tk()
     root.title("Kidney Perfusion App")
     w,h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -61,7 +62,7 @@ def app():
     tsx = 0.85
     chemsub_pady = 10
     istat_relx,pic_relx = 0.5, 0.5
-    istat_rely,pic_rely = 0.6, 0.9 
+    istat_rely,pic_rely = 0.7, 0.95
     allset_pad = 10
     u_pady, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
 
@@ -82,12 +83,12 @@ def app():
         tsx = 0.75
         chemsub_pady = 30
         istat_relx,pic_relx = 0.48, 0.525
-        istat_rely,pic_rely = 0.55, 0.8
+        istat_rely,pic_rely = 0.95, 0.8
         allset_pad = 45
         u_pady, sub_pad,rest_pad,ex_pad = 25, 5, 5, 15
 
-    var,unos_txt, contr, exp = StringVar(), StringVar(), StringVar(), StringVar()
-    header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)    
+    var,unos_txt,exp_type = StringVar(), StringVar(), StringVar()
+    header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)
 
     #This initializes the warning sound to be played if a sensor falls asleep.
     N = 44100
@@ -101,6 +102,7 @@ def app():
     #no firewall access, no internet connection, etc.) arises during the perfusion so that no data is lost.
     def file_write(file_name, h_array, r_array):
         h = False
+        
         try:
             with open(file_name, "r") as file:
                 r = csv.reader(file)
@@ -216,7 +218,7 @@ def app():
     def MT(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
             MT_port.write(b"DR 05 013B\r")
-            fn = "{}_mt_data.csv".format(unos_ID)
+            fn = "{}_{}_mt_data.csv".format(unos_ID, c_or_e)
             head_row = ["UNOS_ID", "time_stamp", "flow", "pressure", "rpm"]
 
             while STOP == False:
@@ -311,7 +313,7 @@ def app():
     #Medtronic Biotrend sensor function                                                  
     def BT(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
-            fn = "{}_bt_data.csv".format(unos_ID)
+            fn = "{}_{}_bt_data.csv".format(unos_ID, c_or_e)
             head_row = ["UNOS_ID", "time_stamp", "sO2", "hct"]
             
             while STOP == False:        
@@ -431,7 +433,7 @@ def app():
                     sleepy = np.isnan(mass)
 
                     if measure == "km":
-                        fn = "{}_km_data.csv".format(unos_ID)
+                        fn = "{}_{}_km_data.csv".format(unos_ID, c_or_e)
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
                         up_time = datetime.utcnow()
 
@@ -463,7 +465,7 @@ def app():
                         ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER)
                         
                     elif measure == "uo":
-                        fn = "{}_uo_data.csv".format(unos_ID)
+                        fn = "{}_{}_uo_data.csv".format(unos_ID, c_or_e)
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
                         up_time = datetime.utcnow()
 
@@ -580,23 +582,32 @@ def app():
     def choice():
         global CHOOSE_AGN
         global unos_ID
+        global c_or_e
 
         if CHOOSE_AGN == False:
-            unos_ID = unos_txt.get()
+            if UNOS_AGAIN == "Y":
+                unos_ID = unos_txt.get()
+                c_or_e = exp_type.get()
+            else:
+                pass
+
             sel = var.get()
 
-            if unos_ID == "":
-                Label(unos_w, text= "Blank UNOS ID entered.", font= txt, padx= 30).place(relx= 0.5, rely= 0.6, anchor= CENTER)
-
+            if unos_ID == "" or c_or_e == "":
+                Label(unos_w, text= "Incomplete information.", font= txt, padx= 30).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+                      
                 if sel == "":
-                    Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                    Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                 else:
-                    Label(ch_w, text= "Awaiting UNOS ID", font= txt).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-            elif unos_ID != "":
-                Label(unos_w, text= "UNOS ID successfully entered.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
-
+                    Label(ch_w, text= "Awaiting UNOS ID", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+            elif unos_ID != "" and c_or_e != "":
+                if UNOS_AGAIN == "Y":
+                    Label(unos_w, text= "UNOS ID successfully entered.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+                else:
+                    Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= u_pady).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+                    
                 if sel == "":
-                    Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                    Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                 else:
                     CHOOSE_AGN = True
 
@@ -605,12 +616,12 @@ def app():
                     #GUI so that the user may edit any values that were incorrectly read from the PDF. When ready, the user can
                     #then upload this data to the Azure database.
                     if sel == "1":
-                        Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                        Label(ch_w, text= "Donor information upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.8, anchor= CENTER)
 
                         def find(name, path):
                             for root, dirs, files in os.walk(path):
                                 if name in files:
-                                    return os.path.join(root, name)
+                                    return os.path.join(root, name)             
                                 else:
                                     pass
 
@@ -635,6 +646,7 @@ def app():
                         def donor_upload(data):
                             
                             don_row = [None]*57
+                            upload_status, file_status = True, True
                             
                             try:
                                 df = data.transpose()
@@ -675,11 +687,19 @@ def app():
                                             cursor.execute(cnxn_str.format(*head_row, *don_row))
                                             cnxn_DI.commit()       
                                 except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                    pass          
+                                    upload_status = False
                             except (KeyError, IndexError, pd.errors.InvalidIndexError):
                                 pass
                             
-                            file_write("{}_donor_info.csv".format(unos_ID), head_row, don_row)
+                            try:
+                                file_write("{}_donor_info.csv".format(unos_ID), head_row, don_row)
+                            except(PermissionError, OSError, FileNotFoundError):
+                                file_status = False
+                                
+                            if upload_status == True or file_status == True:
+                                Label(data_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.6, rely= 0.95, anchor= CENTER)
+                            else:
+                                Label(data_w, text= "Data saving unsuccessful.", font= txt, padx= 5).place(relx= 0.6, rely= 0.95, anchor= CENTER)
 
                         if no_fitz == False:
                             donor_file = find("{}.pdf".format(unos_ID), "/")
@@ -819,10 +839,10 @@ def app():
                                 df.index = ["Values"]
 
                             except ValueError:
-                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+                                Label(unos_w, text= "No file associated with such an ID.\nRestart and enter a valid ID\nor enter values manually.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
 
                             table = df.transpose().reset_index().rename(columns={"index":"Parameters"})
-                            Label(data_w, text= "Click submit when ready to upload:", font= txt).place(relx= 0.4, rely= 0.95, anchor= CENTER)
+                            Label(data_w, text= "Click when ready to upload:", font= txt).place(relx= 0.01, rely= 0.95, anchor= W)
                             donor_w = Frame(data_w, width= don_x*w, height= don_y*h, bd= 2, relief= "sunken")
                             donor_w.grid(row= 0, column= 0, padx= 10, pady= 10)
                             donor_w.grid_propagate(False)
@@ -831,14 +851,15 @@ def app():
                             donor_info.cellbackgr = "white"
                             donor_info.boxoutlinecolor = "black"
                             donor_info.show()
-                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.65, rely= 0.95, anchor= CENTER)   
+                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.375, rely= 0.95, anchor= CENTER)   
                         else:
                             Label(data_w, text= "PDF scanner currently unavailable.\nUpdate Python to 3.7 or higher.", font= txt).place(relx= 0.5, rely= 0.5, anchor= CENTER)
 
                     #This option allows one to manually input blood gas data from the iStat and Piccolo devices to the Azure database.
                     elif sel == "2":
-                        Label(ch_w, text= "Blood gas data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
-
+                        av_opt = ["Arterial", "Venous"]
+                        Label(ch_w, text= "Perfusate data upload chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+                                           
                         istat_w = Frame(data_w, width= chemf_x*w, height= chemf_y*h, bd= 2, relief= "sunken")
                         istat_w.grid(row= 0,  column= 0, padx= 10, pady= 10)
                         istat_w.grid_propagate(False)
@@ -846,111 +867,149 @@ def app():
                         pic_w.grid(row= 0,  column= 1, padx= 10, pady= 10)
                         pic_w.grid_propagate(False)
                         med_w = Frame(data_w, width= 2*chemf_x*w, height= med_y*h, bd= 2, relief= "sunken")
-                        med_w.grid(row= 0, column= 1, padx= 10, pady= 10)
+                        med_w.grid(row= 1, column= 0, padx= 10, pady= 10, columnspan= 2)
                         med_w.grid_propagate(False)
 
                         def upload(instr):
-                            fn = ""
-                            head_row = ""
-                            data_row = ""
+                            fn,head_row,data_row = "", [], []
                             
                             if instr == "istat":
-                                fn = "{}_istat.csv".format(unos_ID)
-                                head_row = ["UNOS_ID", "time_stamp", "ph", "pco2", "po2", "tco2", "hco3", "be", "so2", "hb"]
-                                data_row = [unos_ID, pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), TCO2_istat_txt.get(), HCO3_txt.get(), BE_txt.get(), sO2_txt.get(), Hb_txt.get()]
-                                Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                fn = "{0}_{1}_istat.csv".format(unos_ID, c_or_e)
+                                head_row = ["UNOS_ID", "time_stamp", "side", "ph", "pco2", "po2", "be", "hco3", "tco2", "so2", "Na", "K", "Ca", "glu", "hct", "hb"]
+                                data_row = [unos_ID, iside_txt.get(), pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), BE_txt.get(), HCO3_txt.get(), TCO2_istat_txt.get(), sO2_txt.get(), iNa_txt.get(), iK_txt.get(), iCa_txt.get(), iGlu_txt.get(), iHct_txt, Hb_txt.get()]
                             elif instr == "pic":
-                                fn = "{}_pic.csv".format(unos_ID)
-                                head_row = ["UNOS_ID", "time_stamp", "Na", "K", "tco2", "Cl", "glu", "Ca", "BUN", "cre", "egfr", "alp", "ast", "tbil", "alb", "tp"]
-                                data_row = [unos_ID, Na_txt.get(), K_txt.get(), TCO2_pic_txt.get(), Cl_txt.get(), Glu_txt.get(), Ca_txt.get(), BUN_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALP_txt.get(), AST_txt.get(), TBIL_txt.get(), ALB_txt.get(), TP_txt.get()]
-                                Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
- 
+                                fn = "{0}_{1}_pic.csv".format(unos_ID, c_or_e)
+                                head_row = ["UNOS_ID", "time_stamp", "side", "glu", "BUN", "Ca", "cre", "egfr", "alb", "Na", "K", "Cl", "tco2"]
+                                data_row = [unos_ID, pside_txt.get(), pGlu_txt.get(), BUN_txt.get(), pCa_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALB_txt.get(), pNa_txt.get(), pK_txt.get(), Cl_txt.get(), TCO2_pic_txt.get()]
+                            elif instr == "med":
+                                fn = "{0}_{1}_med.csv".format(unos_ID, c_or_e)
+                                head_row = ["UNOS_ID", "time_stamp", "medication", "dose"]
+                                data_row = [unos_ID, med_txt.get(), amt_txt.get()]
+                            
+                            upload_status,file_status = True, True
+                            
                             try:
                                 with pyodbc.connect(connString) as cnxn_bg:
                                     with cnxn_bg.cursor() as cursor:
-                                        if instr == "istat":
-                                            try:                                             
-                                                execstr = "INSERT INTO dbo.istat_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}]) VALUES('{10}', GETDATE(), '{11}', '{12}', '{13}', '{14}', '{15}', '{16}', '{17}', '{18}');".format(*head_row, *data_row)
-                                                cursor.execute(execstr)
-                                                cnxn_bg.commit()
-                                                Label(istat_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
-                                            except ValueError:
-                                                Label(istat_w, text= "Invalid data type or blank entry", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)         
+                                        if instr == "istat":                                       
+                                            execstr = "INSERT INTO dbo.istat_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}], [{15}]) VALUES('{16}', GETDATE(), '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}');".format(*head_row, *data_row)
+                                            cursor.execute(execstr)
+                                            cnxn_bg.commit()
                                         elif instr == "pic":
-                                            try:
-                                                execstr = "INSERT INTO dbo.pic_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}], [{15}]) VALUES('{16}', GETDATE(), '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}');".format(*head_row, *data_row) 
-                                                cursor.execute(execstr)
-                                                cnxn_bg.commit()   
-                                                Label(pic_w, text= "Data successfully uploaded!", font= txt, padx= allset_pad).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)     
-                                            except ValueError:
-                                                Label(pic_w, text= "Invalid data type or blank entry.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                                            execstr = "INSERT INTO dbo.pic_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}]) VALUES('{13}', GETDATE(), '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}');".format(*head_row, *data_row) 
+                                            cursor.execute(execstr)
+                                            cnxn_bg.commit()   
+                                        elif instr == "med":
+                                            execstr = "INSERT INTO dbo.meds([{0}], [{1}], [{2}], [{3}]) VALUES('{4}', GETDATE(), '{5}', '{6}');".format(*head_row, *data_row)
+                                            cursor.execute(execstr)
+                                            cnxn_bg.commit()          
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
+                                upload_status = False
                             
                             data_row.insert(1, datetime.utcnow())
-                            file_write(fn, head_row, data_row)
                             
+                            try:
+                                file_write(fn, head_row, data_row)
+                            except (PermissionError, OSError, FileNotFoundError):
+                                file_status = False
+                                
+                            if upload_status == True or file_status == True:
+                                if instr == "istat":
+                                    Label(istat_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                elif instr == "pic":
+                                    Label(pic_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                                elif instr == "med":
+                                    Label(med_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+                            else:
+                                if instr == "istat":
+                                    Label(istat_w, text= "Data saving unsuccessful.", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
+                                elif instr == "pic":
+                                    Label(pic_w, text= "Data saving unsuccessful.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
+                                elif instr == "med":
+                                    Label(med_w, text= "Data saving unsuccessful.", font= txt).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+   
                         #iStat
-                        pH_txt, PCO2_txt, PO2_txt, TCO2_istat_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        HCO3_txt, BE_txt, sO2_txt, Hb_txt = StringVar(), StringVar(), StringVar(), StringVar()
-
+                        iside_txt, pH_txt, PCO2_txt, PO2_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        BE_txt, HCO3_txt, TCO2_istat_txt, sO2_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        iNa_txt, iK_txt, iCa_txt, iGlu_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        iHct_txt, Hb_txt = StringVar(), StringVar()
+                    
+                        iside_txt.set("Arterial")
+                        
                         Label(istat_w, text= "iStat Measurements:", font= header).grid(row= 0, column= 2)
-                        Label(istat_w, text= "pH: ", font= txt).grid(row= 1, column= 1)
-                        pH_e = Entry(istat_w, text= pH_txt, font= txt).grid(row= 1, column= 2)
-                        Label(istat_w, text= "PCO2: ", font= txt).grid(row= 2, column= 1)
-                        PCO2_e = Entry(istat_w, text= PCO2_txt, font= txt).grid(row= 2, column= 2)
-                        Label(istat_w, text= "PO2: ", font= txt).grid(row= 3, column= 1)
-                        PO2_e = Entry(istat_w, text= PO2_txt, font= txt).grid(row= 3, column= 2)
-                        Label(istat_w, text= "TCO2: ", font= txt).grid(row= 4, column= 1)
-                        TCO2_istat_e = Entry(istat_w, text= TCO2_istat_txt, font= txt).grid(row= 4, column= 2)
-                        Label(istat_w, text= "HCO3: ", font= txt).grid(row= 5, column= 1)
-                        HCO3_e = Entry(istat_w, text= HCO3_txt, font= txt).grid(row= 5, column= 2)
-                        Label(istat_w, text= "BE: ", font= txt).grid(row= 6, column= 1)
-                        BE_e = Entry(istat_w, text= BE_txt, font= txt).grid(row= 6, column= 2)
-                        Label(istat_w, text= "sO2: ", font= txt).grid(row= 7, column= 1)
-                        sO2_e = Entry(istat_w, text= sO2_txt, font= txt).grid(row= 7, column= 2)
-                        Label(istat_w, text= "Hb: ", font= txt).grid(row= 8, column= 1)
-                        Hb_e = Entry(istat_w, text= Hb_txt, font= txt).grid(row= 8, column= 2)
-
+                        Label(istat_w, text= "A/V: ", font= txt).grid(row= 1, column= 1)
+                        iside_e = OptionMenu(istat_w, iside_txt, *av_opt).grid(row= 1, column= 2, ipadx= 50)
+                        Label(istat_w, text= "pH: ", font= txt).grid(row= 2, column= 1)
+                        pH_e = Entry(istat_w, text= pH_txt, font= txt).grid(row= 2, column= 2)
+                        Label(istat_w, text= "PCO2: ", font= txt).grid(row= 3, column= 1)
+                        PCO2_e = Entry(istat_w, text= PCO2_txt, font= txt).grid(row= 3, column= 2)
+                        Label(istat_w, text= "PO2: ", font= txt).grid(row= 4, column= 1)
+                        PO2_e = Entry(istat_w, text= PO2_txt, font= txt).grid(row= 4, column= 2)
+                        Label(istat_w, text= "BE: ", font= txt).grid(row= 5, column= 1)
+                        BE_e = Entry(istat_w, text= BE_txt, font= txt).grid(row= 5, column= 2)
+                        Label(istat_w, text= "HCO3: ", font= txt).grid(row= 6, column= 1)
+                        HCO3_e = Entry(istat_w, text= HCO3_txt, font= txt).grid(row= 6, column= 2)
+                        Label(istat_w, text= "TCO2: ", font= txt).grid(row= 7, column= 1)
+                        TCO2_istat_e = Entry(istat_w, text= TCO2_istat_txt, font= txt).grid(row= 7, column= 2)
+                        Label(istat_w, text= "sO2: ", font= txt).grid(row= 8, column= 1)
+                        sO2_e = Entry(istat_w, text= sO2_txt, font= txt).grid(row= 8, column= 2)
+                        Label(istat_w, text= "Na: ", font= txt).grid(row= 9, column= 1)
+                        iNa_e = Entry(istat_w, text= iNa_txt, font= txt).grid(row= 9, column= 2)
+                        Label(istat_w, text= "K: ", font= txt).grid(row= 10, column= 1)
+                        iK_e = Entry(istat_w, text= iK_txt, font= txt).grid(row= 10, column= 2)
+                        Label(istat_w, text= "Ca: ", font= txt).grid(row= 11, column= 1)
+                        iCa_e = Entry(istat_w, text= iCa_txt, font= txt).grid(row= 11, column= 2)
+                        Label(istat_w, text= "Glu: ", font= txt).grid(row= 12, column= 1)
+                        iGlu_e = Entry(istat_w, text= iGlu_txt, font= txt).grid(row= 12, column= 2)
+                        Label(istat_w, text= "Hct: ", font= txt).grid(row= 13, column= 1)
+                        iHct_e = Entry(istat_w, text= iHct_txt, font= txt).grid(row= 13, column= 2)
+                        Label(istat_w, text= "Hb: ", font= txt).grid(row= 14, column= 1)
+                        Hb_e = Entry(istat_w, text= Hb_txt, font= txt).grid(row= 14, column= 2)
+                        
                         #Piccolo
-                        Na_txt, K_txt, TCO2_pic_txt, Cl_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        Glu_txt, Ca_txt, BUN_txt, Cre_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        eGFR_txt, ALP_txt, AST_txt, TBIL_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        ALB_txt, TP_txt = StringVar(), StringVar()
+                        pside_txt, pNa_txt, pK_txt, TCO2_pic_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        Cl_txt, pGlu_txt, pCa_txt, BUN_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        Cre_txt, eGFR_txt, ALP_txt, AST_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        TBIL_txt, ALB_txt, TP_txt = StringVar(), StringVar(), StringVar()
+                        
+                        pside_txt.set("Arterial")
 
                         Label(pic_w, text= "Piccolo Measurements:", font= header).grid(row= 0, column= 4)
-                        Label(pic_w, text= "Na: ", font= txt).grid(row= 1, column= 3)
-                        Na_e = Entry(pic_w, text= Na_txt, font= txt).grid(row= 1, column= 4)
-                        Label(pic_w, text= "K: ", font= txt).grid(row= 2, column= 3)
-                        K_e = Entry(pic_w, text= K_txt, font= txt).grid(row= 2, column= 4)
-                        Label(pic_w, text= "TCO2: ", font= txt).grid(row= 3, column= 3)
-                        TCO2_pic_e = Entry(pic_w, text= TCO2_pic_txt, font= txt).grid(row= 3, column= 4)
-                        Label(pic_w, text= "Cl: ", font= txt).grid(row= 4, column= 3)
-                        Cl_e = Entry(pic_w, text= Cl_txt, font= txt).grid(row= 4, column= 4)
-                        Label(pic_w, text= "Glu: ", font= txt).grid(row= 5, column= 3)
-                        Glu_e = Entry(pic_w, text= Glu_txt, font= txt).grid(row= 5, column= 4)
-                        Label(pic_w, text= "Ca: ", font= txt).grid(row= 6, column= 3)
-                        Ca_e = Entry(pic_w, text= Ca_txt, font= txt).grid(row= 6, column= 4)
-                        Label(pic_w, text= "BUN: ", font= txt).grid(row= 7, column= 3)
-                        BUN_e = Entry(pic_w, text= BUN_txt, font= txt).grid(row= 7, column= 4)
-                        Label(pic_w, text= "Cre: ", font= txt).grid(row= 8, column= 3)
-                        Cre_e = Entry(pic_w, text= Cre_txt, font= txt).grid(row= 8, column= 4)
-                        Label(pic_w, text= "eGFR: ", font= txt).grid(row= 9, column= 3)
-                        eGFR_e = Entry(pic_w, text= eGFR_txt, font= txt).grid(row= 9, column= 4)
-                        Label(pic_w, text= "ALP: ", font= txt).grid(row= 10, column= 3)
-                        ALP_e = Entry(pic_w, text= ALP_txt, font= txt).grid(row= 10, column= 4)
-                        Label(pic_w, text= "AST: ", font= txt).grid(row= 11, column= 3)
-                        AST_e = Entry(pic_w, text= AST_txt, font= txt).grid(row= 11, column= 4)
-                        Label(pic_w, text= "TBIL: ", font= txt).grid(row= 12, column= 3)
-                        TBIL_e = Entry(pic_w, text= TBIL_txt, font= txt).grid(row= 12, column= 4)
-                        Label(pic_w, text= "ALB: ", font= txt).grid(row= 13, column= 3)
-                        ALB_e = Entry(pic_w, text= ALB_txt, font= txt).grid(row= 13, column= 4)
-                        Label(pic_w, text= "TP: ", font= txt).grid(row= 14, column= 3)
-                        TP_e = Entry(pic_w, text= TP_txt, font= txt).grid(row= 14, column= 4)
+                        Label(pic_w, text= "A/V: ", font= txt).grid(row= 1, column= 3)
+                        pside_e = OptionMenu(pic_w, pside_txt, *av_opt).grid(row= 1, column= 4, ipadx= 50)
+                        Label(pic_w, text= "Glu: ", font= txt).grid(row= 2, column= 3)
+                        pGlu_e = Entry(pic_w, text= pGlu_txt, font= txt).grid(row= 2, column= 4)
+                        Label(pic_w, text= "BUN: ", font= txt).grid(row= 3, column= 3)
+                        BUN_e = Entry(pic_w, text= BUN_txt, font= txt).grid(row= 3, column= 4)
+                        Label(pic_w, text= "Ca: ", font= txt).grid(row= 4, column= 3)
+                        pCa_e = Entry(pic_w, text= pCa_txt, font= txt).grid(row= 4, column= 4)
+                        Label(pic_w, text= "Cre: ", font= txt).grid(row= 5, column= 3)
+                        Cre_e = Entry(pic_w, text= Cre_txt, font= txt).grid(row= 5, column= 4)
+                        Label(pic_w, text= "eGFR: ", font= txt).grid(row= 6, column= 3)
+                        eGFR_e = Entry(pic_w, text= eGFR_txt, font= txt).grid(row= 6, column= 4)
+                        Label(pic_w, text= "ALB: ", font= txt).grid(row= 7, column= 3)
+                        ALB_e = Entry(pic_w, text= ALB_txt, font= txt).grid(row= 7, column= 4)
+                        Label(pic_w, text= "Na: ", font= txt).grid(row= 8, column= 3)
+                        pNa_e = Entry(pic_w, text= pNa_txt, font= txt).grid(row= 8, column= 4)
+                        Label(pic_w, text= "K: ", font= txt).grid(row= 9, column= 3)
+                        pK_e = Entry(pic_w, text= pK_txt, font= txt).grid(row= 9, column= 4)
+                        Label(pic_w, text= "Cl: ", font= txt).grid(row= 10, column= 3)
+                        Cl_e = Entry(pic_w, text= Cl_txt, font= txt).grid(row= 10, column= 4)
+                        Label(pic_w, text= "TCO2: ", font= txt).grid(row= 11, column= 3)
+                        TCO2_pic_e = Entry(pic_w, text= TCO2_pic_txt, font= txt).grid(row= 11, column= 4)
+                        
+                        #Medications
+                        med_txt, amt_txt = StringVar(), StringVar()
+                        
+                        Label(med_w, text= "Medication administered:", font= txt).place(relx= 0.01, rely= 0.2)
+                        med_e = Entry(med_w, text= med_txt, font= txt).place(relx= 0.01, rely= 0.5)
+                        Label(med_w, text= "Amount (in mL):", font= txt).place(relx= 0.35, rely= 0.2)
+                        amt_e = Entry(med_w, text= amt_txt, font= txt).place(relx= 0.35, rely= 0.5)
 
-                        submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 9, column= 2, pady= chemsub_pady)
-                        submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 15, column= 4, pady= chemsub_pady)
-
+                        submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 15, column= 2, pady= chemsub_pady)
+                        submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 12, column= 4, pady= chemsub_pady)
+                        submit_med = Button(med_w, text= "Submit", command= lambda: upload("med"), font= txt).place(relx= 0.77, rely= 0.1)
+                        
                     #This option collects data from the myriad perfusion sensors, integrates and formats the data, and then
                     #uploads it to the Azure database.
                     elif sel == "3":
@@ -974,13 +1033,13 @@ def app():
                         row4 = Label(vals, text= "Last urine output update (time stamp):", font= txt, bg= "white")
                         row4.place(relx= 0.05, rely= 0.8, anchor= W) 
 
-                        Label(ch_w, text= "Sensor data collection chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.7, anchor= CENTER)
+                        Label(ch_w, text= "Sensor data collection chosen.", font= txt, padx= 15).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                         user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (kidney scale, then urine scale)"
                         Label(port_w, text= user_guide_1, font= txt).place(relx= 0.5, rely= 0.3, anchor= CENTER)
                         port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
         else:
             Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.8, anchor= CENTER)
-            Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= u_pady).place(relx= 0.5, rely= 0.6, anchor= CENTER)
+            Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= u_pady).place(relx= 0.5, rely= 0.8, anchor= CENTER)
 
     #Now that the GUI has been initialized and all the functions ready for execution, the block of code below establishes the widgets necessary
     #for the user to interact with the program.
@@ -1011,10 +1070,10 @@ def app():
     Label(unos_w, text= "Enter UNOS ID (case sensitive):", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
     unos = Entry(unos_w, text= unos_txt, font= txt)
     unos.place(relx= 0.5, rely= 0.35, anchor= CENTER)
-    C = Radiobutton(unos_w, text= "Control", font= txt, variable= contr, value= "C")
-    C.place(relx= 0.5, rely= 0.5, anchor= W)
-    E = Radiobutton(unos_w, text= "Experimental", font= txt, variable= exp, value= "E")
-    E.place(relx= 0.5, rely= 0.6, anchor= W)
+    C = Radiobutton(unos_w, text= "Control", font= txt, variable= exp_type, value= "C")
+    C.place(relx= 0.35, rely= 0.5, anchor= W)
+    E = Radiobutton(unos_w, text= "Experimental", font= txt, variable= exp_type, value= "E")
+    E.place(relx= 0.35, rely= 0.6, anchor= W)
     
     submit = Button(opts_w, text= "Submit", font= txt, command= choice).grid(row= 2, column= 0, pady= 5, ipadx= sub_pad)
     restart = Button (opts_w, text= "Restart", font= txt, command= anew).grid(row= 2,column= 1, pady= 5, ipadx= rest_pad)
@@ -1022,4 +1081,4 @@ def app():
 
     root.mainloop()
     
-app()
+app("Y")
