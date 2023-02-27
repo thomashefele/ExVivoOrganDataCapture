@@ -15,7 +15,7 @@ except ImportError:
     
 lap, perf_time, name, baud_rate, t_o = 5, 30000, [], [9600,2400], [5.1, 5.2, 0.2]
 CHOOSE_AGN, CHECK_AGAIN = False, False
-null_input, nan, connString = "b\'\'", float("nan"), ""
+null_input, nan, connString, execstr  = "b\'\'", float("nan"), "", ""
 OS = platform.system()
 
 #The code below establishes the necessary information to interact with the given OS. Note: SQL drivers have been tricky to install on Mac (at least those
@@ -60,7 +60,7 @@ def app(UNOS_AGAIN= None):
     disp_x,disp_y = 0.54, 0.53
     val_x,val_y = 0.45, 0.35
     tsx = 0.85
-    chemsub_pady = 10
+    chemsub_pady = 5
     istat_relx,pic_relx = 0.5, 0.5
     istat_rely,pic_rely = 0.7, 0.95
     allset_pad = 10
@@ -81,7 +81,7 @@ def app(UNOS_AGAIN= None):
         disp_x,disp_y = 0.59, 0.6
         val_x,val_y = 0.5, 0.4
         tsx = 0.75
-        chemsub_pady = 30
+        chemsub_pady = 15
         istat_relx,pic_relx = 0.48, 0.525
         istat_rely,pic_rely = 0.95, 0.8
         allset_pad = 45
@@ -218,7 +218,7 @@ def app(UNOS_AGAIN= None):
     def MT(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as MT_port:                                              
             MT_port.write(b"DR 05 013B\r")
-            fn = "{}_{}_mt_data.csv".format(unos_ID, c_or_e)
+            fn = "{0}_{1}_mt_data.csv".format(unos_ID, c_or_t)
             head_row = ["UNOS_ID", "time_stamp", "flow", "pressure", "rpm"]
 
             while STOP == False:
@@ -237,7 +237,7 @@ def app(UNOS_AGAIN= None):
                         try:
                             with pyodbc.connect(connString) as cnxn_MT:
                                 with cnxn_MT.cursor() as cursor:
-                                    execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                    execstr = "INSERT INTO dbo.mt_{0}([UNOS_ID], [time_stamp]) VALUES('{1}', GETDATE());".format(c_or_t, unos_ID)
                                     cursor.execute(execstr)
                                     cnxn_MT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -267,7 +267,7 @@ def app(UNOS_AGAIN= None):
                             try:
                                 with pyodbc.connect(connString) as cnxn_MT:
                                     with cnxn_MT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{0}', GETDATE(), {1}, {2}, {3});".format(unos_ID, data_AF, data_AP, rpm)
+                                        execstr = "INSERT INTO dbo.mt_{0}([UNOS_ID], [time_stamp], [flow], [pressure], [rpm]) VALUES('{1}', GETDATE(), {2}, {3}, {4});".format(c_or_t, unos_ID, data_AF, data_AP, rpm)
                                         cursor.execute(execstr)
                                         cnxn_MT.commit()
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -281,7 +281,7 @@ def app(UNOS_AGAIN= None):
                             try:
                                 with pyodbc.connect(connString) as cnxn_MT:
                                     with cnxn_MT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                        execstr = "INSERT INTO dbo.mt_{0}([UNOS_ID], [time_stamp]) VALUES('{1}', GETDATE());".format(c_or_t, unos_ID)
                                         cursor.execute(execstr)
                                         cnxn_MT.commit()
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -297,7 +297,7 @@ def app(UNOS_AGAIN= None):
                     try:
                         with pyodbc.connect(connString) as cnxn_MT:
                             with cnxn_MT.cursor() as cursor:
-                                execstr = "INSERT INTO dbo.mt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                execstr = "INSERT INTO dbo.mt_{0}([UNOS_ID], [time_stamp]) VALUES('{1}', GETDATE());".format(c_or_t, unos_ID)
                                 cursor.execute(execstr)
                                 cnxn_MT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -313,7 +313,7 @@ def app(UNOS_AGAIN= None):
     #Medtronic Biotrend sensor function                                                  
     def BT(port_name, b, t):
         with ser.Serial(port_name, baudrate= b, timeout= t) as BT_port:
-            fn = "{}_{}_bt_data.csv".format(unos_ID, c_or_e)
+            fn = "{0}_{1}_bt_data.csv".format(unos_ID, c_or_t)
             head_row = ["UNOS_ID", "time_stamp", "sO2", "hct"]
             
             while STOP == False:        
@@ -329,7 +329,7 @@ def app(UNOS_AGAIN= None):
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
                                 with cnxn_BT.cursor() as cursor:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                    execstr = "INSERT INTO dbo.bt_{0}([UNOS_ID], [time_stamp]) VALUES('{1}', GETDATE());".format(c_or_t, unos_ID)
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -340,7 +340,7 @@ def app(UNOS_AGAIN= None):
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
                                 with cnxn_BT.cursor() as cursor:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [hct]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, data_hct)
+                                    execstr = "INSERT INTO dbo.bt_{0}([UNOS_ID], [time_stamp], [hct]) VALUES('{1}', GETDATE(), {2});".format(c_or_t, unos_ID, data_hct)
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -351,7 +351,7 @@ def app(UNOS_AGAIN= None):
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
                                 with cnxn_BT.cursor() as cursor:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, data_sO2v)
+                                    execstr = "INSERT INTO dbo.bt_{0}([UNOS_ID], [time_stamp], [sO2]) VALUES('{1}', GETDATE(), {2});".format(c_or_t, unos_ID, data_sO2v)
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -362,7 +362,7 @@ def app(UNOS_AGAIN= None):
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
                                 with cnxn_BT.cursor() as cursor:
-                                    execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{0}', GETDATE(), {1}, {2});".format(unos_ID, data_sO2v, data_hct)
+                                    execstr = "INSERT INTO dbo.bt_{0}([UNOS_ID], [time_stamp], [sO2], [hct]) VALUES('{1}', GETDATE(), {2}, {3});".format(c_or_t, unos_ID, data_sO2v, data_hct)
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -377,7 +377,7 @@ def app(UNOS_AGAIN= None):
                     try:
                         with pyodbc.connect(connString) as cnxn_BT:
                             with cnxn_BT.cursor() as cursor:
-                                execstr = "INSERT INTO dbo.bt_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
+                                execstr = "INSERT INTO dbo.bt_{0}([UNOS_ID], [time_stamp]) VALUES('{1}', GETDATE());".format(c_or_t, unos_ID)
                                 cursor.execute(execstr)
                                 cnxn_BT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
@@ -432,69 +432,47 @@ def app(UNOS_AGAIN= None):
                     mass = min(m_arr, key= lambda x: x[0])[1]
                     sleepy = np.isnan(mass)
 
+                    fn = "{0}_{1}_{2}_data.csv".format(unos_ID, c_or_t, measure)
+                    head_row = []
+
                     if measure == "km":
-                        fn = "{}_{}_km_data.csv".format(unos_ID, c_or_e)
                         head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
-                        up_time = datetime.utcnow()
-
-                        if sleepy:
-                            alert()
-
-                            try:
-                                with pyodbc.connect(connString) as cnxn_FT:
-                                    with cnxn_FT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                        cursor.execute(execstr)
-                                        cnxn_FT.commit()
-                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
-
-                            file_write(fn, head_row, [unos_ID, up_time, None])
-                        else:
-                            try:
-                                with pyodbc.connect(connString) as cnxn_FT:
-                                    with cnxn_FT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.km_t([UNOS_ID], [time_stamp], [kidney_mass]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, mass)
-                                        cursor.execute(execstr)
-                                        cnxn_FT.commit()
-                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
-
-                            file_write(fn, head_row, [unos_ID, up_time, mass])
-                        ts_km = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_km.place(relx= tsx, rely= 0.6, anchor= CENTER)
-                        
                     elif measure == "uo":
-                        fn = "{}_{}_uo_data.csv".format(unos_ID, c_or_e)
-                        head_row = ["UNOS_ID", "time_stamp", "kidney_mass"]
-                        up_time = datetime.utcnow()
+                        head_row = ["UNOS_ID", "time_stamp", "urine_output"]
 
-                        if sleepy:
-                            alert()
+                    up_time = datetime.utcnow()
 
-                            try:
-                                with pyodbc.connect(connString) as cnxn_FT:
-                                    with cnxn_FT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp]) VALUES('{}', GETDATE());".format(unos_ID)
-                                        cursor.execute(execstr)
-                                        cnxn_FT.commit()
-                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
+                    if sleepy:
+                        alert()
 
-                            file_write(fn, head_row, [unos_ID, up_time, None])
-                        else:
-                            try:
-                                with pyodbc.connect(connString) as cnxn_FT:
-                                    with cnxn_FT.cursor() as cursor:
-                                        execstr = "INSERT INTO dbo.uo_t([UNOS_ID], [time_stamp], [urine_output]) VALUES('{0}', GETDATE(), {1});".format(unos_ID, mass)
-                                        cursor.execute(execstr)
-                                        cnxn_FT.commit()
-                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
+                        try:
+                            with pyodbc.connect(connString) as cnxn_FT:
+                                with cnxn_FT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.{0}_{1}([UNOS_ID], [time_stamp]) VALUES('{2}', GETDATE());".format(measure, c_or_t, unos_ID)
+                                    cursor.execute(execstr)
+                                    cnxn_FT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
 
-                            file_write(fn, head_row, [unos_ID, up_time, mass])
-                        ts_uo = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                        ts_uo.place(relx= tsx, rely= 0.8, anchor= CENTER)
+                        file_write(fn, head_row, [unos_ID, up_time, None])
+                    else:
+                        try:
+                            with pyodbc.connect(connString) as cnxn_FT:
+                                with cnxn_FT.cursor() as cursor:
+                                    execstr = "INSERT INTO dbo.{0}_{1}([{2}], [{3}], [{4}]) VALUES('{5}', GETDATE(), {6});".format(measure, c_or_t, *head_row, unos_ID, mass)
+                                    cursor.execute(execstr)
+                                    cnxn_FT.commit()
+                        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                            pass
+
+                        file_write(fn, head_row, [unos_ID, up_time, mass])
+
+                    ts = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
+
+                    if measure == "km":
+                        ts.place(relx= tsx, rely= 0.6, anchor= CENTER)
+                    elif measure == "uo":
+                        ts.place(relx= tsx, rely= 0.8, anchor= CENTER)
 
                     del m_arr[:]
                 else:
@@ -582,25 +560,119 @@ def app(UNOS_AGAIN= None):
     def choice():
         global CHOOSE_AGN
         global unos_ID
-        global c_or_e
+        global c_or_t
+        
+        def upload(instr):
+            fn, intro_str, head_row, data_row = "", "", [], []
+
+            if instr == "istat":
+                head_row = ["UNOS_ID", "time_stamp", "side", "ph", "pco2", "po2", "be", "hco3", "tco2", "so2", "Na", "K", "Ca", "glu", "hct", "hb"]
+                data_row = [unos_ID, iside_txt.get(), pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), BE_txt.get(), HCO3_txt.get(), TCO2_istat_txt.get(), 
+                            sO2_txt.get(), iNa_txt.get(), iK_txt.get(), iCa_txt.get(), iGlu_txt.get(), iHct_txt.get(), Hb_txt.get()]
+            elif instr == "pic":
+                head_row = ["UNOS_ID", "time_stamp", "side", "glu", "BUN", "Ca", "cre", "egfr", "alb", "Na", "K", "Cl", "tco2"]
+                data_row = [unos_ID, pside_txt.get(), pGlu_txt.get(), BUN_txt.get(), pCa_txt.get(), Cre_txt.get(), eGFR_txt.get(), 
+                            ALB_txt.get(), pNa_txt.get(), pK_txt.get(), Cl_txt.get(), TCO2_pic_txt.get()]
+            elif instr == "meds":
+                head_row = ["UNOS_ID", "time_stamp", "medication", "dosage"]
+                data_row = [unos_ID, med_txt.get(), amt_txt.get()]
+            elif instr == "perf":
+                head_row = ["UNOS_ID", "time_stamp", "A1", "A2", "A3", "A4", "A5", "V1", "V2", "V3", "V4", "V5", "U1", "U2"]
+                data_row = [unos_ID, A1_txt.get(), A2_txt.get(), A3_txt.get(), A4_txt.get(), A5_txt.get(), V1_txt.get(), 
+                            V2_txt.get(), V3_txt.get(), V4_txt.get(), V5_txt.get(), U1_txt.get(), U2_txt.get()]
+            elif instr == "biop":
+                head_row = ["UNOS_ID", "time_stamp", "CFM1", "CFZ1", "CFM2", "CFZ2", "CFM3", "CFZ3", "CFM4", "CFZ4", "CFM5", "CFZ5", "MFM1", "MFZ1", 
+                            "MFM2", "MFZ2", "MFM3", "MFZ3", "MFM4", "MFZ4", "MFM5", "MFZ5"]
+                data_row = [unos_ID, CFM1_txt.get(), CFZ1_txt.get(), CFM2_txt.get(), CFZ2_txt.get(), CFM3_txt.get(), CFZ3_txt.get(), CFM4_txt.get(), 
+                            CFZ4_txt.get(), CFM5_txt.get(), CFZ5_txt.get(), MFM1_txt.get(), MFZ1_txt.get(), MFM2_txt.get(), MFZ2_txt.get(), 
+                            MFM3_txt.get(), MFZ3_txt.get(), MFM4_txt.get(), MFZ4_txt.get(), MFM5_txt.get(), MFZ5_txt.get()]
+
+            upload_status,file_status = True, True
+            
+            if instr == "meds":
+                fn = "{0}_{1}.csv".format(unos_ID, instr)
+                intro_str = "INSERT INTO dbo.{}".format(instr)
+            else:
+                fn = "{0}_{1}_{2}.csv".format(unos_ID, c_or_t, instr)
+                intro_str = "INSERT INTO dbo.{0}_{1}".format(instr, c_or_t)
+
+            try:
+                with pyodbc.connect(connString) as cnxn_bg:
+                    with cnxn_bg.cursor() as cursor:
+                        if instr == "istat":                                       
+                            execstr_1 = "([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}]," 
+                            execstr_2 =  " [{12}], [{13}], [{14}], [{15}]) VALUES('{16}', GETDATE(), '{17}', '{18}', '{19}', '{20}', '{21}', '{22}',"
+                            execstr_3 =  " '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}');"
+                            execstr = intro_str+execstr_1+execstr_2+execstr_3
+                        elif instr == "pic":
+                            execstr_1 = "([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}])"
+                            execstr_2 = " VALUES('{13}', GETDATE(), '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}');"  
+                            execstr = intro_str+execstr_1+execstr_2
+                        elif instr == "meds":
+                            execstr_1 = "([{0}], [{1}], [{2}], [{3}]) VALUES('{4}', GETDATE(), '{5}', '{6}');"
+                            execstr = intro_str+execstr_1
+                        elif instr == "perf":
+                            execstr_1 = "INSERT INTO dbo.perf_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}])"
+                            execstr_2 = " VALUES('{13}', GETDATE(), '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}');"
+                            execstr = intro_str+execstr_1+execstr_2
+                        elif instr == "biop":
+                            execstr_1 = "([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}],"
+                            execstr_2 = " [{13}], [{14}], [{15}], [{16}], [{17}], [{18}], [{19}], [{20}], [{21}])"
+                            execstr_3 = " VALUES('{22}', GETDATE(), '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}', '{31}', '{32}', '{33}',"
+                            execstr_4 = " '{34}', '{35}', '{36}', '{37}', '{38}', '{39}', '{40}', '{41}', '{42}');"
+                            execstr = intro_str+execstr_1+execstr_2+execstr_3+execstr_4
+                        cursor.execute(execstr.format(*head_row, *data_row))
+                        cnxn_bg.commit()
+            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+                upload_status = False
+
+            data_row.insert(1, datetime.utcnow())
+
+            try:
+                file_write(fn, head_row, data_row)
+            except (PermissionError, OSError, FileNotFoundError):
+                file_status = False
+
+            if upload_status == True or file_status == True:
+                if instr == "istat":
+                    Label(istat_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 16, column= 2)
+                elif instr == "pic":
+                    Label(pic_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 13, column= 4)
+                elif instr == "meds":
+                    Label(med_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+                elif instr == "perf":
+                    Label(perf_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 16, column= 1)    
+                elif instr == "biop":
+                    Label(biop_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 13, column= 3, columnspan= 2)
+            else:
+                if instr == "istat":
+                    Label(istat_w, text= "Data saving unsuccessful.", font= txt).grid(row= 16, column= 2)
+                elif instr == "pic":
+                    Label(pic_w, text= "Data saving unsuccessful.", font= txt).grid(row= 13, column= 4)
+                elif instr == "meds":
+                    Label(med_w, text= "Data saving unsuccessful.", font= txt).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+                elif instr == "perf":
+                    Label(perf_w, text= "Data saving unsuccessful.", font= txt).grid(row= 16, column= 1)
+                elif instr == "biop":
+                    Label(biop_w, text= "Data saving unsuccessful.", font= txt).grid(row= 13, column= 3, columnspan= 2)
 
         if CHOOSE_AGN == False:
             if UNOS_AGAIN == "Y":
                 unos_ID = unos_txt.get()
-                c_or_e = exp_type.get()
+                c_or_t = exp_type.get()
             else:
                 pass
 
             sel = var.get()
 
-            if unos_ID == "" or c_or_e == "":
+            if unos_ID == "" or c_or_t == "":
                 Label(unos_w, text= "Incomplete information.", font= txt, padx= 30).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                       
                 if sel == "":
                     Label(ch_w, text= "No selection made.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                 else:
                     Label(ch_w, text= "Awaiting UNOS ID", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
-            elif unos_ID != "" and c_or_e != "":
+            elif unos_ID != "" and c_or_t != "":
                 if UNOS_AGAIN == "Y":
                     Label(unos_w, text= "UNOS ID successfully entered.", font= txt).place(relx= 0.5, rely= 0.8, anchor= CENTER)
                 else:
@@ -644,7 +716,6 @@ def app(UNOS_AGAIN= None):
                             return pos
 
                         def donor_upload(data):
-                            
                             don_row = [None]*57
                             upload_status, file_status = True, True
                             
@@ -675,16 +746,17 @@ def app(UNOS_AGAIN= None):
                                 try:
                                     with pyodbc.connect(connString) as cnxn_DI:
                                         with cnxn_DI.cursor() as cursor:                                
-                                            cnxn_str_1 = "INSERT INTO dbo.organ_t([{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}],[{7}],[{8}],[{9}],"
-                                            cnxn_str_2 = "[{10}],[{11}],[{12}],[{13}],[{14}],[{15}],[{16}],[{17}],[{18}],[{19}],[{20}],[{21}],[{22}],"
-                                            cnxn_str_3 = "[{23}],[{24}],[{25}],[{26}],[{27}],[{28}],[{29}],[{30}],[{31}],[{32}],[{33}],[{34}],[{35}],[{36}],[{37}],"
-                                            cnxn_str_4 = "[{38}],[{39}],[{40}],[{41}],[{42}],[{43}],[{44}],[{45}],[{46}],[{47}],[{48}],[{49}],[{50}],[{51}],[{52}],"
-                                            cnxn_str_5 = "[{53}],[{54}],[{55}],[{56}]) "
-                                            cnxn_str_6 = "VALUES('{57}','{58}','{59}','{60}','{61}','{62}','{63}','{64}','{65}','{66}','{67}','{68}','{69}','{70}','{71}','{72}','{73}','{74}','{75}','{76}','{77}','{78}',"
-                                            cnxn_str_7 = "'{80}','{81}','{82}','{83}','{84}','{85}','{86}','{87}','{88}','{89}','{90}','{91}','{92}','{93}','{94}','{95}','{96}','{97}','{98}','{99}','{100}','{101}',"
-                                            cnxn_str_8 = "'{102}','{103}','{104}','{105}','{106}','{107}','{108}','{109}','{110}','{111}','{112}','{113}');"
-                                            cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                                            cursor.execute(cnxn_str.format(*head_row, *don_row))
+                                            exec_str_1 = "INSERT INTO dbo.organ([{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}],[{7}],[{8}],[{9}],"
+                                            exec_str_2 = "[{10}],[{11}],[{12}],[{13}],[{14}],[{15}],[{16}],[{17}],[{18}],[{19}],[{20}],[{21}],[{22}],"
+                                            exec_str_3 = "[{23}],[{24}],[{25}],[{26}],[{27}],[{28}],[{29}],[{30}],[{31}],[{32}],[{33}],[{34}],[{35}],[{36}],[{37}],"
+                                            exec_str_4 = "[{38}],[{39}],[{40}],[{41}],[{42}],[{43}],[{44}],[{45}],[{46}],[{47}],[{48}],[{49}],[{50}],[{51}],[{52}],"
+                                            exec_str_5 = "[{53}],[{54}],[{55}],[{56}]) "
+                                            exec_str_6 = "VALUES('{57}','{58}','{59}','{60}','{61}','{62}','{63}','{64}','{65}','{66}','{67}','{68}','{69}','{70}',"
+                                            exec_str_7 = "'{71}','{72}','{73}','{74}','{75}','{76}','{77}','{78}','{80}','{81}','{82}','{83}','{84}','{85}','{86}',"
+                                            exec_str_8 = "'{87}','{88}','{89}','{90}','{91}','{92}','{93}','{94}','{95}','{96}','{97}','{98}','{99}','{100}','{101}',"
+                                            exec_str_9 = "'{102}','{103}','{104}','{105}','{106}','{107}','{108}','{109}','{110}','{111}','{112}','{113}');"
+                                            execstr = exec_str_1+exec_str_2+exec_str_3+exec_str_4+exec_str_5+exec_str_6+exec_str_7+exec_str_8+exec_str_9
+                                            cursor.execute(execstr.format(*head_row, *don_row))
                                             cnxn_DI.commit()       
                                 except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                     upload_status = False
@@ -869,64 +941,6 @@ def app(UNOS_AGAIN= None):
                         med_w = Frame(data_w, width= 2*chemf_x*w, height= med_y*h, bd= 2, relief= "sunken")
                         med_w.grid(row= 1, column= 0, padx= 10, pady= 10, columnspan= 2)
                         med_w.grid_propagate(False)
-
-                        def upload(instr):
-                            fn,head_row,data_row = "", [], []
-                            
-                            if instr == "istat":
-                                fn = "{0}_{1}_istat.csv".format(unos_ID, c_or_e)
-                                head_row = ["UNOS_ID", "time_stamp", "side", "ph", "pco2", "po2", "be", "hco3", "tco2", "so2", "Na", "K", "Ca", "glu", "hct", "hb"]
-                                data_row = [unos_ID, iside_txt.get(), pH_txt.get(), PCO2_txt.get(), PO2_txt.get(), BE_txt.get(), HCO3_txt.get(), TCO2_istat_txt.get(), sO2_txt.get(), iNa_txt.get(), iK_txt.get(), iCa_txt.get(), iGlu_txt.get(), iHct_txt, Hb_txt.get()]
-                            elif instr == "pic":
-                                fn = "{0}_{1}_pic.csv".format(unos_ID, c_or_e)
-                                head_row = ["UNOS_ID", "time_stamp", "side", "glu", "BUN", "Ca", "cre", "egfr", "alb", "Na", "K", "Cl", "tco2"]
-                                data_row = [unos_ID, pside_txt.get(), pGlu_txt.get(), BUN_txt.get(), pCa_txt.get(), Cre_txt.get(), eGFR_txt.get(), ALB_txt.get(), pNa_txt.get(), pK_txt.get(), Cl_txt.get(), TCO2_pic_txt.get()]
-                            elif instr == "med":
-                                fn = "{0}_{1}_med.csv".format(unos_ID, c_or_e)
-                                head_row = ["UNOS_ID", "time_stamp", "medication", "dose"]
-                                data_row = [unos_ID, med_txt.get(), amt_txt.get()]
-                            
-                            upload_status,file_status = True, True
-                            
-                            try:
-                                with pyodbc.connect(connString) as cnxn_bg:
-                                    with cnxn_bg.cursor() as cursor:
-                                        if instr == "istat":                                       
-                                            execstr = "INSERT INTO dbo.istat_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}], [{13}], [{14}], [{15}]) VALUES('{16}', GETDATE(), '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}', '{26}', '{27}', '{28}', '{29}', '{30}');".format(*head_row, *data_row)
-                                            cursor.execute(execstr)
-                                            cnxn_bg.commit()
-                                        elif instr == "pic":
-                                            execstr = "INSERT INTO dbo.pic_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}]) VALUES('{13}', GETDATE(), '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}', '{25}');".format(*head_row, *data_row) 
-                                            cursor.execute(execstr)
-                                            cnxn_bg.commit()   
-                                        elif instr == "med":
-                                            execstr = "INSERT INTO dbo.meds([{0}], [{1}], [{2}], [{3}]) VALUES('{4}', GETDATE(), '{5}', '{6}');".format(*head_row, *data_row)
-                                            cursor.execute(execstr)
-                                            cnxn_bg.commit()          
-                            except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                upload_status = False
-                            
-                            data_row.insert(1, datetime.utcnow())
-                            
-                            try:
-                                file_write(fn, head_row, data_row)
-                            except (PermissionError, OSError, FileNotFoundError):
-                                file_status = False
-                                
-                            if upload_status == True or file_status == True:
-                                if instr == "istat":
-                                    Label(istat_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
-                                elif instr == "pic":
-                                    Label(pic_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
-                                elif instr == "med":
-                                    Label(med_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.83, rely= 0.63, anchor= CENTER)
-                            else:
-                                if instr == "istat":
-                                    Label(istat_w, text= "Data saving unsuccessful.", font= txt).place(relx= istat_relx, rely= istat_rely, anchor= CENTER)
-                                elif instr == "pic":
-                                    Label(pic_w, text= "Data saving unsuccessful.", font= txt).place(relx= pic_relx, rely= pic_rely, anchor= CENTER)
-                                elif instr == "med":
-                                    Label(med_w, text= "Data saving unsuccessful.", font= txt).place(relx= 0.83, rely= 0.63, anchor= CENTER)
    
                         #iStat
                         iside_txt, pH_txt, PCO2_txt, PO2_txt = StringVar(), StringVar(), StringVar(), StringVar()
@@ -937,7 +951,7 @@ def app(UNOS_AGAIN= None):
                         iside_txt.set("Arterial")
                         
                         Label(istat_w, text= "iStat Measurements:", font= header).grid(row= 0, column= 2)
-                        Label(istat_w, text= "A/V: ", font= txt).grid(row= 1, column= 1)
+                        Label(istat_w, text= "A/V: ", font= txt).grid(row= 1, column= 1, padx= 20)
                         iside_e = OptionMenu(istat_w, iside_txt, *av_opt).grid(row= 1, column= 2, ipadx= 50)
                         Label(istat_w, text= "pH: ", font= txt).grid(row= 2, column= 1)
                         pH_e = Entry(istat_w, text= pH_txt, font= txt).grid(row= 2, column= 2)
@@ -975,7 +989,7 @@ def app(UNOS_AGAIN= None):
                         pside_txt.set("Arterial")
 
                         Label(pic_w, text= "Piccolo Measurements:", font= header).grid(row= 0, column= 4)
-                        Label(pic_w, text= "A/V: ", font= txt).grid(row= 1, column= 3)
+                        Label(pic_w, text= "A/V: ", font= txt).grid(row= 1, column= 3, padx= 20)
                         pside_e = OptionMenu(pic_w, pside_txt, *av_opt).grid(row= 1, column= 4, ipadx= 50)
                         Label(pic_w, text= "Glu: ", font= txt).grid(row= 2, column= 3)
                         pGlu_e = Entry(pic_w, text= pGlu_txt, font= txt).grid(row= 2, column= 4)
@@ -1008,7 +1022,7 @@ def app(UNOS_AGAIN= None):
 
                         submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 15, column= 2, pady= chemsub_pady)
                         submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 12, column= 4, pady= chemsub_pady)
-                        submit_med = Button(med_w, text= "Submit", command= lambda: upload("med"), font= txt).place(relx= 0.77, rely= 0.1)
+                        submit_med = Button(med_w, text= "Submit", command= lambda: upload("meds"), font= txt).place(relx= 0.77, rely= 0.1)
                         
                     #This option collects data from the myriad perfusion sensors, integrates and formats the data, and then
                     #uploads it to the Azure database.
@@ -1037,6 +1051,92 @@ def app(UNOS_AGAIN= None):
                         user_guide_1 = "Plug in the devices in the following order:\n- Medtronic Bioconsole\n- Medtronic Biotrend\n- Force transducers (kidney scale, then urine scale)"
                         Label(port_w, text= user_guide_1, font= txt).place(relx= 0.5, rely= 0.3, anchor= CENTER)
                         port_check = Button(port_w, text= "Click to check port status", command= port_detect, font= txt).place(relx= 0.5, rely= 0.65, anchor= CENTER)
+                    
+                    #This option allows one to scan in samples for perfusate, urine, and biopsy collections.
+                    elif sel == "4":
+                        Label(ch_w, text= "Sample scanning chosen.", font= txt, padx= 30).place(relx= 0.5, rely= 0.8, anchor= CENTER)
+                        perf_w = Frame(data_w, width= (chemf_x-0.1)*w, height= (chemf_y+0.15)*h, bd= 2, relief= "sunken")
+                        perf_w.grid(row= 0,  column= 0, padx= 10, pady= 10)
+                        perf_w.grid_propagate(False)
+                        biop_w = Frame(data_w, width= (chemf_x+0.1)*w, height= (chemf_y+0.15)*h, bd= 2, relief= "sunken")
+                        biop_w.grid(row= 0,  column= 1, padx= 10, pady= 10)
+                        biop_w.grid_propagate(False)
+                        
+                        A1_txt, A2_txt, A3_txt, A4_txt, A5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        V1_txt, V2_txt, V3_txt, V4_txt, V5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        U1_txt, U2_txt = StringVar(), StringVar()
+                        
+                        #Arterial perfusates
+                        Label(perf_w, text= "Arterial Perfusates:", font= txt).grid(row= 0, column= 1)
+                        A1_e = Entry(perf_w, text= A1_txt, font= txt, width= 15).grid(row= 1, column= 1, padx= 35)
+                        A2_e = Entry(perf_w, text= A2_txt, font= txt, width= 15).grid(row= 2, column= 1)
+                        A3_e = Entry(perf_w, text= A3_txt, font= txt, width= 15).grid(row= 3, column= 1)
+                        A4_e = Entry(perf_w, text= A4_txt, font= txt, width= 15).grid(row= 4, column= 1)
+                        A5_e = Entry(perf_w, text= A5_txt, font= txt, width= 15).grid(row= 5, column= 1)
+                        
+                        #Venous perfusates
+                        Label(perf_w, text= "Venous Perfusates:", font= txt).grid(row= 6, column= 1)
+                        V1_e = Entry(perf_w, text= V1_txt, font= txt, width= 15).grid(row= 7, column= 1)
+                        V2_e = Entry(perf_w, text= V2_txt, font= txt, width= 15).grid(row= 8, column= 1)
+                        V3_e = Entry(perf_w, text= V3_txt, font= txt, width= 15).grid(row= 9, column= 1)
+                        V4_e = Entry(perf_w, text= V4_txt, font= txt, width= 15).grid(row= 10, column= 1)
+                        V5_e = Entry(perf_w, text= V5_txt, font= txt, width= 15).grid(row= 11, column= 1)
+                        
+                        #Urine samples
+                        Label(perf_w, text= "Urine Samples:", font= txt).grid(row= 12, column= 1)
+                        U1_e = Entry(perf_w, text= U1_txt, font= txt, width= 15).grid(row= 13, column= 1)
+                        U2_e = Entry(perf_w, text= U2_txt, font= txt, width= 15).grid(row= 14, column= 1)
+                        
+                        CFM1_txt, CFM2_txt, CFM3_txt, CFM4_txt, CFM5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        CFZ1_txt, CFZ2_txt, CFZ3_txt, CFZ4_txt, CFZ5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        MFM1_txt, MFM2_txt, MFM3_txt, MFM4_txt, MFM5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        MFZ1_txt, MFZ2_txt, MFZ3_txt, MFZ4_txt, MFZ5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
+                        
+                        Label(biop_w, text= "Site 1:", font= txt).grid(row= 1, column= 2, padx= 20)
+                        Label(biop_w, text= "Site 2:", font= txt).grid(row= 2, column= 2)
+                        Label(biop_w, text= "Site 3:", font= txt).grid(row= 3, column= 2)
+                        Label(biop_w, text= "Site 4:", font= txt).grid(row= 4, column= 2)
+                        Label(biop_w, text= "Site 5:", font= txt).grid(row= 5, column= 2)
+                        Label(biop_w, text= "Site 1:", font= txt).grid(row= 7, column= 2)
+                        Label(biop_w, text= "Site 2:", font= txt).grid(row= 8, column= 2)
+                        Label(biop_w, text= "Site 3:", font= txt).grid(row= 9, column= 2)
+                        Label(biop_w, text= "Site 4:", font= txt).grid(row= 10, column= 2)
+                        Label(biop_w, text= "Site 5:", font= txt).grid(row= 11, column= 2)
+                        
+                        #Cortical Formalin
+                        Label(biop_w, text= "Cortical Formalin:", font= txt).grid(row= 0, column= 3)
+                        CFM1_e = Entry(biop_w, text= CFM1_txt, font= txt, width= 15).grid(row= 1, column= 3)
+                        CFM2_e = Entry(biop_w, text= CFM2_txt, font= txt, width= 15).grid(row= 2, column= 3)
+                        CFM3_e = Entry(biop_w, text= CFM3_txt, font= txt, width= 15).grid(row= 3, column= 3)
+                        CFM4_e = Entry(biop_w, text= CFM4_txt, font= txt, width= 15).grid(row= 4, column= 3)
+                        CFM5_e = Entry(biop_w, text= CFM5_txt, font= txt, width= 15).grid(row= 5, column= 3)
+                        
+                        #Cortical Snap Frozen
+                        Label(biop_w, text= "Cortical Frozen:", font= txt).grid(row= 6, column= 3)
+                        CFZ1_e = Entry(biop_w, text= CFZ1_txt, font= txt, width= 15).grid(row= 7, column= 3)
+                        CFZ2_e = Entry(biop_w, text= CFZ2_txt, font= txt, width= 15).grid(row= 8, column= 3)
+                        CFZ3_e = Entry(biop_w, text= CFZ3_txt, font= txt, width= 15).grid(row= 9, column= 3)
+                        CFZ4_e = Entry(biop_w, text= CFZ4_txt, font= txt, width= 15).grid(row= 10, column= 3)
+                        CFZ5_e = Entry(biop_w, text= CFZ5_txt, font= txt, width= 15).grid(row= 11, column= 3)
+                        
+                        #Medulla Formalin
+                        Label(biop_w, text= "Medullary Formalin:", font= txt).grid(row= 0, column= 4)
+                        MFM1_e = Entry(biop_w, text= MFM1_txt, font= txt, width= 15).grid(row= 1, column= 4)
+                        MFM2_e = Entry(biop_w, text= MFM2_txt, font= txt, width= 15).grid(row= 2, column= 4)
+                        MFM3_e = Entry(biop_w, text= MFM3_txt, font= txt, width= 15).grid(row= 3, column= 4)
+                        MFM4_e = Entry(biop_w, text= MFM4_txt, font= txt, width= 15).grid(row= 4, column= 4)
+                        MFM5_e = Entry(biop_w, text= MFM5_txt, font= txt, width= 15).grid(row= 5, column= 4)
+                        
+                        #Medulla Frozen
+                        Label(biop_w, text= "Medullary Frozen:", font= txt).grid(row= 6, column= 4)
+                        MFZ1_e = Entry(biop_w, text= MFZ1_txt, font= txt, width= 15).grid(row= 7, column= 4)
+                        MFZ2_e = Entry(biop_w, text= MFZ2_txt, font= txt, width= 15).grid(row= 8, column= 4)
+                        MFZ3_e = Entry(biop_w, text= MFZ3_txt, font= txt, width= 15).grid(row= 9, column= 4)
+                        MFZ4_e = Entry(biop_w, text= MFZ4_txt, font= txt, width= 15).grid(row= 10, column= 4)
+                        MFZ5_e = Entry(biop_w, text= MFZ5_txt, font= txt, width= 15).grid(row= 11, column= 4)
+                        
+                        submit_perf = Button(perf_w, text= "Submit", command= lambda: upload("perf"), font= txt).grid(row= 15, column= 1, pady= chemsub_pady)
+                        submit_biop = Button(biop_w, text= "Submit", command= lambda: upload("biop"), font= txt).grid(row= 12, column= 3, pady= chemsub_pady, columnspan= 2)
         else:
             Label(ch_w, text= "Selection already made.\nRestart to choose a new option.", font= txt, padx= allset_pad).place(relx= 0.5, rely= 0.8, anchor= CENTER)
             Label(unos_w, text= "UNOS ID already set.", font= txt, padx= 60, pady= u_pady).place(relx= 0.5, rely= 0.8, anchor= CENTER)
@@ -1070,9 +1170,9 @@ def app(UNOS_AGAIN= None):
     Label(unos_w, text= "Enter UNOS ID (case sensitive):", font= txt).place(relx= 0.5, rely= 0.15, anchor= CENTER)
     unos = Entry(unos_w, text= unos_txt, font= txt)
     unos.place(relx= 0.5, rely= 0.35, anchor= CENTER)
-    C = Radiobutton(unos_w, text= "Control", font= txt, variable= exp_type, value= "C")
+    C = Radiobutton(unos_w, text= "Control", font= txt, variable= exp_type, value= "c")
     C.place(relx= 0.35, rely= 0.5, anchor= W)
-    E = Radiobutton(unos_w, text= "Experimental", font= txt, variable= exp_type, value= "E")
+    E = Radiobutton(unos_w, text= "Experimental", font= txt, variable= exp_type, value= "t")
     E.place(relx= 0.35, rely= 0.6, anchor= W)
     
     submit = Button(opts_w, text= "Submit", font= txt, command= choice).grid(row= 2, column= 0, pady= 5, ipadx= sub_pad)
