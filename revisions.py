@@ -981,10 +981,9 @@ def app(UNOS_AGAIN= None):
                         Hb_e = Entry(istat_w, text= Hb_txt, font= txt).grid(row= 14, column= 2)
                         
                         #Piccolo
-                        pside_txt, pNa_txt, pK_txt, TCO2_pic_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        Cl_txt, pGlu_txt, pCa_txt, BUN_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        Cre_txt, eGFR_txt, ALP_txt, AST_txt = StringVar(), StringVar(), StringVar(), StringVar()
-                        TBIL_txt, ALB_txt, TP_txt = StringVar(), StringVar(), StringVar()
+                        pside_txt, pGlu_txt, BUN_txt, pCa_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        Cre_txt, eGFR_txt, ALB_txt, pNa_txt = StringVar(), StringVar(), StringVar(), StringVar()
+                        pK_txt, Cl_txt, TCO2_pic_txt = StringVar(), StringVar(), StringVar()
                         
                         pside_txt.set("Arterial")
 
@@ -1119,7 +1118,7 @@ def app(UNOS_AGAIN= None):
                         CFZ4_e = Entry(biop_w, text= CFZ4_txt, font= txt, width= 15).grid(row= 10, column= 3)
                         CFZ5_e = Entry(biop_w, text= CFZ5_txt, font= txt, width= 15).grid(row= 11, column= 3)
                         
-                        #Medulla Formalin
+                        #Medullary Formalin
                         Label(biop_w, text= "Medullary Formalin:", font= txt).grid(row= 0, column= 4)
                         MFM1_e = Entry(biop_w, text= MFM1_txt, font= txt, width= 15).grid(row= 1, column= 4)
                         MFM2_e = Entry(biop_w, text= MFM2_txt, font= txt, width= 15).grid(row= 2, column= 4)
@@ -1127,7 +1126,7 @@ def app(UNOS_AGAIN= None):
                         MFM4_e = Entry(biop_w, text= MFM4_txt, font= txt, width= 15).grid(row= 4, column= 4)
                         MFM5_e = Entry(biop_w, text= MFM5_txt, font= txt, width= 15).grid(row= 5, column= 4)
                         
-                        #Medulla Frozen
+                        #Medullary Snap Frozen
                         Label(biop_w, text= "Medullary Frozen:", font= txt).grid(row= 6, column= 4)
                         MFZ1_e = Entry(biop_w, text= MFZ1_txt, font= txt, width= 15).grid(row= 7, column= 4)
                         MFZ2_e = Entry(biop_w, text= MFZ2_txt, font= txt, width= 15).grid(row= 8, column= 4)
