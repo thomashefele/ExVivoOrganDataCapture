@@ -15,7 +15,7 @@ Features:
 - Real time data collection of biomarkers pertinent to hemodynamics and vascular leak, such as:
   - Arterial pressure
   - Arterial flow
-  - Venous oxygen saturation
+  - Arterial and venous oxygen saturation
   - Hematocrit
   - Organ mass
   - Urine production
