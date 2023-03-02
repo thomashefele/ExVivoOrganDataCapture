@@ -1,5 +1,4 @@
 # DTK Data Collection Project
-Contributors: Alborz Feizi, Katherine Nurminsky, Gregory Tietjen, Owen Richfield, Thomas Hefele
 
 A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in healthcare, such as:
 - Creating digital twins of organs
