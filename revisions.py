@@ -494,7 +494,7 @@ def app(UNOS_AGAIN= None):
         FT_1_thread.start()
         FT_2_thread.start()
 
-        halt = Button(disp_w, text= "Stop Data Collection", font= txt, padx= 10, command= lambda: q("data"))
+        halt = Button(disp_w, text= "Stop data collection", font= txt, padx= 10, command= lambda: q("data"))
         halt.place(relx= 0.5, rely= 0.1, anchor= CENTER)
 
         t_init = datetime.now() + timedelta(seconds= 5)
@@ -552,7 +552,7 @@ def app(UNOS_AGAIN= None):
                 degunk_thread.start()
                 degunk_thread.join()
 
-                collecting = Button(disp_w, text= "Start Data Collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
+                collecting = Button(disp_w, text= "Start data collection", font= txt, command= start_coll).place(relx= 0.5, rely= 0.1, anchor= CENTER)
 
         elif CHECK_AGAIN == True:
             Label(port_w, text= "Data collection ready to commence!", font= txt, padx= 100).place(relx= 0.5, rely= 0.85, anchor= CENTER)
