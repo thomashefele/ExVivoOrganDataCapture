@@ -632,12 +632,12 @@ def app():
 
                         def donor_upload(data):
                             
-                            don_row = [None]*57
+                            don_row = [None]*58
                             
                             try:
                                 df = data.transpose()
                                 
-                                head_row = ["blood_type","ID","height","weight","age","bmi","gender","kdpi","eth_race","cause",
+                                head_row = ["blood_type","UNOS_ID","match_ID","height","weight","age","bmi","gender","kdpi","eth_race","cause",
                                             "mech","circ","cold_time","dcd","card_ar","CPR","diabetes","cancer","hypert","CAD","GI_dis","smoker","etoh",            
                                             "iv_drug","BP_avg","HR_avg","BP_high","dur_high","BP_low","dur_low","wbc","rbc","hgb","hct","plt","Na","K","Cl",            
                                             "BUN","crea","glu","tbili","dbili","idbili","sgot","sgpt","aphos","prothr","ptt","l_biop","l_glom_per","l_type",            
@@ -652,25 +652,26 @@ def app():
                                            df.iloc[1,38],df.iloc[1,39],df.iloc[1,40],df.iloc[1,41],df.iloc[1,42],df.iloc[1,43],
                                            df.iloc[1,44],df.iloc[1,45],df.iloc[1,46],df.iloc[1,47],df.iloc[1,48],df.iloc[1,49],
                                            df.iloc[1,50],df.iloc[1,51],df.iloc[1,52],df.iloc[1,53],df.iloc[1,54],df.iloc[1,55],
-                                           df.iloc[1,56]] 
+                                           df.iloc[1,56],df.iloc[1,57]] 
                                 
-                                for i in range(0,57):
+                                for i in range(0,58):
                                     if isinstance(don_row[i], float):
                                         if np.isnan(don_row[i]):
                                             don_row[i] = None
                                 try:
                                     with pyodbc.connect(connString) as cnxn_DI:
                                         with cnxn_DI.cursor() as cursor:                                
-                                            cnxn_str_1 = "INSERT INTO dbo.organ_t([{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}],[{7}],[{8}],[{9}],"
-                                            cnxn_str_2 = "[{10}],[{11}],[{12}],[{13}],[{14}],[{15}],[{16}],[{17}],[{18}],[{19}],[{20}],[{21}],[{22}],"
-                                            cnxn_str_3 = "[{23}],[{24}],[{25}],[{26}],[{27}],[{28}],[{29}],[{30}],[{31}],[{32}],[{33}],[{34}],[{35}],[{36}],[{37}],"
-                                            cnxn_str_4 = "[{38}],[{39}],[{40}],[{41}],[{42}],[{43}],[{44}],[{45}],[{46}],[{47}],[{48}],[{49}],[{50}],[{51}],[{52}],"
-                                            cnxn_str_5 = "[{53}],[{54}],[{55}],[{56}]) "
-                                            cnxn_str_6 = "VALUES('{57}','{58}','{59}','{60}','{61}','{62}','{63}','{64}','{65}','{66}','{67}','{68}','{69}','{70}','{71}','{72}','{73}','{74}','{75}','{76}','{77}','{78}',"
-                                            cnxn_str_7 = "'{80}','{81}','{82}','{83}','{84}','{85}','{86}','{87}','{88}','{89}','{90}','{91}','{92}','{93}','{94}','{95}','{96}','{97}','{98}','{99}','{100}','{101}',"
-                                            cnxn_str_8 = "'{102}','{103}','{104}','{105}','{106}','{107}','{108}','{109}','{110}','{111}','{112}','{113}');"
-                                            cnxn_str = cnxn_str_1+cnxn_str_2+cnxn_str_3+cnxn_str_4+cnxn_str_5+cnxn_str_6+cnxn_str_7+cnxn_str_8
-                                            cursor.execute(cnxn_str.format(*head_row, *don_row))
+                                            exec_str_1 = "INSERT INTO dbo.organ([{0}],[{1}],[{2}],[{3}],[{4}],[{5}],[{6}],[{7}],[{8}],[{9}],"
+                                            exec_str_2 = "[{10}],[{11}],[{12}],[{13}],[{14}],[{15}],[{16}],[{17}],[{18}],[{19}],[{20}],[{21}],[{22}],"
+                                            exec_str_3 = "[{23}],[{24}],[{25}],[{26}],[{27}],[{28}],[{29}],[{30}],[{31}],[{32}],[{33}],[{34}],[{35}],[{36}],[{37}],"
+                                            exec_str_4 = "[{38}],[{39}],[{40}],[{41}],[{42}],[{43}],[{44}],[{45}],[{46}],[{47}],[{48}],[{49}],[{50}],[{51}],[{52}],"
+                                            exec_str_5 = "[{53}],[{54}],[{55}],[{56}], [{57}]) "
+                                            exec_str_6 = "VALUES('{57}','{58}','{59}','{60}','{61}','{62}','{63}','{64}','{65}','{66}','{67}','{68}','{69}','{70}',"
+                                            exec_str_7 = "'{71}','{72}','{73}','{74}','{75}','{76}','{77}','{78}','{80}','{81}','{82}','{83}','{84}','{85}','{86}',"
+                                            exec_str_8 = "'{87}','{88}','{89}','{90}','{91}','{92}','{93}','{94}','{95}','{96}','{97}','{98}','{99}','{100}','{101}',"
+                                            exec_str_9 = "'{102}','{103}','{104}','{105}','{106}','{107}','{108}','{109}','{110}','{111}','{112}','{113}', '{114}');"
+                                            execstr = exec_str_1+exec_str_2+exec_str_3+exec_str_4+exec_str_5+exec_str_6+exec_str_7+exec_str_8+exec_str_9
+                                            cursor.execute(execstr.format(*head_row, *don_row))
                                             cnxn_DI.commit()       
                                 except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
                                     pass          
@@ -803,13 +804,19 @@ def app():
 
                                     if len(i[1]) == 0:
                                         i[1].append("NA")
-
-                                if len(i[1]) == 1: 
+                                        
+                                if i[1][0].find("Donor ID: ") != -1:
+                                    ids = i[1][0].split(" (")
+                                    for j in ids:
+                                        i_id = j.find(":") + 2
+                                        f_id = j.find(")")
+                                        trunc.append(j[i_id:f_id])
+                                elif len(i[1]) == 1: 
                                     trunc.append((i[1])[0])
                                 else:
                                     trunc.append(", ".join(i[1]))
 
-                            df = pd.DataFrame(columns= [param[i][0] for i in range(lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
+                            df = pd.DataFrame(columns= [param[i][0] for i in range(0,2)]+["Match ID:"]+[param[i][0] for i in range(2,lp)]+[lr_par[0]]+[ren_par[i] for i in range(3)]+[lr_par[1]]+[ren_par[i] for i in range(3)])
                             df_length = len(df)
 
                             try:
