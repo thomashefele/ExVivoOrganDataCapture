@@ -103,16 +103,16 @@ def app(UNOS_AGAIN= None):
     def file_write(file_name, h_array, r_array):
         h = False
         
-        try:
-            with open(file_name, "r") as file:
-                r = csv.reader(file)
-                h_row = next(r)
+        #try:
+         #   with open(file_name, "r") as file:
+          #      r = csv.reader(file)
+           #     h_row = next(r)
 
-                if h_row == h_array:
-                    h = True
+            #    if h_row == h_array:
+             #       h = True
                     
-        except FileNotFoundError:
-            print("No file")
+        #except FileNotFoundError:
+         #   print("No file")
         
         with open(file_name, "a") as file:
             a = csv.writer(file)
