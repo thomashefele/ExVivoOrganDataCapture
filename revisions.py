@@ -103,18 +103,18 @@ def app(UNOS_AGAIN= None):
     def file_write(file_name, h_array, r_array):
         h = False
         
-        #try:
-         #   with open(file_name, "r") as file:
-          #      r = csv.reader(file)
-           #     h_row = next(r)
+        try:
+            with open(file_name, "r") as file:
+                r = csv.reader(file)
+                h_row = next(r)
 
-            #    if h_row == h_array:
-             #       h = True
+                if h_row == h_array:
+                    h = True
                     
-        #except FileNotFoundError:
-         #   print("No file")
+        except FileNotFoundError:
+            print("No file")
         
-        with open(file_name, "w") as file:
+        with open(file_name, "a") as file:
             a = csv.writer(file)
             
             if h == False:
@@ -764,10 +764,10 @@ def app(UNOS_AGAIN= None):
                             except (KeyError, IndexError, pd.errors.InvalidIndexError):
                                 pass
                             
-                            #try:
-                            file_write("{}_donor_info.csv".format(unos_ID), head_row, don_row)
-                            #except(PermissionError, OSError, FileNotFoundError):
-                                #file_status = False
+                            try:
+                                file_write("{}_donor_info.csv".format(unos_ID), head_row, don_row)
+                            except(PermissionError, OSError, FileNotFoundError):
+                                file_status = False
                                 
                             if upload_status == True or file_status == True:
                                 Label(data_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.6, rely= 0.95, anchor= CENTER)
