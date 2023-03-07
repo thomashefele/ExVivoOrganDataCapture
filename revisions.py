@@ -759,7 +759,7 @@ def app(UNOS_AGAIN= None):
                                             cursor.execute(execstr.format(*head_row, *don_row))
                                             cnxn_DI.commit()       
                                 except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                    #upload_status = False
+                                    upload_status = False
                             except (KeyError, IndexError, pd.errors.InvalidIndexError):
                                 pass
                             
