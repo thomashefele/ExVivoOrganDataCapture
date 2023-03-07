@@ -612,7 +612,7 @@ def app(UNOS_AGAIN= None):
                             execstr_1 = "([{0}], [{1}], [{2}], [{3}]) VALUES('{4}', GETDATE(), '{5}', '{6}');"
                             execstr = intro_str+execstr_1
                         elif instr == "perf":
-                            execstr_1 = "INSERT INTO dbo.perf_t([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}])"
+                            execstr_1 = "([{0}], [{1}], [{2}], [{3}], [{4}], [{5}], [{6}], [{7}], [{8}], [{9}], [{10}], [{11}], [{12}])"
                             execstr_2 = " VALUES('{13}', GETDATE(), '{14}', '{15}', '{16}', '{17}', '{18}', '{19}', '{20}', '{21}', '{22}', '{23}', '{24}');"
                             execstr = intro_str+execstr_1+execstr_2
                         elif instr == "biop":
