@@ -114,7 +114,7 @@ def app(UNOS_AGAIN= None):
         #except FileNotFoundError:
          #   print("No file")
         
-        with open(file_name, "a") as file:
+        with open(file_name, "w") as file:
             a = csv.writer(file)
             
             if h == False:
