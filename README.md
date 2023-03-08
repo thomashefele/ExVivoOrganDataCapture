@@ -1,6 +1,7 @@
 # DTK Data Collection Project
 
 Last updated: 3/8/2022
+Version: 1.1
 
 A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in biomedical research, such as:
 - Creating digital twins of organs
