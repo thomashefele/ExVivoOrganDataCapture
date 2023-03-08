@@ -1,12 +1,14 @@
-# DTK Data Collection Project
+#/{ex vivo} Organ Perfusion Continuous Data Collection Project
 
 Last updated: 3/8/2022.
 Version: 1.1
 
-A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in biomedical research, such as:
+A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during organ perfusions, this software can be utilized for various projects in biomedical research, such as:
 - Creating digital twins of organs
 - Analyzing hemodynamics and vascular leak in organs
 - Whole organ isolation for studies of therapeutic effects on specific organs
+
+The software has been developed for kidney perfusions but, as an open-source project, can be modified and customized for 
 
 Features:
 
