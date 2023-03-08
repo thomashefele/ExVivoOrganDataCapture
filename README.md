@@ -1,4 +1,4 @@
-# ex vivo Organ Perfusion Continuous Data Collection Project
+# *ex vivo* Organ Perfusion Continuous Data Collection Project
 
 Last updated: 3/8/2022.
 Version: 1.1
@@ -8,9 +8,9 @@ A tool for extracting, transforming, and loading (ETL) real time data on biomark
 - Analyzing hemodynamics and vascular leak in organs
 - Whole organ isolation for studies of therapeutic effects on specific organs
 
-The software has been developed for kidney perfusions but, as an open-source project, can be modified and customized for 
+The software has been developed for kidney perfusions but, as an open-source project, can be modified and customized for perfusion of any organ and myriad biometrics.
 
-Features:
+## Features:
 
 - Available for Linux, Windows, and Mac!
 - User-friendly GUI!
@@ -27,7 +27,7 @@ Features:
 - Alarms to warn if a sensor has powered off/become disconnected
 - Real time data visualization provided by PowerBI
 
-Navigating the GUI:
+## Navigating the GUI:
 
 The GUI of the software appears as follows:
 
@@ -41,7 +41,7 @@ To use, simply select an option, enter the UNOS ID (or another identifier), and 
 
 Due to the runtime complexity of each individual option, the app is designed to run only one feature at a time. Want to choose a different option? Simply click "Restart"! The app will save the UNOS ID so you can choose a new task without the redundancy of having to enter the UNOS ID each time.
 
-Donor Information Upload:
+## Donor Information Upload:
   
 Enter a UNOS ID and the software will find and mine data from the respective file on your computer: 
   
@@ -55,7 +55,7 @@ If the data does not appear correct or data is missing, one can edit by double c
 
 ![DI3](https://user-images.githubusercontent.com/116929892/223640093-e17365f7-7e4d-418e-ad93-91bb1c6cd3e3.png)
   
-Perfusate Data and Medications:
+## Perfusate Data and Medications:
 
 Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
   
@@ -63,7 +63,7 @@ Take output from iStat and Piccolo analyzers, enter into the app, and upload! Ea
 
 The recording of medications administered allows one to determine whether or not changes in the pathophysiology of the organ (as visualized by the sensor data collected) can be ascribed to the medication (in conjunction with the data collected on control organs).
   
-Sensor Data Collection:
+## Sensor Data Collection:
   
 To start sensor data collection, follow the steps below:
 - Ensure each sensor is on and properly calibrated
@@ -88,8 +88,9 @@ To start sensor data collection, follow the steps below:
 - The time stamps indicate to you the last time data was uploaded from each respective sensor. Each time stamp should update every ~5 seconds.
 - To restart or exit from data collection, make sure to click "Stop Data Collection" first and wait for time stamps to stop updating. Afterwards, "Restart" or "Exit" may be clicked.
     
-- Troubleshooting Data Collection:
-    
+## Troubleshooting Data Collection:
+
+
     Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
     
     A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)    
@@ -115,7 +116,7 @@ To start sensor data collection, follow the steps below:
     
     To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
     
-Samples:
+## Samples:
 
 The software is also designed so that unique identifiers of biological samples (such as barcodes) may be recorded and uploaded to the database:
 
@@ -123,7 +124,7 @@ The software is also designed so that unique identifiers of biological samples (
 
 The resulting record of samples can also be used to corroborate changes in the sensor data, such as a decrease in urine mass/introduction of noise due to a collection of urine sampling.
     
-Data Visualization with PowerBI:
+## Data Visualization with PowerBI:
     
 If using the Azure database, PowerBI can pull data from the database and display it to provide users with a realtime visualization of what is happening during the perfusion. In addition, the AI in PowerBI allows one to ask questions about specific perfusion metrics to gain powerful insights to organ performance!
 
@@ -131,7 +132,7 @@ If using the Azure database, PowerBI can pull data from the database and display
   
   *Note: for donor privacy, the above is a screenshot of pseudo-data produced by a random number generator program.
 
-Establishing Azure Database Connection (Optional):
+## Establishing Azure Database Connection (Optional):
   
 Although the program has been designed to be user-friendly and flexible in use, the most ideal use of the software is when coupled with Azure. To setup an Azure database and connection, follow the instructions below:
   
@@ -164,4 +165,3 @@ Although the program has been designed to be user-friendly and flexible in use, 
   There are a multitude of alternative drivers for Mac and Linux in addition to the above.
   
 - Ensure that your wifi is a private network. Public networks will not work for uploading data to Azure. (Although data can still be written to CSV files on the backup system.)
-
