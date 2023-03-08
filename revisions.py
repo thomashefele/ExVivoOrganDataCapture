@@ -182,7 +182,7 @@ def app(UNOS_AGAIN= None):
 
         return float(new_str)
 
-    #This function parses the data output from the Biotrend device to retreive the venous sO2 and the hematocrit during perfusion. Due to the 
+    #This function parses the data output from the Biotrend device to retrieve the venous sO2 and the hematocrit during perfusion. Due to the 
     #presence of hexadecimal characters at times at the beginning of the data output, this function searches for certain characters and then 
     #locates the values based on those characters. This is in contrast to other functions which parses the known indices of values and reports 
     #at those indices. It has been encountered in the past that hexadecimal characters appear in the middle of the data string, but it has not 
@@ -222,6 +222,8 @@ def app(UNOS_AGAIN= None):
             head_row = ["UNOS_ID", "time_stamp", "flow", "pressure", "rpm"]
 
             while STOP == False:
+                upload_status,file_status = True,True
+                
                 try:
                     if MT_port.is_open == False:
                         MT_port.open()
@@ -241,10 +243,13 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_MT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
-
-                        file_write(fn, head_row, data_row) 
-
+                            upload_status = False
+                        
+                        try:
+                            file_write(fn, head_row, data_row)
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
+                            
                     else:
                         try:
                             AF_str = MT_str[5:8] + "." + MT_str[8:10]
@@ -271,9 +276,12 @@ def app(UNOS_AGAIN= None):
                                         cursor.execute(execstr)
                                         cnxn_MT.commit()
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
+                                upload_status = False
 
-                            file_write(fn, head_row, [unos_ID, up_time, data_AF, data_AP, rpm])       
+                            try:
+                                file_write(fn, head_row, [unos_ID, up_time, data_AF, data_AP, rpm])
+                            except (PermissionError, OSError, IOError):
+                                file_status = False
 
                         except (IndexError, ValueError, TypeError):
                             alert()
@@ -285,9 +293,12 @@ def app(UNOS_AGAIN= None):
                                         cursor.execute(execstr)
                                         cnxn_MT.commit()
                             except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                                pass
-
-                            file_write(fn, head_row, data_row)  
+                                upload_status = False
+                            
+                            try:
+                                file_write(fn, head_row, data_row)
+                            except (PermissionError, OSError, IOError):
+                                file_status = False
 
                 except (OSError, FileNotFoundError):
                     MT_port.close()
@@ -301,14 +312,22 @@ def app(UNOS_AGAIN= None):
                                 cursor.execute(execstr)
                                 cnxn_MT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                        pass
+                        upload_status = False
                     
                     up_time = datetime.utcnow()
                     data_row = [unos_ID, up_time, None, None, None]
-                    file_write(fn, head_row, data_row) 
+                    
+                    try:
+                        file_write(fn, head_row, data_row)
+                    except (PermissionError, OSError, IOError):
+                        file_status = False
                 
                 ts_MT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER)
+                
+                if upload_status == True or file_status == True:
+                    ts_MT.place(relx= tsx, rely= 0.2, anchor= CENTER)
+                else:
+                    pass
 
     #Medtronic Biotrend sensor function                                                  
     def BT(port_name, b, t):
@@ -316,7 +335,9 @@ def app(UNOS_AGAIN= None):
             fn = "{0}_{1}_bt_data.csv".format(unos_ID, c_or_t)
             head_row = ["UNOS_ID", "time_stamp", "sO2", "hct"]
             
-            while STOP == False:        
+            while STOP == False:
+                upload_status,file_status = True,True
+                
                 try:
                     if BT_port.is_open == False:
                         BT_port.open()
@@ -333,9 +354,13 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
+                            upload_status = False
                         
-                        file_write(fn, head_row, [unos_ID, up_time, None, None]) 
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, None, None])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
+                        
                     elif np.isnan(data_sO2v) == True and np.isnan(data_hct) == False:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -344,9 +369,13 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
+                            upload_status = False
                         
-                        file_write(fn, head_row, [unos_ID, up_time, None, data_hct]) 
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, None, data_hct])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
+                        
                     elif np.isnan(data_sO2v) == False and np.isnan(data_hct) == True:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -355,9 +384,13 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
+                            upload_status = False
                         
-                        file_write(fn, head_row, [unos_ID, up_time, data_sO2v, None]) 
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, data_sO2v, None])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
+                        
                     else:
                         try:
                             with pyodbc.connect(connString) as cnxn_BT:
@@ -366,9 +399,13 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_BT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass             
+                            upload_status = False             
                     
-                        file_write(fn, head_row, [unos_ID, up_time, data_sO2v, data_hct])
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, data_sO2v, data_hct])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
+                        
                 except (OSError, FileNotFoundError):
                     BT_port.close()
                     alert()
@@ -381,13 +418,21 @@ def app(UNOS_AGAIN= None):
                                 cursor.execute(execstr)
                                 cnxn_BT.commit()
                     except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
+                        upload_status = False
 
                     up_time = datetime.utcnow()
-                    file_write(fn, head_row, [unos_ID, up_time, None, None])
+                    
+                    try:
+                        file_write(fn, head_row, [unos_ID, up_time, None, None])
+                    except (PermissionError, OSError, IOError):
+                        file_status = False
                   
                 ts_BT = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-                ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER)
+                
+                if upload_status == True or file_status == True:
+                    ts_BT.place(relx= tsx, rely= 0.4, anchor= CENTER)
+                else:
+                    pass
 
     #Force transducer sensor function. The force transducer outputs data at a variable frequency.. The "interval" parameter allows us to set the 
     #what time interval at which we want to collect data (i.e. every x seconds withing +/- 0.5 secs of x). The function collects the data point closest to the "x"
@@ -397,7 +442,8 @@ def app(UNOS_AGAIN= None):
             rd, check, mass, m_arr = 0, 0, 0, []
             start = monotonic()
 
-            while STOP == False:                                            
+            while STOP == False:
+                upload_status,file_status = True,True
                 intv = monotonic()-start
                 rd = round(intv)
 
@@ -452,9 +498,12 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_FT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
-
-                        file_write(fn, head_row, [unos_ID, up_time, None])
+                            upload_status = False
+                        
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, None])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
                     else:
                         try:
                             with pyodbc.connect(connString) as cnxn_FT:
@@ -463,16 +512,22 @@ def app(UNOS_AGAIN= None):
                                     cursor.execute(execstr)
                                     cnxn_FT.commit()
                         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-                            pass
-
-                        file_write(fn, head_row, [unos_ID, up_time, mass])
+                            upload_status = False
+                        
+                        try:
+                            file_write(fn, head_row, [unos_ID, up_time, mass])
+                        except (PermissionError, OSError, IOError):
+                            file_status = False
 
                     ts = Label(vals, text= "{}".format(datetime.now().strftime("%H:%M:%S")), font= txt, bg= "white", padx= 5)
-
-                    if measure == "km":
-                        ts.place(relx= tsx, rely= 0.6, anchor= CENTER)
-                    elif measure == "uo":
-                        ts.place(relx= tsx, rely= 0.8, anchor= CENTER)
+                    
+                    if upload_status == True or file_status == True:
+                        if measure == "km":
+                            ts.place(relx= tsx, rely= 0.6, anchor= CENTER)
+                        elif measure == "uo":
+                            ts.place(relx= tsx, rely= 0.8, anchor= CENTER)
+                    else:
+                        pass
 
                     del m_arr[:]
                 else:
@@ -591,7 +646,7 @@ def app(UNOS_AGAIN= None):
                             CFZ4_txt.get(), CFM5_txt.get(), CFZ5_txt.get(), MFM1_txt.get(), MFZ1_txt.get(), MFM2_txt.get(), MFZ2_txt.get(), 
                             MFM3_txt.get(), MFZ3_txt.get(), MFM4_txt.get(), MFZ4_txt.get(), MFM5_txt.get(), MFZ5_txt.get()]
 
-            upload_status,file_status = True, True
+            upload_status,file_status = True,True
             
             if instr == "meds":
                 fn = "{0}_{1}.csv".format(unos_ID, instr)
@@ -635,7 +690,7 @@ def app(UNOS_AGAIN= None):
 
             try:
                 file_write(fn, head_row, data_row)
-            except (PermissionError, OSError, FileNotFoundError):
+            except (PermissionError, OSError, IOError):
                 file_status = False
 
             if upload_status == True or file_status == True:
@@ -770,7 +825,7 @@ def app(UNOS_AGAIN= None):
                             
                             try:
                                 file_write("{}_donor_info.csv".format(unos_ID), head_row, don_row)
-                            except(PermissionError, OSError, FileNotFoundError):
+                            except (PermissionError, OSError, IOError):
                                 file_status = False
                                 
                             if upload_status == True or file_status == True:
