@@ -39,7 +39,6 @@ elif OS == "Windows":
 def app(UNOS_AGAIN= None):
     #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
     #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
-    
     root = Tk()
     root.title("Kidney Perfusion App")
     w,h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -52,9 +51,11 @@ def app(UNOS_AGAIN= None):
     cf_x,cf_y = 0.34, 0.4
     radx = 0.2
     uf_x,uf_y = 0.34, 0.32
-    don_x,don_y = 0.59, 0.8
+    don_x,don_y = 0.53, 0.8
+    don_up, don_yes = 0.42, 0.7
     chemf_x,chemf_y = 0.255, 0.7
-    med_y = 0.15
+    med_y = 0.13
+    sub_med, med_yes = 0.76, 0.75
     prt_x,prt_y = 0.54, 0.29
     prt_padx = 110
     disp_x,disp_y = 0.54, 0.53
@@ -63,8 +64,10 @@ def app(UNOS_AGAIN= None):
     chemsub_pady = 5
     istat_relx,pic_relx = 0.5, 0.5
     istat_rely,pic_rely = 0.7, 0.95
+    av_label,opt_label = 10, 20
     allset_pad = 10
     u_pady, sub_pad,rest_pad,ex_pad = 10, 1, 1, 5
+    perf_pad, biop_pad = 5, 10
 
     if w >= 1440 and h >= 900:
         head_sz, txt_sz = 25, 20
@@ -74,8 +77,10 @@ def app(UNOS_AGAIN= None):
         radx = 0.25
         uf_x,uf_y = 0.34, 0.38
         don_x,don_y = 0.59, 0.8
+        don_up, don_yes = 0.375, 0.6
         chemf_x,chemf_y = 0.29, 0.72
         med_y = 0.15
+        sub_med, med_yes = 0.78, 0.63
         prt_x,prt_y = 0.59, 0.25
         prt_padx = 160
         disp_x,disp_y = 0.59, 0.6
@@ -84,8 +89,10 @@ def app(UNOS_AGAIN= None):
         chemsub_pady = 15
         istat_relx,pic_relx = 0.48, 0.525
         istat_rely,pic_rely = 0.95, 0.8
+        av_label,opt_label = 20, 50
         allset_pad = 45
         u_pady, sub_pad,rest_pad,ex_pad = 25, 5, 5, 15
+        perf_pad, biop_pad = 35, 20
 
     var,unos_txt,exp_type = StringVar(), StringVar(), StringVar()
     header,txt = ("Helvetica", head_sz, "bold"), ("Helvetica", txt_sz)
@@ -699,9 +706,9 @@ def app(UNOS_AGAIN= None):
                 elif instr == "pic":
                     Label(pic_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 13, column= 4)
                 elif instr == "meds":
-                    Label(med_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+                    Label(med_w, text= "Data\nsuccessfully saved!", font= txt, padx= 5).place(relx= 0.84, rely= med_yes, anchor= CENTER)
                 elif instr == "perf":
-                    Label(perf_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 16, column= 1)    
+                    Label(perf_w, text= "Data\nsuccessfully saved!", font= txt, padx= 5).grid(row= 16, column= 1)    
                 elif instr == "biop":
                     Label(biop_w, text= "Data successfully saved!", font= txt, padx= 5).grid(row= 13, column= 3, columnspan= 2)
             else:
@@ -710,9 +717,9 @@ def app(UNOS_AGAIN= None):
                 elif instr == "pic":
                     Label(pic_w, text= "Data saving unsuccessful.", font= txt).grid(row= 13, column= 4)
                 elif instr == "meds":
-                    Label(med_w, text= "Data saving unsuccessful.", font= txt).place(relx= 0.83, rely= 0.63, anchor= CENTER)
+                    Label(med_w, text= "Data saving\nunsuccessful.", font= txt).place(relx= 0.84, rely= med_yes, anchor= CENTER)
                 elif instr == "perf":
-                    Label(perf_w, text= "Data saving unsuccessful.", font= txt).grid(row= 16, column= 1)
+                    Label(perf_w, text= "Data\nsaving unsuccessful.", font= txt).grid(row= 16, column= 1)
                 elif instr == "biop":
                     Label(biop_w, text= "Data saving unsuccessful.", font= txt).grid(row= 13, column= 3, columnspan= 2)
 
@@ -829,9 +836,9 @@ def app(UNOS_AGAIN= None):
                                 file_status = False
                                 
                             if upload_status == True or file_status == True:
-                                Label(data_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= 0.6, rely= 0.95, anchor= CENTER)
+                                Label(data_w, text= "Data successfully saved!", font= txt, padx= 5).place(relx= don_yes, rely= 0.95, anchor= CENTER)
                             else:
-                                Label(data_w, text= "Data saving unsuccessful.", font= txt, padx= 5).place(relx= 0.6, rely= 0.95, anchor= CENTER)
+                                Label(data_w, text= "Data saving unsuccessful.", font= txt, padx= 5).place(relx= don_yes, rely= 0.95, anchor= CENTER)
 
                         if no_fitz == False:
                             donor_file = find("{}.pdf".format(unos_ID), "/")
@@ -989,7 +996,7 @@ def app(UNOS_AGAIN= None):
                             donor_info.cellbackgr = "white"
                             donor_info.boxoutlinecolor = "black"
                             donor_info.show()
-                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= 0.375, rely= 0.95, anchor= CENTER)   
+                            donor_ul = Button(data_w, text= "Upload", font= txt, command= lambda: donor_upload(table)).place(relx= don_up, rely= 0.95, anchor= CENTER)   
                         else:
                             Label(data_w, text= "PDF scanner currently unavailable.\nUpdate Python to 3.7 or higher.", font= txt).place(relx= 0.5, rely= 0.5, anchor= CENTER)
 
@@ -1017,8 +1024,8 @@ def app(UNOS_AGAIN= None):
                         iside_txt.set("Arterial")
                         
                         Label(istat_w, text= "iStat Measurements:", font= header).grid(row= 0, column= 2)
-                        Label(istat_w, text= "A/V: ", font= txt).grid(row= 1, column= 1, padx= 20)
-                        iside_e = OptionMenu(istat_w, iside_txt, *av_opt).grid(row= 1, column= 2, ipadx= 50)
+                        Label(istat_w, text= "A/V: ", font= txt).grid(row= 1, column= 1, padx= av_label)
+                        iside_e = OptionMenu(istat_w, iside_txt, *av_opt).grid(row= 1, column= 2, ipadx= opt_label)
                         Label(istat_w, text= "pH: ", font= txt).grid(row= 2, column= 1)
                         pH_e = Entry(istat_w, text= pH_txt, font= txt).grid(row= 2, column= 2)
                         Label(istat_w, text= "PCO2: ", font= txt).grid(row= 3, column= 1)
@@ -1054,8 +1061,8 @@ def app(UNOS_AGAIN= None):
                         pside_txt.set("Arterial")
 
                         Label(pic_w, text= "Piccolo Measurements:", font= header).grid(row= 0, column= 4)
-                        Label(pic_w, text= "A/V: ", font= txt).grid(row= 1, column= 3, padx= 20)
-                        pside_e = OptionMenu(pic_w, pside_txt, *av_opt).grid(row= 1, column= 4, ipadx= 50)
+                        Label(pic_w, text= "A/V: ", font= txt).grid(row= 1, column= 3, padx= av_label)
+                        pside_e = OptionMenu(pic_w, pside_txt, *av_opt).grid(row= 1, column= 4, ipadx= opt_label)
                         Label(pic_w, text= "Glu: ", font= txt).grid(row= 2, column= 3)
                         pGlu_e = Entry(pic_w, text= pGlu_txt, font= txt).grid(row= 2, column= 4)
                         Label(pic_w, text= "BUN: ", font= txt).grid(row= 3, column= 3)
@@ -1087,7 +1094,7 @@ def app(UNOS_AGAIN= None):
 
                         submit_istat = Button(istat_w, text= "Submit", command= lambda: upload("istat"), font= txt).grid(row= 15, column= 2, pady= chemsub_pady)
                         submit_pic = Button(pic_w, text= "Submit", command= lambda: upload("pic"), font= txt).grid(row= 12, column= 4, pady= chemsub_pady)
-                        submit_med = Button(med_w, text= "Submit", command= lambda: upload("meds"), font= txt).place(relx= 0.77, rely= 0.1)
+                        submit_med = Button(med_w, text= "Submit", command= lambda: upload("meds"), font= txt).place(relx= sub_med, rely= 0.1)
                         
                     #This option collects data from the myriad perfusion sensors, integrates and formats the data, and then
                     #uploads it to the Azure database.
@@ -1133,7 +1140,7 @@ def app(UNOS_AGAIN= None):
                         
                         #Arterial perfusates
                         Label(perf_w, text= "Arterial Perfusates:", font= txt).grid(row= 0, column= 1)
-                        A1_e = Entry(perf_w, text= A1_txt, font= txt, width= 15).grid(row= 1, column= 1, padx= 35)
+                        A1_e = Entry(perf_w, text= A1_txt, font= txt, width= 15).grid(row= 1, column= 1, padx= perf_pad)
                         A2_e = Entry(perf_w, text= A2_txt, font= txt, width= 15).grid(row= 2, column= 1)
                         A3_e = Entry(perf_w, text= A3_txt, font= txt, width= 15).grid(row= 3, column= 1)
                         A4_e = Entry(perf_w, text= A4_txt, font= txt, width= 15).grid(row= 4, column= 1)
@@ -1157,7 +1164,7 @@ def app(UNOS_AGAIN= None):
                         MFM1_txt, MFM2_txt, MFM3_txt, MFM4_txt, MFM5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
                         MFZ1_txt, MFZ2_txt, MFZ3_txt, MFZ4_txt, MFZ5_txt = StringVar(), StringVar(), StringVar(), StringVar(), StringVar()
                         
-                        Label(biop_w, text= "Site 1:", font= txt).grid(row= 1, column= 2, padx= 20)
+                        Label(biop_w, text= "Site 1:", font= txt).grid(row= 1, column= 2, padx= biop_pad)
                         Label(biop_w, text= "Site 2:", font= txt).grid(row= 2, column= 2)
                         Label(biop_w, text= "Site 3:", font= txt).grid(row= 3, column= 2)
                         Label(biop_w, text= "Site 4:", font= txt).grid(row= 4, column= 2)
