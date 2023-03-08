@@ -88,33 +88,6 @@ To start sensor data collection, follow the steps below:
 - The time stamps indicate to you the last time data was uploaded from each respective sensor. Each time stamp should update every ~5 seconds.
 - To restart or exit from data collection, make sure to click "Stop Data Collection" first and wait for time stamps to stop updating. Afterwards, "Restart" or "Exit" may be clicked.
     
-## Troubleshooting Data Collection:
-
-Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
-
-A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)    
-
-Q: We have lost internet connection during perfusion! Is our data being lost?
-
-A: The software has a backup feature that writes the data to local CSV files during the perfusion. If there is a connection issue during perfusion         (internet or otherwise), data will continue to be written to the CSV files, which can then be uploaded to the database post-perfusion. That being         said, the backup feature is not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear,         indicating that data transfer is no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
-
-Q: The time stamp(s) are appearing irregularly!
-
-A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
-
- - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.      
- - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
-
-          https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
-
-On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to check:
-
-          https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
-
-After finding the app that is hijacking the COM ports, one can quit or turn off that app.
-
-To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
-    
 ## Samples:
 
 The software is also designed so that unique identifiers of biological samples (such as barcodes) may be recorded and uploaded to the database:
@@ -164,3 +137,44 @@ Although the program has been designed to be user-friendly and flexible in use, 
   There are a multitude of alternative drivers for Mac and Linux in addition to the above.
   
 - Ensure that your wifi is a private network. Public networks will not work for uploading data to Azure. (Although data can still be written to CSV files on the backup system.)
+
+## Troubleshooting:
+
+Q: The time stamp(s) are not appearing/have stopped updating What is happening?
+
+A: There are three causes of this:
+
+  - If the time stamps are not appearing, this means that the database connection was never established and that the backup system is not working. The software is designed so that if an upload is made to the database or to a backup CSV file, the time stamp updates. Likewise, for other data, if an upload is made "Data successfully saved!" message is reported. 
+  
+The backup system code itself has no errors and works as intended on Mac and Linux; however, mixed success has been encountered with the system on Windows. On some Windows devices, the system works as intended; on others, an "OSError: [Errno 13] Permission denied" is raised. When the file writing method is isolated from the overarching code the error disappears, nad the feature works without error on Mac and Linux. As far as can be determined, this bug is not due to the software but rather due to permission issues on Windows.
+
+- On Linux, a unique and very rare error ("OSError: errno 5 input/output error") can appear if the initialization with one of the serial port drivers is not successful. This is not a software issue but rather an issue between the driver and the hardware in making a connection. Stop the data collection, click "Exit" and restart the program. (Do NOT just click "Restart".)
+
+- The internet connection has abruptly been broken. See "We have lost internet connection..." question below.
+
+Please note that the software is designed to upload to the database and the backup CSV files separately. As such, if an unforeseen error occurs with one, it will not affect the performance of the other and vice-versa.
+
+Q: The time stamp(s) are appearing irregularly! What can be done?
+
+A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
+
+ - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.      
+ - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
+
+          https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
+
+On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to check:
+
+          https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
+
+After finding the app that is hijacking the COM ports, one can quit or turn off that app.
+
+Q: We have lost internet connection during perfusion! Is our data being lost?
+
+A: The software has a backup feature that writes the data to local CSV files during the perfusion. If there is a connection issue during perfusion         (internet or otherwise), data will continue to be written to the CSV files, which can then be uploaded to the database post-perfusion. That being         said, the backup feature is not foolproof: rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear,         indicating that data transfer is no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
+
+Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
+
+A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)
+
+To report other unforeseen issues that may arise, please contact dtk.yale@gmail.com
