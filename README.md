@@ -1,6 +1,8 @@
 # DTK Data Collection Project
 
-A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in healthcare, such as:
+Last updated: 3/8/2022
+
+A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during kidney perfusions, this software can be utilized for various projects in biomedical research, such as:
 - Creating digital twins of organs
 - Analyzing hemodynamics and vascular leak in organs
 - Whole organ isolation for studies of therapeutic effects on specific organs
@@ -10,8 +12,8 @@ Features:
 - Available for Linux, Windows, and Mac!
 - User-friendly GUI!
 - Backup system stores data on CSV files in case connection to database is broken (such as internet loss, lack of firewall access, or lack of SQL driver)
-- PDF scanner will find and extract pertinent donor information. User can check and edit donor information prior to storing in database.
-- User input for blood gas measurements
+- Data mining with PDF scanner automates the process of finding pertinent donor medical history. The user can then check and edit donor information prior to storing in database.
+- User input for blood gas measurements and medications; perfusate, urine, and biopsy samples.
 - Real time data collection of biomarkers pertinent to hemodynamics and vascular leak, such as:
   - Arterial pressure
   - Arterial flow
@@ -28,12 +30,13 @@ The GUI of the software appears as follows:
 
 ![GUI Main](https://user-images.githubusercontent.com/116929892/220244767-1b087a14-031e-4603-9dd4-3252978b9c21.png)
 
-To use, simply select an option and enter the UNOS ID (or another identifier) into the app. There are three options from which to choose:
-- Donor Information Upload
-- Blood Gas Data Upload
-- Sensor Data Collection
+To use, simply select an option, enter the UNOS ID (or another identifier), and choose if the trial is a control or experimental. There are four options from which to choose:
+- Donor information upload
+- Perfusate data and medications
+- Sensor data collection
+- Samples
 
-Due to the runtime complexity of each individual option, the app is designed to run only one feature at a time. Want to choose a different option or entered the wrong ID? Simply click "Restart"!
+Due to the runtime complexity of each individual option, the app is designed to run only one feature at a time. Want to choose a different option? Simply click "Restart"! The app will save the UNOS ID so you can choose a new task without the redundancy of having to enter the UNOS ID each time.
 
 Donor Information Upload:
   
@@ -49,11 +52,13 @@ If the data does not appear correct or data is missing, one can edit by double c
 
 ![DI_3](https://user-images.githubusercontent.com/116929892/220244921-1d97af0c-0d2f-4d4b-a54c-86cabbe9192e.png)
   
-Blood Gas Data Upload:
+Perfusate Data and Medications:
 
 Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
   
-![BG](https://user-images.githubusercontent.com/116929892/220245002-b4d3d7a4-b201-4a3b-8514-b3906e1af30b.png)
+<img width="1440" alt="Perf" src="https://user-images.githubusercontent.com/116929892/223633949-b50d677b-c155-4b5b-ba76-5a0a155a7512.png">
+
+The recording of medications administered allows one to determine whether or not changes in the pathophysiology of the organ correspond (as visualized by the data collected) can be ascribed to the medication (in conjunction with the data collected on control organs).
   
 Sensor Data Collection:
   
@@ -70,6 +75,7 @@ To start sensor data collection, follow the steps below:
 - If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retrieved from CSV files that can be found on the computer:
     
     - Donor information: [id]_donor_info.csv
+    - Medications: [id]_meds.csv
     - iStat and Piccolo data: [id]_istat.csv, [id]_pic.csv
     - Arterial flow and pressure: [id]_mt_data.csv
     - Venous oxygen saturation and hematocrit: [id]_bt_data.csv
@@ -105,6 +111,14 @@ To start sensor data collection, follow the steps below:
     After finding the app that is hijacking the COM ports, one can quit or turn off that app.
     
     To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
+    
+Samples:
+
+The software is also designed so that unique identifies of biological samples (such as barcodes) may be recorded and uploaded to the database:
+
+<pic>
+
+The resulting record of samples can also be used to corroborate changes in the sensor data, such as a decrease in urine mass/introduction of noise due to a collection of urine sampling.
     
 Data Visualization with PowerBI:
     
