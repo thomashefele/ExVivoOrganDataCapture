@@ -507,10 +507,14 @@ def app(UNOS_AGAIN= None):
     def port_detect():
         global name
         global CHECK_AGAIN
-        ports = serial.tools.list_ports.comports()
+        
+        if OS == "Darwin":
+            ports = serial.tools.list_ports.comports()
+        elif OS == "Linux" or OS == "Windows":
+            ports = sorted(serial.tools.list_ports.comports())
 
         if CHECK_AGAIN == False:
-            for dev,descr,hwid in sorted(ports):
+            for dev,descr,hwid in ports:
                     if dev.find("COM") != -1 or dev.find("USB") != -1 or dev.find("usbserial") != -1:
                         name.append(dev)
                     else:
