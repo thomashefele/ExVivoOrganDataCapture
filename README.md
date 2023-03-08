@@ -142,7 +142,7 @@ Although the program has been designed to be user-friendly and flexible in use, 
 
 Q: The time stamp(s) are not appearing/have stopped updating What is happening?
 
-A: There are three causes of this:
+A: There are three known causes of this:
 
   - If the time stamps are not appearing, this means that the database connection was never established and that the backup system is not working. The software is designed so that if an upload is made to the database or to a backup CSV file, the time stamp updates. Likewise, for other data, if an upload is made "Data successfully saved!" message is reported. 
   
