@@ -90,31 +90,30 @@ To start sensor data collection, follow the steps below:
     
 ## Troubleshooting Data Collection:
 
+Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
 
-    Q: USB port(s) have powered off/become disconnected during perfusion! What should we do?
-    
-    A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)    
-    
-    Q: We have lost internet connection during perfusion! Is our data being lost?
-    
-    A: The software has a backup feature that writes the data to local CSV files during the perfusion. If there is a connection issue during perfusion         (internet or otherwise), data will continue to be written to the CSV files, which can then be uploaded to the database post-perfusion. That being         said, the backup feature is not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear,         indicating that data transfer is no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
-    
-    Q: The time stamp(s) are appearing irregularly!
-    
-    A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
-    
-     - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.      
-     - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
-    
-              https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
-    
-    On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to check:
-   
-              https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
-    
-    After finding the app that is hijacking the COM ports, one can quit or turn off that app.
-    
-    To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
+A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)    
+
+Q: We have lost internet connection during perfusion! Is our data being lost?
+
+A: The software has a backup feature that writes the data to local CSV files during the perfusion. If there is a connection issue during perfusion         (internet or otherwise), data will continue to be written to the CSV files, which can then be uploaded to the database post-perfusion. That being         said, the backup feature is not foolproof. Rarely, if the internet connection is lost abruptly, the timestamp(s) will cease to update/not appear,         indicating that data transfer is no longer occuring. In this case, exit out of the program and re-open. (Do NOT simply click "Restart".)
+
+Q: The time stamp(s) are appearing irregularly!
+
+A: This is an indicator that the USB ports have not been plugged in properly. Follow the steps for each OS below:
+
+ - Linux and Mac: Unplug ALL USB ports and re-connect them according to the proper order stated on the GUI.      
+ - Windows: The COM port numbers must be changed so that the order matches that stated on the GUI. A most excellent guide for how to do this:
+
+          https://kb.plugable.com/serial-adapter/how-to-change-the-com-port-for-a-usb-serial-adapter-on-windows-7,-8,-81,-and-10
+
+On Windows, another issue that may occur is that a background app may be hijacking the COM ports. Another most excellent guide for how to check:
+
+          https://knowledge.ni.com/KnowledgeArticleDetails?id=kA03q000000YGw9CAG&l=en-US
+
+After finding the app that is hijacking the COM ports, one can quit or turn off that app.
+
+To report unforeseen issues that may arise, please contact dtk.yale@gmail.com
     
 ## Samples:
 
