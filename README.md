@@ -76,11 +76,11 @@ To start sensor data collection, follow the steps below:
     
     - Donor information: [id]_donor_info.csv
     - Medications: [id]_meds.csv
-    - iStat and Piccolo data: [id]_istat.csv, [id]_pic.csv
-    - Arterial flow and pressure: [id]_mt_data.csv
-    - Venous oxygen saturation and hematocrit: [id]_bt_data.csv
-    - Kidney mass: [id]_km_data.csv
-    - Urine output: [id]_uo_data.csv
+    - iStat and Piccolo data: [id]_[control_or_experimental]_istat.csv, [id]_pic.csv
+    - Arterial flow and pressure: [id]_[control_or_experimental]_mt_data.csv
+    - Venous oxygen saturation and hematocrit: [id]_[control_or_experimental]_bt_data.csv
+    - Kidney mass: [id]_[control_or_experimental]_km_data.csv
+    - Urine output: [id]_[control_or_experimental]_uo_data.csv
     
 - The time stamps indicate to you the last time data was uploaded from each respective sensor. Each time stamp should update every ~5 seconds.
 - To restart or exit from data collection, make sure to click "Stop Data Collection" first and wait for time stamps to stop updating. Afterwards, "Restart" or "Exit" may be clicked.
