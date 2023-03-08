@@ -1,4 +1,4 @@
-#/{ex vivo} Organ Perfusion Continuous Data Collection Project
+#Organ Perfusion Continuous Data Collection Project
 
 Last updated: 3/8/2022.
 Version: 1.1
