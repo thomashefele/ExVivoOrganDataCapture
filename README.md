@@ -115,7 +115,7 @@ To start sensor data collection, follow the steps below:
     
 Samples:
 
-The software is also designed so that unique identifies of biological samples (such as barcodes) may be recorded and uploaded to the database:
+The software is also designed so that unique identifiers of biological samples (such as barcodes) may be recorded and uploaded to the database:
 
 ![Samples](https://user-images.githubusercontent.com/116929892/223641354-14c9c2df-3a93-47bc-8812-80169e7491fa.png)
 
