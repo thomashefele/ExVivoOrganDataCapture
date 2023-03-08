@@ -116,7 +116,7 @@ Samples:
 
 The software is also designed so that unique identifies of biological samples (such as barcodes) may be recorded and uploaded to the database:
 
-<pic>
+![Samples](https://user-images.githubusercontent.com/116929892/223641354-14c9c2df-3a93-47bc-8812-80169e7491fa.png)
 
 The resulting record of samples can also be used to corroborate changes in the sensor data, such as a decrease in urine mass/introduction of noise due to a collection of urine sampling.
     
@@ -157,3 +157,7 @@ Although the program has been designed to be user-friendly and flexible in use, 
   - On Mac:
   
           https://learn.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos?view=sql-server-ver16
+  
+  There are a multitude of alternative drivers for Mac and Linux in addition to the above.
+  
+- Ensure that your wifi is a private network. Public networks will not work for uploading data to Azure. (Although data can still be written to CSV files on the backup system.)
