@@ -42,15 +42,15 @@ Donor Information Upload:
   
 Enter a UNOS ID and the software will find and mine data from the respective file on your computer: 
   
-![DI_1](https://user-images.githubusercontent.com/116929892/220244880-387d45df-9a70-4b56-9a12-6023163dd293.png)
+![DI1](https://user-images.githubusercontent.com/116929892/223640050-e704a6c0-d636-4ac1-89b8-504338602290.png)
   
   *Note: for donor privacy, the above is a screenshot of a non-existent file to which "dummy" data has been added manually.
   
 If the data does not appear correct or data is missing, one can edit by double clicking on a cell or by adding a column via right click:
   
-![DI_2](https://user-images.githubusercontent.com/116929892/220244909-f5e184fd-b33e-4856-9c98-f82e2bfe120a.png)
+![DI2](https://user-images.githubusercontent.com/116929892/223640071-2405daeb-8408-4fc3-bae8-e62cd3f95bec.png)
 
-![DI_3](https://user-images.githubusercontent.com/116929892/220244921-1d97af0c-0d2f-4d4b-a54c-86cabbe9192e.png)
+![DI3](https://user-images.githubusercontent.com/116929892/223640093-e17365f7-7e4d-418e-ad93-91bb1c6cd3e3.png)
   
 Perfusate Data and Medications:
 
@@ -66,11 +66,11 @@ To start sensor data collection, follow the steps below:
 - Ensure each sensor is on and properly calibrated
 - Connect the USB cables for each driver to the computer according to the order on the GUI:
 
-  ![Driver_order](https://user-images.githubusercontent.com/116929892/220245035-19556eca-5424-44ef-bb6c-e3e0f25562e8.png)
+  ![Sensors](https://user-images.githubusercontent.com/116929892/223640132-2e63cda4-4591-4df9-b799-eafeec0e83fc.png)
     
 - Once all sensors are connected, click "Click to check port status" followed by "Start Data Collection". All done!
   
-  ![Data_stamp_pic](https://user-images.githubusercontent.com/116929892/220245088-0e519bde-188c-45d3-9a0b-b1b669d2ede7.png)
+  ![Sensors 2](https://user-images.githubusercontent.com/116929892/223640169-f2813a53-d90b-42fe-b374-86cded7b3b08.png)
     
 - If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retrieved from CSV files that can be found on the computer:
     
