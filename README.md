@@ -28,7 +28,7 @@ Navigating the GUI:
 
 The GUI of the software appears as follows:
 
-![GUI Main](https://user-images.githubusercontent.com/116929892/220244767-1b087a14-031e-4603-9dd4-3252978b9c21.png)
+![GUI Main](https://user-images.githubusercontent.com/116929892/223634508-e9fe156e-4a5b-46e3-b220-80d16acdb9f4.png)
 
 To use, simply select an option, enter the UNOS ID (or another identifier), and choose if the trial is a control or experimental. There are four options from which to choose:
 - Donor information upload
@@ -56,9 +56,9 @@ Perfusate Data and Medications:
 
 Take output from iStat and Piccolo analyzers, enter into the app, and upload! Easy as can be!
   
-<img width="1440" alt="Perf" src="https://user-images.githubusercontent.com/116929892/223633949-b50d677b-c155-4b5b-ba76-5a0a155a7512.png">
+<img width="1440" alt="Perf" src="https://user-images.githubusercontent.com/116929892/223634550-d04d1168-8eeb-44ac-ae02-34b92a298ebc.png">
 
-The recording of medications administered allows one to determine whether or not changes in the pathophysiology of the organ correspond (as visualized by the data collected) can be ascribed to the medication (in conjunction with the data collected on control organs).
+The recording of medications administered allows one to determine whether or not changes in the pathophysiology of the organ (as visualized by the sensor data collected) can be ascribed to the medication (in conjunction with the data collected on control organs).
   
 Sensor Data Collection:
   
