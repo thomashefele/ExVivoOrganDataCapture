@@ -5,10 +5,7 @@ from time import monotonic, sleep
 
 #timer
 start = monotonic() 
-lap = 0
-interval = 3600
-
-connString = ""
+lap, interval, connString, unos_id = 0, 3600, "", ""
 OS = platform.system()
 
 if OS == "Linux":
@@ -37,27 +34,33 @@ cnxn_FT2 =  pyodbc.connect(connString)
 cursor_FT2 = cnxn_FT2.cursor()
 
 i = 0
-#Information for the categories belowed is pulled from:
+#Information for the categories below is pulled from:
 #Ethnicity/race: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1447913/
 eth = ["Hispanic or Latino", "White", "Black or African American", "Asian", "American Indian or Alaska Native", "Native Hawaiian or Other Pacific Islander"]
 #Gender identities: https://www.bestnotes.com/how-to-classify-gender-identity-and-track-behavioral-health-data-in-your-ehr/
 gender = ["Male", "Female", "Non-binary", "Transgender male", "Transgender female", "Other", "Does not wish to disclose"]
-bt = ["A", "B", "AB", "O"]                                    
+bt = ["A", "B", "AB", "O"]
+
+def wab():
+    #For weight and bmi: https://www.cancer.org/healthy/cancer-causes/diet-physical-activity/body-weight-and-cancer-risk/adult-bmi.html
+    weight = round(rand.random(91, 279), 1)
+    #For age: https://www.nyp.org/transplant/organ-donation/organ-donation-facts
+    age = rand.randint(16, 100)
+    bmi = round(rand.random(19, 35), 1)
+    wab_lst = [weight, age, bmi]
+    
+    return wab_lst
 
 #Random data generator
-while lap <= interval:
+while lap <= interval:  
   if lap < (interval/2):
         unos_id = "TEST_ID_1"
-        #Organ donation age requirements: https://www.nyp.org/transplant/organ-donation/organ-donation-facts
-        age, bmi, weight,
-   bmi = 
-        weight =  
-        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
         cnxn_don.commit()
             
   elif lap >= (interval/2):
         unos_id = "TEST_ID_2"
-        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, bt, weight, age, bmi, gender, eth))
+        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
         cnxn_don.commit()
             
   #MedTronic data
