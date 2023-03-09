@@ -39,6 +39,7 @@ elif OS == "Windows":
 
 def app(UNOS_AGAIN= None):
     root = Tk()
+    root.withdraw()
     root.title("Kidney Perfusion App")
     
     #Unit testing of file writer and database connection
