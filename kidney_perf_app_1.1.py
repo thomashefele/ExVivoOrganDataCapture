@@ -45,16 +45,16 @@ def app(UNOS_AGAIN= None):
     #Unit testing of file writer and database connection
     if UNOS_AGAIN == "Y":
         file_unit, db_unit = True, True
-        start_msg = "The following issues exist:\n\n"
+        start_msg = "Data upload test results:\n\n"
 
         try:
             with open("test_file.csv", "a") as file:
                 a = csv.writer(file)
                 a.writerow(["Test"])
             os.remove("test_file.csv")     
+            start_msg += u"\u2713 File writing system\n\n"
         except (PermissionError, OSError, IOError):
-            file_unit = False
-            start_msg += "- The file writing system does not\nhave permission to write on this system.\n\n"
+            start_msg += u"\u2717 File writing system\n\nCheck the permissions on your computer.\n\n"
 
         try:
             with pyodbc.connect(connString) as cnxn_test:
@@ -65,12 +65,10 @@ def app(UNOS_AGAIN= None):
                     execstr = "DROP TABLE test"
                     cursor.execute(execstr)
                     cnxn_test.commit()
+            start_msg += u"\u2713 Database connection\n\n"
         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
             db_unit = False
-            start_msg += "- The database connection\nwas not established.\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security"
-
-        if file_unit == True and db_unit == True:
-            start_msg = "Database connection and backup system successful!"
+            start_msg += u"\u2717 Database connection\n\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security\n\n"
 
         messagebox.showinfo("Start Up", start_msg)
     else:
