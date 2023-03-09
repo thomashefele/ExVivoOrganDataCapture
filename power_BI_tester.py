@@ -1,3 +1,4 @@
+#A pseudo-data random generator for testing out the Azure database and PowerBI data visualization system.
 import pyodbc, platform
 import random as rand
 from time import monotonic, sleep
@@ -36,20 +37,26 @@ cnxn_FT2 =  pyodbc.connect(connString)
 cursor_FT2 = cnxn_FT2.cursor()
 
 i = 0
+#Information for the categories belowed is pulled from:
+#Ethnicity/race: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1447913/
+eth = ["Hispanic or Latino", "White", "Black or African American", "Asian", "American Indian or Alaska Native", "Native Hawaiian or Other Pacific Islander"]
+#Gender identities: https://www.bestnotes.com/how-to-classify-gender-identity-and-track-behavioral-health-data-in-your-ehr/
+gender = ["Male", "Female", "Non-binary", "Transgender male", "Transgender female", "Other", "Does not wish to disclose"]
+bt = ["A", "B", "AB", "O"]                                    
 
-#data generator
+#Random data generator
 while lap <= interval:
   if lap < (interval/2):
         unos_id = "TEST_ID_1"
-
-        eth, gender, bt, age, bmi, weight = "Hispanic", "M", "O", "37", "23.4", "190"
+        #Organ donation age requirements: https://www.nyp.org/transplant/organ-donation/organ-donation-facts
+        age, bmi, weight,
+   bmi = 
+        weight =  
         cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, bt, weight, age, bmi, gender, eth))
         cnxn_don.commit()
             
   elif lap >= (interval/2):
         unos_id = "TEST_ID_2"
-        
-        eth, gender, bt, age, bmi, weight = "White", "F", "A", "24", "20.6", "155"
         cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, bt, weight, age, bmi, gender, eth))
         cnxn_don.commit()
             
