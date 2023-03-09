@@ -43,10 +43,10 @@ bt = ["A", "B", "AB", "O"]
 
 def wab():
     #For weight and bmi: https://www.cancer.org/healthy/cancer-causes/diet-physical-activity/body-weight-and-cancer-risk/adult-bmi.html
-    weight = round(rand.uniform(91, 279), 1)
+    weight = str(round(rand.uniform(91, 279), 1))
     #For age: https://www.nyp.org/transplant/organ-donation/organ-donation-facts
-    age = rand.randint(16, 100)
-    bmi = round(rand.uniform(19, 35), 1)
+    age = str(rand.randint(16, 100))
+    bmi = str(round(rand.uniform(19, 35), 1))
     wab_lst = [weight, age, bmi]
     
     return wab_lst
