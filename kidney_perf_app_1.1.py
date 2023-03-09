@@ -3,6 +3,7 @@ import pyodbc, serial.tools.list_ports, os, sys, platform, csv
 from time import monotonic, sleep
 from datetime import datetime, timedelta
 from tkinter import *
+from tkinter import messagebox
 from threading import Thread
 from pandastable import Table
 
@@ -37,10 +38,47 @@ elif OS == "Windows":
     connString = "DRIVER={0};SERVER={1};DATABASE={2};UID={3};PWD={4}".format(driver,server,database,username,password)
 
 def app(UNOS_AGAIN= None):
-    #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
-    #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
     root = Tk()
     root.title("Kidney Perfusion App")
+    
+    #Unit testing of file writer and database connection
+    if UNOS_AGAIN == "Y":
+        file_unit, db_unit = True, True
+        start_msg = "The following issues exist:\n\n"
+
+        try:
+            with open("test_file.csv", "a") as file:
+                a = csv.writer(file)
+                a.writerow(["Test"])
+            os.remove("test_file.csv")     
+        except (PermissionError, OSError, IOError):
+            file_unit = False
+            start_msg += "- The file writing system does not\nhave permission to write on this system.\n\n"
+
+        try:
+            with pyodbc.connect(connString) as cnxn_test:
+                with cnxn_test.cursor() as cursor:
+                    execstr = "CREATE TABLE test(TEST text)"
+                    cursor.execute(execstr)
+                    cnxn_test.commit()
+                    execstr = "DROP TABLE test"
+                    cursor.execute(execstr)
+                    cnxn_test.commit()
+        except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
+            db_unit = False
+            start_msg += "- The database connection\nwas not established.\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security"
+
+        if file_unit == True and db_unit == True:
+            start_msg = "Database connection and backup system successful!"
+
+        messagebox.showinfo("Start Up", start_msg)
+    else:
+        pass
+    
+    root.deiconify()
+    
+    #The block of code below sets up the initial screen/GUI for the app. The program was originally designed for an 800x480 Raspberry Pi and tested 
+    #on a 1440x900 MacBook so those are the standards for initializing the GUI screen size.
     w,h = root.winfo_screenwidth(), root.winfo_screenheight()
     root.call("tk", "scaling", 1.0)
     root.attributes("-fullscreen", True)  
