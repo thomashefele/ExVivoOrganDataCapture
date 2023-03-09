@@ -144,13 +144,13 @@ Q: The time stamp(s) are not appearing/have stopped updating What is happening?
 
 A: There are three known causes of this:
 
-  - If the time stamps are not appearing, this means that the database connection was never established and that the backup system is not working. The software is designed so that if an upload is made to the database or to a backup CSV file, the time stamp updates. Likewise, for other data if an upload is made, a "Data successfully saved!" message is reported. 
-  
-  The backup system code itself has no errors and works as intended on Mac and Linux; however, mixed success has been encountered with the system on         Windows. On some Windows devices, the system works as intended; on others, an "PermissionError: [Errno 13] Permission denied" is raised. This is           strictly a Windows issue due to permissions in the file directory of the OS system. A useful article on circumventing this:
+  - If the time stamps are not appearing, this means that the database connection was never established and that the backup system is not working. The software is designed so that if an upload is made to the database or to a backup CSV file, the time stamp updates. Likewise, for other data if an upload is made, a "Data successfully saved!" message is reported. For database connection, see "Establishing Azure Database Connection (Optional)".
+
+    The backup system code itself has no errors and works as intended on Mac and Linux; however, mixed success has been encountered with the system on Windows. On some Windows devices, the system works as intended; on others, an "PermissionError: [Errno 13] Permission denied" is raised. This is strictly a Windows issue due to permissions in the file directory of the OS system. A useful article on circumventing this:
 
           https://windowsreport.com/windows-11-python-permission-denied/
 
-  If none of the solutions proposed above work, the code can be run from a Jupyter notebook (or other notebook) and the filewriting feature will work as     intended. The backlup CSV files can be found in the Jupyter directory and then downloaded to the Windows device.
+    If none of the solutions proposed above work, the code can be run from a Jupyter notebook (or other notebook) and the filewriting feature will work as     intended. The backlup CSV files can be found in the Jupyter directory and then downloaded to the Windows device.
 
 - On Linux, a unique and very rare error ("OSError: errno 5 input/output error") can appear if the initialization with one of the serial port drivers is not successful. This is not a software issue but rather an issue between the driver and the hardware in making a connection. Stop the data collection, click "Exit" and restart the program. (Do NOT just click "Restart".)
 
