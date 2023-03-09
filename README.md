@@ -152,7 +152,7 @@ A: There are three known causes of this:
 
     If none of the solutions proposed above work, the code can be run from a Jupyter notebook (or other notebook) and the filewriting feature will work as     intended. The backup CSV files can be found in the Jupyter directory and then downloaded to the Windows device.
 
-- On Linux, a unique and very rare error ("OSError: errno 5 input/output error") can appear if the initialization with one of the serial port drivers is not successful. This is not a software issue but rather an issue between the driver and the hardware in making a connection. Stop the data collection, click "Exit" and restart the program. (Do NOT just click "Restart".)
+- On Linux, a unique and very rare startup error ("OSError: errno 5 input/output error") can appear if the initialization with one of the serial port drivers is not successful. This is not a software issue but rather an issue between the driver and the hardware in making a connection. Stop the data collection, click "Exit" and restart the program. (Do NOT just click "Restart".)
 
 - The internet connection has abruptly been broken. See "We have lost internet connection..." question below.
 
