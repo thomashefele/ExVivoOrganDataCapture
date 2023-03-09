@@ -68,7 +68,7 @@ def app(UNOS_AGAIN= None):
             start_msg += u"\u2713 Database connection\n\n"
         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
             db_unit = False
-            start_msg += u"\u2717 Database connection\n\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security\n\n"
+            start_msg += u"\u2717 Database connection\n\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security"
 
         messagebox.showinfo("Start Up", start_msg)
     else:
