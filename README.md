@@ -102,7 +102,7 @@ If using the Azure database, PowerBI can pull data from the database and display
 
   <img width="658" alt="PowerBI" src="https://user-images.githubusercontent.com/116929892/220245423-9167dbdf-86d0-4704-ad37-6ca7920c3ac8.png">
   
-  *Note: for donor privacy, the above is a screenshot of pseudo-data produced by the -power_BI_tester.py- program.
+  *Note: for donor privacy, the above is a screenshot of pseudo-data produced by the *power_BI_tester.py* program.
 
 ## Establishing Azure Database Connection (Optional):
   
