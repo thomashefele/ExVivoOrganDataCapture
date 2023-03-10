@@ -200,7 +200,7 @@ A: The software has been designed to account for such things. The data transfer 
 ## System Limitations:
 
 - If using a version of Python less than 3.7, the PyMuPDF library cannot be installed and hence not used. As a result, it is recommended that Python 3.7 or above be used in executing the software.
-- On Mac (at least on the M1 on which the software was designed), the "Restart Button" does not work.
+- On Mac (at least on the M1 on which the software was designed): the "Restart Button" does not work.
 - On Linux: see "The time stamp(s) are not appearing..." in "Troubleshooting".
 - On Windows: see "Start Up" or "The time stamp(s) are not appearing..." in "Troubleshooting".
 
