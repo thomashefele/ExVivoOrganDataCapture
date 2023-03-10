@@ -44,7 +44,6 @@ def app(UNOS_AGAIN= None):
     
     #Unit testing of file writer and database connection
     if UNOS_AGAIN == "Y":
-        file_unit, db_unit = True, True
         start_msg = "Data upload test results:\n\n"
 
         try:
@@ -67,7 +66,6 @@ def app(UNOS_AGAIN= None):
                     cnxn_test.commit()
             start_msg += u"\u2713 Database connection\n\n"
         except (pyodbc.InterfaceError, pyodbc.OperationalError, pyodbc.ProgrammingError, pyodbc.IntegrityError, pyodbc.DataError, pyodbc.NotSupportedError):
-            db_unit = False
             start_msg += u"\u2717 Database connection\n\nCheck the following:\n\n1.) Firewall access\n2.) SQL driver\n3.) Internet connection\n4.) Wifi security"
 
         messagebox.showinfo("Start Up", start_msg)
