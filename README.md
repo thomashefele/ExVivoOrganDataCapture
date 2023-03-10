@@ -41,7 +41,7 @@ The backup CSV system works as intended on Mac and Linux, but has mixed success 
   
 The issue is not due to the software but rather is strictly a Windows issue due to permissions in the file directory of the OS system. The link above is useful in remedying this issue.
 
-The database upload and backup CSV uploads are separate and hence do not interfere with one another. Thus, if one is unable to connect to the database, they can still use the software in an offline-manner through the backup CSV system (the converse also holds as well).
+The database upload and backup CSV upload are separate and hence do not interfere with one another. Thus, if one is unable to connect to the database, they can still use the software in an offline-manner through the backup CSV system (the converse also holds as well).
 
 ## Navigating the GUI:
 
