@@ -14,7 +14,7 @@ The software has been developed for kidney perfusions but, as an open-source pro
 
 - Available for Linux, Windows, and Mac!
 - User-friendly GUI!
-- Backup system stores data on CSV files in case connection to database is broken (such as internet loss, lack of firewall access, or lack of SQL driver)
+- Backup system stores data on CSV files in case connection to database is not established (such as internet loss, lack of firewall access, or lack of SQL driver)
 - Data mining with PDF scanner automates the process of finding pertinent donor medical history. The user can then check and edit donor information prior to storing in database.
 - User input for blood gas measurements and medications; perfusate, urine, and biopsy samples.
 - Real time data collection of biomarkers pertinent to hemodynamics and vascular leak, such as:
@@ -26,6 +26,22 @@ The software has been developed for kidney perfusions but, as an open-source pro
   - Urine production
 - Alarms to warn if a sensor has powered off/become disconnected
 - Real time data visualization provided by PowerBI
+
+## Start Up:
+
+Prior to commencing the GUI, the software will conduct unit tests on the database connection and the backup system:
+
+<img width="1440" alt="Start Up" src="https://user-images.githubusercontent.com/116929892/224196929-1d694a20-6cb6-4178-a491-9e996c21c016.png">
+
+The database connection requires one to have an Azure database, firewall access, an SQL driver that can connect to the database, and a private internet connection. The section "Establishing Azure Database Connection (Optional)" contains information on how to setup and connect to an Azure database.
+
+The backup CSV system works as intended on Mac and Linux, but has mixed success on Windows if the OS is Windows 11:
+
+  https://windowsreport.com/windows-11-python-permission-denied/
+  
+The issue is not due to the software but rather is strictly a Windows issue due to permissions in the file directory of the OS system. The link above is useful in remedying this issue.
+
+The database upload and backup CSV uploads are separate and hence do not interfere with one another. Thus, if one is unable to connect to the database, they can still use the software in an offline-manner through the backup CSV system (the converse also holds as well). The results of the upload test will outline steps that can be taken to resolve each respective issue.
 
 ## Navigating the GUI:
 
