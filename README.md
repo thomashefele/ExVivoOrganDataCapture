@@ -5,7 +5,7 @@ Version: 1.1
 
 A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during organ perfusions, this software can be utilized for various projects in biomedical research, such as:
 - Creating digital twins of organs
-- Analyzing hemodynamics and vascular leak in organs
+- Analyzing real-time changes in the pathophysiology of an organ
 - Whole organ isolation for studies of therapeutic effects on specific organs
 
 The software has been developed for kidney perfusions but, as an open-source project, can be modified and customized for perfusion of any organ and myriad biometrics.
