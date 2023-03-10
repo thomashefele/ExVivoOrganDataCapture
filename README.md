@@ -1,6 +1,6 @@
 # *ex vivo* Organ Perfusion Continuous Data Collection Project
 
-Last updated: 3/8/2022.
+Last updated: 3/9/2022.
 Version: 1.1
 
 A tool for extracting, transforming, and loading (ETL) real time data on biomarkers during organ perfusions, this software can be utilized for various projects in biomedical research, such as:
@@ -91,7 +91,7 @@ To start sensor data collection, follow the steps below:
   
   ![Sensors 2](https://user-images.githubusercontent.com/116929892/223640169-f2813a53-d90b-42fe-b374-86cded7b3b08.png)
     
-- If connected to a cloud database (see "Establishing Database Connection" below), the data will be uploaded to the database automatically. If not, the data can be retrieved from CSV files that can be found on the computer:
+- If connected to a cloud database (see "Establishing Azure Database Connection (Optional)" below), the data will be uploaded to the database automatically. If not, the data can be retrieved from CSV files that can be found on the computer:
     
     - Donor information: [id]_donor_info.csv
     - Medications: [id]_meds.csv
@@ -197,4 +197,15 @@ Q: USB port(s) have powered off/become disconnected during perfusion! What shoul
 
 A: The software has been designed to account for such things. The data transfer will continue until the issue has been resolved, with NULL values         being uploaded in place of the usual values. If a sensor is off, simply turn the sensor back on. If a sensor is disconnected, simply reconnect it.         (Note that if multiple sensors become unplugged, they must be plugged back in according to the order stated on the GUI.)
 
-To report other unforeseen issues that may arise, please contact dtk.yale@gmail.com
+## System Limitations:
+
+- If using a version of Python less than 3.7, the PyMuPDF library cannot be installed and hence not used. As a result, it is recommended that Python 3.7 or above be used in executing the software.
+- On Mac (at least on the M1 on which the software was designed), the "Restart Button" does not work.
+- On Linux: see "The time stamp(s) are not appearing..." in "Troubleshooting".
+- On Windows: see "Start Up" or "The time stamp(s) are not appearing..." in "Troubleshooting".
+
+## Current Modifications Being Made:
+
+A standalone executable for each OS is in progress so that one may use the software without needing to download Python and to install all the libraries used by the software.
+
+To report other unforeseen issues that may arise, please contact dtk.yale@gmail.com.
