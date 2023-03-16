@@ -55,15 +55,15 @@ def wab():
 while lap <= interval:  
   if lap < (interval/2):
         unos_id = "TEST_ID_1"
-        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
+        cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
         cnxn_don.commit()
             
   elif lap >= (interval/2):
         unos_id = "TEST_ID_2"
-        cursor_don.execute("INSERT INTO dbo.organ_t([ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
+        cursor_don.execute("INSERT INTO dbo.organ_t([UNOS_ID], [blood_type], [weight], [age], [bmi], [gender], [eth_race]) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');".format(unos_id, rand.choice(bt), *wab(), rand.choice(gender), rand.choice(eth)))
         cnxn_don.commit()
             
-  #MedTronic data
+  #Medtronic data
   data_AF = round(rand.random(), 3)
   data_AP = round(5*rand.random(), 3)
   rpm = round(5000*rand.random())
