@@ -2,7 +2,6 @@ import numpy as np, pandas as pd
 import os, sys, platform, csv
 from time import monotonic, sleep
 from datetime import datetime, timedelta
-from pandastable import Table
 
 no_fitz = False
 
